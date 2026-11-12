@@ -1,0 +1,18 @@
+{
+  "name": "item-4-folha-atendimento",
+  "version": "1.0.0",
+  "description": "Item 4 - Módulo de Folha de Pagamento, Empregados e Atendimento (SPEC-4.1)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/test_endpoints.js"
+  },
+  "keywords": ["folha", "rh", "esocial", "sdd", "sqlite"],
+  "author": "Douglas",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^13.1.1",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0"
+  }
+}

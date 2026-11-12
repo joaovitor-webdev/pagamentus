@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo Folha de Pagamento & Atendimento | SPEC-4.1</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/custom.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+
+  <!-- Top Navbar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <!-- Logo & Context -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-blue-200">
+            FP
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-slate-900 text-base sm:text-lg">Sistema Integrado de Contabilidade</span>
+              <span class="text-xs bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded-full border border-blue-200">Item 4 · SPEC-4.1</span>
+            </div>
+            <p class="text-xs text-slate-500">Módulo de Cadastro de Empregados, Contratos e Folha de Pagamento</p>
+          </div>
+        </div>
+
+        <!-- Seletor de Perfil Simulado (RF-056) -->
+        <div class="flex items-center space-x-3 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+          <div class="text-xs font-medium text-slate-600 hidden sm:block pl-2">
+            Perfil Simulado (RBAC):
+          </div>
+          <select id="role-selector" class="text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-300 bg-white text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
+            <option value="rh_admin">🛡️ Perfil RH / Admin (Acesso Total)</option>
+            <option value="consulta_assistente">👁️ Perfil Consulta / Assistente (Mascarado)</option>
+          </select>
+          <span id="role-badge" class="text-xs px-2 py-1 rounded-md font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            Acesso Total
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegação por Abas -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100">
+      <nav class="flex space-x-1 sm:space-x-4 overflow-x-auto py-2" id="nav-tabs">
+        <button data-tab="dashboard" class="tab-btn px-3 py-2 text-sm font-semibold rounded-lg text-blue-600 bg-blue-50 transition-all flex items-center space-x-1.5">
+          <span>📊 Dashboard</span>
+        </button>
+        <button data-tab="employees" class="tab-btn px-3 py-2 text-sm font-medium rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center space-x-1.5">
+          <span>👥 Empregados (RF-051)</span>
+        </button>
+        <button data-tab="events" class="tab-btn px-3 py-2 text-sm font-medium rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center space-x-1.5">
+          <span>⏱️ Eventos & Afastamentos (RF-053)</span>
+        </button>
+        <button data-tab="payroll" class="tab-btn px-3 py-2 text-sm font-medium rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center space-x-1.5">
+          <span>🧮 Cálculo de Folha (RF-052)</span>
+        </button>
+        <button data-tab="receipts" class="tab-btn px-3 py-2 text-sm font-medium rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center space-x-1.5">
+          <span>📄 Holerite & Provisões (RF-055)</span>
+        </button>
+        <button data-tab="esocial" class="tab-btn px-3 py-2 text-sm font-medium rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center space-x-1.5">
+          <span>🏛️ eSocial Simulado (RF-054)</span>
+        </button>
+        <button data-tab="audit" class="tab-btn px-3 py-2 text-sm font-medium rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center space-x-1.5">
+          <span>📝 Auditoria & Parâmetros (RF-056)</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Notification Banner -->
+  <div id="alert-banner" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 no-print">
+    <div class="p-3 rounded-lg flex items-center justify-between text-sm" id="alert-content">
+      <span id="alert-message"></span>
+      <button onclick="hideAlert()" class="text-sm font-bold ml-4">✕</button>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- ==================== ABA 1: DASHBOARD ==================== -->
+    <section id="tab-dashboard" class="tab-content space-y-6">
+      <!-- Indicadores Rápidos -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Colaboradores Ativos</div>
+          <div class="mt-2 flex items-baseline justify-between">
+            <div id="dash-colaboradores" class="text-2xl font-bold text-slate-900">3</div>
+            <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">100% CLT</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Dados 100% fictícios (LGPD)</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Folha Bruta (Mensal)</div>
+          <div class="mt-2 flex items-baseline justify-between">
+            <div id="dash-proventos" class="text-2xl font-bold text-slate-900">R$ 15.850,00</div>
+            <span class="text-xs text-blue-600 font-medium">Ref. Corrente</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1" id="dash-proventos-sub">Proventos calculados</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Encargos da Empresa</div>
+          <div class="mt-2 flex items-baseline justify-between">
+            <div id="dash-encargos" class="text-2xl font-bold text-amber-600">R$ 5.674,30</div>
+            <span class="text-xs bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded">35,8% Encargos</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">FGTS (8%) + INSS Empresa + RAT</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Provisões (13º + Férias)</div>
+          <div class="mt-2 flex items-baseline justify-between">
+            <div id="dash-provisoes" class="text-2xl font-bold text-indigo-600">R$ 4.250,15</div>
+            <span class="text-xs bg-indigo-100 text-indigo-800 font-semibold px-2 py-0.5 rounded">Mensal</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Garantia contábil periódica</p>
+        </div>
+      </div>
+
+      <!-- Status da Folha & Ações Rápidas -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Competência Corrente: <span id="dash-comp-label" class="text-blue-600">2026-11</span></h2>
+            <p class="text-sm text-slate-600 mt-0.5">Status do Fechamento: <span id="dash-folha-status" class="font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Rascunho</span></p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="switchTab('payroll')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-all shadow-sm">
+              🧮 Abrir Cálculo de Folha
+            </button>
+            <button onclick="switchTab('esocial')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium rounded-lg text-sm transition-all border border-slate-300">
+              🏛️ Exportar eSocial
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo de Especificação e Escopo do Item 4 -->
+      <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 rounded-xl shadow-md">
+        <div class="flex items-start justify-between">
+          <div>
+            <span class="text-xs uppercase tracking-wider font-semibold bg-blue-800/80 text-blue-200 px-2.5 py-1 rounded-md">Spec-Driven Development · SPEC-4.1</span>
+            <h3 class="text-xl font-bold mt-2">Módulo Douglas — Item 4: Folha de Pagamento, Obrigações e RH</h3>
+            <p class="text-blue-200 text-sm mt-1 max-w-3xl">
+              Este módulo atende integralmente aos requisitos <strong>RF-051</strong> (Cadastro e Contratos), <strong>RF-052</strong> (Cálculos de Folha, Férias e 13º), <strong>RF-053</strong> (Eventos Variáveis e Afastamentos), <strong>RF-054</strong> (Preparação eSocial), <strong>RF-055</strong> (Recibos e Provisões) e <strong>RF-056</strong> (RBAC e Trilha de Aprovação).
+            </p>
+          </div>
+          <div class="hidden md:block text-right">
+            <span class="text-xs text-blue-300 block">Arquitetura</span>
+            <span class="text-sm font-semibold">Node.js · Express · SQLite</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 2: EMPREGADOS & CONTRATOS (RF-051) ==================== -->
+    <section id="tab-employees" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Cadastro de Empregados e Contratos</h2>
+          <p class="text-sm text-slate-600">Gestão completa de contratos, admissões e dependentes (RF-051)</p>
+        </div>
+        <button onclick="openEmployeeModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-all shadow-sm flex items-center space-x-1.5 self-start">
+          <span>➕ Novo Empregado</span>
+        </button>
+      </div>
+
+      <!-- Tabela de Empregados -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+            <thead class="bg-slate-50 text-slate-700 font-semibold">
+              <tr>
+                <th class="py-3.5 px-4">Nome / Colaborador</th>
+                <th class="py-3.5 px-4">CPF (LGPD)</th>
+                <th class="py-3.5 px-4">Cargo</th>
+                <th class="py-3.5 px-4">Salário Base</th>
+                <th class="py-3.5 px-4">Jornada</th>
+                <th class="py-3.5 px-4">Admissão</th>
+                <th class="py-3.5 px-4">Dependentes</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="employees-table-body" class="divide-y divide-slate-200 text-slate-800">
+              <tr>
+                <td colspan="9" class="py-8 text-center text-slate-400">Carregando empregados...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 3: EVENTOS & AFASTAMENTOS (RF-053) ==================== -->
+    <section id="tab-events" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Eventos Variáveis, Afastamentos e Histórico</h2>
+          <p class="text-sm text-slate-600">Lançamento de horas extras, faltas, adicionais e afastamentos (RF-053)</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <label class="text-xs font-semibold text-slate-600">Competência:</label>
+          <input type="month" id="events-competencia" class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+          <button onclick="openEventModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-all shadow-sm">
+            ➕ Novo Evento
+          </button>
+        </div>
+      </div>
+
+      <!-- Sub-abas: Eventos do Mês vs Afastamentos vs Alterações Contratuais -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex space-x-2 border-b border-slate-200 pb-2">
+          <button onclick="toggleEventsSubtab('rubricas')" id="subtab-btn-rubricas" class="px-3 py-1.5 text-sm font-semibold text-blue-600 bg-blue-50 rounded-lg">
+            Eventos da Competência
+          </button>
+          <button onclick="toggleEventsSubtab('afastamentos')" id="subtab-btn-afastamentos" class="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg">
+            Afastamentos e Licenças
+          </button>
+          <button onclick="toggleEventsSubtab('contratuais')" id="subtab-btn-contratuais" class="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg">
+            Histórico Contratual
+          </button>
+        </div>
+
+        <!-- Subconteúdo 1: Eventos Variáveis -->
+        <div id="subtab-rubricas" class="space-y-4">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+              <thead class="bg-slate-50 text-slate-700 font-semibold">
+                <tr>
+                  <th class="py-3 px-4">Empregado</th>
+                  <th class="py-3 px-4">Tipo</th>
+                  <th class="py-3 px-4">Descrição</th>
+                  <th class="py-3 px-4">Quantidade</th>
+                  <th class="py-3 px-4">Percentual</th>
+                  <th class="py-3 px-4">Valor</th>
+                  <th class="py-3 px-4 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="variable-events-table-body" class="divide-y divide-slate-200">
+                <tr>
+                  <td colspan="7" class="py-6 text-center text-slate-400">Nenhum evento registrado nesta competência.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Subconteúdo 2: Afastamentos -->
+        <div id="subtab-afastamentos" class="hidden space-y-4">
+          <div class="flex justify-between items-center">
+            <h4 class="text-sm font-bold text-slate-800">Afastamentos e Licenças Registrados</h4>
+            <button onclick="openLeaveModal()" class="px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-md">
+              ➕ Registrar Afastamento
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+              <thead class="bg-slate-50 text-slate-700 font-semibold">
+                <tr>
+                  <th class="py-3 px-4">Colaborador</th>
+                  <th class="py-3 px-4">Tipo de Afastamento</th>
+                  <th class="py-3 px-4">Data Início</th>
+                  <th class="py-3 px-4">Data Fim</th>
+                  <th class="py-3 px-4">Motivo / CID Fictício</th>
+                </tr>
+              </thead>
+              <tbody id="leaves-table-body" class="divide-y divide-slate-200">
+                <tr>
+                  <td colspan="5" class="py-6 text-center text-slate-400">Carregando afastamentos...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Subconteúdo 3: Alterações Contratuais -->
+        <div id="subtab-contratuais" class="hidden space-y-4">
+          <h4 class="text-sm font-bold text-slate-800">Histórico de Alterações Contratuais e Reajustes</h4>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+              <thead class="bg-slate-50 text-slate-700 font-semibold">
+                <tr>
+                  <th class="py-3 px-4">Colaborador</th>
+                  <th class="py-3 px-4">Data</th>
+                  <th class="py-3 px-4">Tipo</th>
+                  <th class="py-3 px-4">Descrição</th>
+                  <th class="py-3 px-4">Salário Anterior</th>
+                  <th class="py-3 px-4">Novo Salário</th>
+                </tr>
+              </thead>
+              <tbody id="contract-changes-table-body" class="divide-y divide-slate-200">
+                <tr>
+                  <td colspan="6" class="py-6 text-center text-slate-400">Carregando histórico contratual...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 4: CÁLCULO DE FOLHA & MEMÓRIA (RF-052) ==================== -->
+    <section id="tab-payroll" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Cálculo de Folha de Pagamento & Simulador</h2>
+          <p class="text-sm text-slate-600">Prévia de folha mensal, férias e 13º com parâmetros auditáveis (RF-052)</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <input type="month" id="payroll-competencia" class="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold">
+          <button onclick="calculatePayroll(true)" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-all shadow-sm">
+            ⚡ Calcular & Gravar Folha
+          </button>
+          <button onclick="openSimulationModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium rounded-lg text-sm transition-all border border-slate-300">
+            🌴 Simular Férias / 13º
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Status e Trilha de Aprovação da Folha (RF-056) -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+          <span class="text-xs font-semibold text-slate-500 uppercase">Status do Processamento:</span>
+          <span id="payroll-status-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+            Rascunho
+          </span>
+          <span id="payroll-run-info" class="text-xs text-slate-500"></span>
+        </div>
+        <div class="flex items-center space-x-2" id="approval-actions-container">
+          <!-- Botão visível para RH/Admin; bloqueado/desabilitado para Consulta -->
+          <button id="btn-approve-payroll" onclick="handleApprovePayroll('aprovada')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs shadow-sm transition-all flex items-center space-x-1">
+            <span>✅ Aprovar Folha (RH/Admin)</span>
+          </button>
+          <button id="btn-close-payroll" onclick="handleApprovePayroll('fechada')" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs shadow-sm transition-all flex items-center space-x-1">
+            <span>🔒 Fechar Competência</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Resumo Totalizador da Folha -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+          <span class="text-xs text-slate-500 font-medium">Total Proventos</span>
+          <div id="tot-proventos" class="text-lg font-bold text-slate-900 mt-1">R$ 0,00</div>
+        </div>
+        <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+          <span class="text-xs text-slate-500 font-medium">Total Descontos</span>
+          <div id="tot-descontos" class="text-lg font-bold text-rose-600 mt-1">R$ 0,00</div>
+        </div>
+        <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+          <span class="text-xs text-slate-500 font-medium">Líquido a Pagar</span>
+          <div id="tot-liquido" class="text-lg font-bold text-emerald-600 mt-1">R$ 0,00</div>
+        </div>
+        <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+          <span class="text-xs text-slate-500 font-medium">Encargos Patronais</span>
+          <div id="tot-encargos" class="text-lg font-bold text-amber-600 mt-1">R$ 0,00</div>
+        </div>
+        <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm col-span-2 md:col-span-1">
+          <span class="text-xs text-slate-500 font-medium">Provisões (13º+Férias)</span>
+          <div id="tot-provisoes" class="text-lg font-bold text-indigo-600 mt-1">R$ 0,00</div>
+        </div>
+      </div>
+
+      <!-- Tabela com Itens Calculados da Folha -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+          <h3 class="text-sm font-bold text-slate-800">Itens e Memória de Cálculo Individual</h3>
+          <span class="text-xs text-slate-500">Tabela Progressiva de INSS e IRRF aplicadas</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+            <thead class="bg-slate-50 text-slate-700 font-semibold">
+              <tr>
+                <th class="py-3 px-4">Colaborador</th>
+                <th class="py-3 px-4">Salário Base</th>
+                <th class="py-3 px-4">Proventos (+HE/Adic)</th>
+                <th class="py-3 px-4">INSS</th>
+                <th class="py-3 px-4">IRRF</th>
+                <th class="py-3 px-4">Total Descontos</th>
+                <th class="py-3 px-4 font-bold text-emerald-700">Salário Líquido</th>
+                <th class="py-3 px-4">FGTS (8%)</th>
+                <th class="py-3 px-4 text-right">Recibo</th>
+              </tr>
+            </thead>
+            <tbody id="payroll-items-table-body" class="divide-y divide-slate-200">
+              <tr>
+                <td colspan="9" class="py-8 text-center text-slate-400">Clique em "Calcular & Gravar Folha" para carregar a prévia.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 5: HOLERITE & PROVISÕES (RF-055) ==================== -->
+    <section id="tab-receipts" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Recibo de Pagamento (Holerite) & Provisões</h2>
+          <p class="text-sm text-slate-600">Visualização de holerite simplificado e quadro de encargos patronais (RF-055)</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <select id="receipt-emp-selector" class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+            <option value="">Selecione o Empregado...</option>
+          </select>
+          <input type="month" id="receipt-competencia" class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+          <button onclick="loadReceipt()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-all shadow-sm">
+            Visualizar
+          </button>
+          <button onclick="window.print()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-lg text-sm transition-all shadow-sm flex items-center space-x-1">
+            <span>🖨️ Imprimir</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Estrutura do Holerite (Estilizado para visualização e impressão) -->
+      <div id="printable-holerite" class="bg-white p-6 sm:p-8 rounded-xl border border-slate-300 shadow-sm max-w-4xl mx-auto space-y-6 text-slate-900">
+        <!-- Cabeçalho da Empresa -->
+        <div class="border-b-2 border-slate-800 pb-4 flex justify-between items-start">
+          <div>
+            <h1 class="text-lg font-bold uppercase tracking-tight text-slate-900">Audicon Contabilidade & Gestão Empresarial Ltda</h1>
+            <p class="text-xs text-slate-600">CNPJ: 00.123.456/0001-78 · Av. Agamenon Magalhães, 1200 - Recife/PE</p>
+            <p class="text-xs text-slate-500">Recibo de Pagamento de Salário · CLT / Mensalista</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-semibold uppercase text-slate-500 block">Referência</span>
+            <span id="holerite-comp" class="text-base font-bold text-blue-600">2026-11</span>
+          </div>
+        </div>
+
+        <!-- Identificação do Empregado -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200 text-xs">
+          <div>
+            <span class="text-slate-500 block">Código / Nome:</span>
+            <span id="holerite-nome" class="font-bold text-slate-900 text-sm">--</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">CPF:</span>
+            <span id="holerite-cpf" class="font-medium">--</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Cargo / Função:</span>
+            <span id="holerite-cargo" class="font-medium">--</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block">Admissão / Dep:</span>
+            <span id="holerite-adm" class="font-medium">--</span>
+          </div>
+        </div>
+
+        <!-- Tabela de Rubricas do Holerite -->
+        <div class="border border-slate-200 rounded-lg overflow-hidden">
+          <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
+            <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider">
+              <tr>
+                <th class="py-2.5 px-3">Cód</th>
+                <th class="py-2.5 px-3">Descrição da Rubrica</th>
+                <th class="py-2.5 px-3">Ref</th>
+                <th class="py-2.5 px-3 text-right">Vencimentos (R$)</th>
+                <th class="py-2.5 px-3 text-right">Descontos (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="holerite-rubricas-body" class="divide-y divide-slate-200 font-mono">
+              <tr>
+                <td colspan="5" class="py-6 text-center text-slate-400">Selecione um empregado para carregar o recibo.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totais do Holerite -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-200 pt-4 text-xs">
+          <div class="bg-slate-50 p-3 rounded border border-slate-200">
+            <span class="text-slate-500 block font-medium">Total de Vencimentos:</span>
+            <span id="holerite-tot-venc" class="text-base font-bold text-slate-900">R$ 0,00</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded border border-slate-200">
+            <span class="text-slate-500 block font-medium">Total de Descontos:</span>
+            <span id="holerite-tot-desc" class="text-base font-bold text-rose-600">R$ 0,00</span>
+          </div>
+          <div class="bg-emerald-50 p-3 rounded border border-emerald-300">
+            <span class="text-emerald-800 block font-bold">Valor Líquido a Receber:</span>
+            <span id="holerite-tot-liq" class="text-lg font-extrabold text-emerald-700">R$ 0,00</span>
+          </div>
+        </div>
+
+        <!-- Rodapé Legal / Bases de Cálculo -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-50 p-3 rounded border border-slate-200 text-[11px] text-slate-600">
+          <div>
+            <span class="block text-slate-400">Salário Base</span>
+            <span id="holerite-base-sal" class="font-semibold text-slate-800">--</span>
+          </div>
+          <div>
+            <span class="block text-slate-400">Base Cálc. INSS</span>
+            <span id="holerite-base-inss" class="font-semibold text-slate-800">--</span>
+          </div>
+          <div>
+            <span class="block text-slate-400">Base Cálc. FGTS</span>
+            <span id="holerite-base-fgts" class="font-semibold text-slate-800">--</span>
+          </div>
+          <div>
+            <span class="block text-slate-400">FGTS do Mês (8%)</span>
+            <span id="holerite-val-fgts" class="font-semibold text-slate-800">--</span>
+          </div>
+          <div>
+            <span class="block text-slate-400">Base Cálc. IRRF</span>
+            <span id="holerite-base-irrf" class="font-semibold text-slate-800">--</span>
+          </div>
+        </div>
+
+        <!-- Linha de Assinatura -->
+        <div class="pt-8 flex justify-between items-end text-xs text-slate-500">
+          <div>
+            <p>Declaro ter recebido a importância líquida discriminada neste recibo.</p>
+            <p class="mt-1">Data: ____/____/________</p>
+          </div>
+          <div class="border-t border-slate-400 w-64 text-center pt-1">
+            Assinatura do Colaborador
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo Geral de Provisões da Empresa (RF-055) -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm max-w-4xl mx-auto space-y-4 no-print">
+        <h3 class="text-base font-bold text-slate-900">Demonstrativo Consolidado de Provisões e Encargos da Empresa</h3>
+        <p class="text-xs text-slate-500">Apropriação mensal de 13º salário (1/12), Férias (1/12 + 1/3) e encargos patronais (35,8%)</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <span class="text-xs text-slate-500 font-semibold block">Provisão 13º Salário</span>
+            <span id="prov-13-val" class="text-lg font-bold text-indigo-700">R$ 0,00</span>
+            <span class="text-xs text-slate-500 block mt-1">+ Encargos: INSS Patr. (20%) + RAT + FGTS</span>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <span class="text-xs text-slate-500 font-semibold block">Provisão Férias + 1/3</span>
+            <span id="prov-ferias-val" class="text-lg font-bold text-indigo-700">R$ 0,00</span>
+            <span class="text-xs text-slate-500 block mt-1">+ Encargos sociais incidentes</span>
+          </div>
+          <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <span class="text-xs text-blue-800 font-semibold block">Custo Total Consolidado</span>
+            <span id="prov-custo-total" class="text-xl font-extrabold text-blue-900">R$ 0,00</span>
+            <span class="text-xs text-blue-700 block mt-1">Folha Bruta + Encargos + Provisões</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 6: eSOCIAL SIMULADO / SISTEMAS OFICIAIS (RF-054) ==================== -->
+    <section id="tab-esocial" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Preparação de Eventos para Sistemas Oficiais (eSocial)</h2>
+          <p class="text-sm text-slate-600">Geração de arquivo estruturado para conferência prévia sem transmissão externa (RF-054 / RB-010)</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="month" id="esocial-competencia" class="border border-slate-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+          <button onclick="loadEsocialPreview()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-all shadow-sm">
+            🔍 Visualizar Eventos
+          </button>
+          <button onclick="downloadEsocial('json')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm transition-all shadow-sm">
+            ⬇️ Baixar JSON
+          </button>
+          <button onclick="downloadEsocial('txt')" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-lg text-sm transition-all shadow-sm">
+            ⬇️ Baixar TXT
+          </button>
+        </div>
+      </div>
+
+      <!-- Alerta de Conformidade RB-010 -->
+      <div class="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg text-amber-900 text-xs">
+        <span class="font-bold">Aviso Legal de Conformidade (RB-010 / RF-054):</span>
+        Este módulo estrutura os eventos no leiaute homologado para validação e conferência da folha. Não executa transmissão telemática externa direta aos servidores do governo federal sem certificado digital ou integração homologada pelo 4º período.
+      </div>
+
+      <!-- Cards dos Eventos Oficiais Gerados -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">S-1000</span>
+            <span class="text-xs text-slate-400">1 Evento</span>
+          </div>
+          <h4 class="font-bold text-slate-900 mt-2 text-sm">Informações Empregador</h4>
+          <p class="text-xs text-slate-500 mt-1">Identificação da empresa, CNPJ e classificação tributária.</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">S-2200</span>
+            <span id="badge-s2200-count" class="text-xs text-slate-400">3 Registros</span>
+          </div>
+          <h4 class="font-bold text-slate-900 mt-2 text-sm">Admissões & Vínculos</h4>
+          <p class="text-xs text-slate-500 mt-1">Dados cadastrais, jornada, cargo e salários contratuais.</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">S-2230</span>
+            <span id="badge-s2230-count" class="text-xs text-slate-400">Eventos Ativos</span>
+          </div>
+          <h4 class="font-bold text-slate-900 mt-2 text-sm">Afastamento Temporário</h4>
+          <p class="text-xs text-slate-500 mt-1">Licenças médicas, maternidade e suspensões de contrato.</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold bg-purple-100 text-purple-800 px-2 py-0.5 rounded">S-1200</span>
+            <span id="badge-s1200-count" class="text-xs text-slate-400">Folha Mensal</span>
+          </div>
+          <h4 class="font-bold text-slate-900 mt-2 text-sm">Remuneração Periódica</h4>
+          <p class="text-xs text-slate-500 mt-1">Rubricas detalhadas de proventos, descontos e bases FGTS/INSS.</p>
+        </div>
+      </div>
+
+      <!-- Visualizador do JSON / Estrutura -->
+      <div class="bg-slate-900 text-slate-200 p-4 rounded-xl shadow-inner font-mono text-xs overflow-x-auto max-h-[500px]">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-700 mb-2">
+          <span class="text-slate-400">Payload Estruturado de Conferência:</span>
+          <span class="text-slate-500 text-[11px]">Padrão eSocial JSON vS-1.2</span>
+        </div>
+        <pre id="esocial-code-preview" class="whitespace-pre-wrap">// Clique em "Visualizar Eventos" para carregar a estrutura...</pre>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 7: AUDITORIA & PARÂMETROS (RF-056 & RF-052) ==================== -->
+    <section id="tab-audit" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Trilha de Auditoria, Aprovações & Parâmetros</h2>
+          <p class="text-sm text-slate-600">Registro de ações, controle de versões de aprovação e parâmetros de cálculo (RF-056 / RNF-004)</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Tabela de Logs de Auditoria (2/3 da largura) -->
+        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-3 p-4">
+          <h3 class="text-sm font-bold text-slate-800">Trilha de Aprovações e Modificações de Folha</h3>
+          <div class="overflow-x-auto max-h-[420px]">
+            <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
+              <thead class="bg-slate-50 text-slate-700 font-semibold sticky top-0">
+                <tr>
+                  <th class="py-2.5 px-3">Data / Hora</th>
+                  <th class="py-2.5 px-3">Usuário</th>
+                  <th class="py-2.5 px-3">Perfil</th>
+                  <th class="py-2.5 px-3">Ação</th>
+                  <th class="py-2.5 px-3">Detalhes</th>
+                </tr>
+              </thead>
+              <tbody id="audit-logs-table-body" class="divide-y divide-slate-200">
+                <tr>
+                  <td colspan="5" class="py-6 text-center text-slate-400">Carregando logs de auditoria...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Parâmetros de Cálculo Fictícios (1/3 da largura) -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-800">Parâmetros de Cálculo</h3>
+            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Fictícios</span>
+          </div>
+          <p class="text-xs text-slate-500">Parâmetros parametrizáveis de alíquotas e limites (RF-052)</p>
+
+          <div id="parameters-container" class="space-y-2.5 text-xs">
+            <div class="text-center py-4 text-slate-400">Carregando parâmetros...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAIS ==================== -->
+
+  <!-- Modal 1: Empregado (Novo / Editar) -->
+  <div id="modal-employee" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
+      <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <h3 id="modal-employee-title" class="text-base font-bold text-slate-900">Novo Empregado</h3>
+        <button onclick="closeEmployeeModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <form id="form-employee" onsubmit="handleEmployeeSubmit(event)" class="p-6 space-y-4 text-sm">
+        <input type="hidden" id="emp-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nome Completo *</label>
+          <input type="text" id="emp-nome" required placeholder="Ex: Roberto Carlos Silva" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">CPF Fictício (LGPD) *</label>
+            <input type="text" id="emp-cpf" required placeholder="000.000.000-00" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Cargo *</label>
+            <input type="text" id="emp-cargo" required placeholder="Ex: Contador Júnior" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Salário Base (R$) *</label>
+            <input type="number" step="0.01" min="0" id="emp-salario" required placeholder="Ex: 3500.00" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Jornada de Trabalho *</label>
+            <select id="emp-jornada" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+              <option value="44h semanais">44h semanais (CLT Padrão)</option>
+              <option value="40h semanais">40h semanais</option>
+              <option value="30h semanais">30h semanais</option>
+              <option value="20h semanais">20h semanais</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data de Admissão *</label>
+            <input type="date" id="emp-admissao" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Dependentes</label>
+            <input type="number" min="0" id="emp-dependentes" value="0" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+            <select id="emp-status" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+              <option value="ativo">Ativo</option>
+              <option value="afastado">Afastado</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+        </div>
+        <div class="pt-4 border-t border-slate-200 flex justify-end space-x-2">
+          <button type="button" onclick="closeEmployeeModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm">Salvar Empregado</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Novo Evento Variável (Horas Extras, Faltas, Adicionais) -->
+  <div id="modal-event" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
+      <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <h3 class="text-base font-bold text-slate-900">Novo Evento Variável de Folha</h3>
+        <button onclick="closeEventModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <form id="form-event" onsubmit="handleEventSubmit(event)" class="p-6 space-y-4 text-sm">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Colaborador *</label>
+          <select id="event-emp-id" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+            <option value="">Selecione o colaborador...</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Competência *</label>
+            <input type="month" id="event-competencia" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Evento *</label>
+            <select id="event-tipo" onchange="adjustEventFields()" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+              <option value="hora_extra">Horas Extras</option>
+              <option value="falta">Falta / Atraso</option>
+              <option value="adicional">Adicional / Bonificação</option>
+              <option value="desconto">Outro Desconto</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Descrição</label>
+          <input type="text" id="event-descricao" placeholder="Ex: Horas Extras Fechamento" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1" id="label-event-qtd">Horas/Dias</label>
+            <input type="number" step="0.5" id="event-qtd" value="0" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Percentual (%)</label>
+            <input type="number" id="event-perc" value="50" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Valor (R$)</label>
+            <input type="number" step="0.01" id="event-valor" value="0" placeholder="Auto ou Fixo" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500">* Se o valor for 0, o sistema calculará o valor automaticamente com base no salário e jornada.</p>
+        <div class="pt-4 border-t border-slate-200 flex justify-end space-x-2">
+          <button type="button" onclick="closeEventModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm">Lançar Evento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Novo Afastamento / Licença -->
+  <div id="modal-leave" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
+      <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <h3 class="text-base font-bold text-slate-900">Registrar Afastamento / Licença</h3>
+        <button onclick="closeLeaveModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <form id="form-leave" onsubmit="handleLeaveSubmit(event)" class="p-6 space-y-4 text-sm">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Colaborador *</label>
+          <select id="leave-emp-id" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+            <option value="">Selecione o colaborador...</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Afastamento *</label>
+          <select id="leave-tipo" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+            <option value="Médico/Doença">Médico / Doença (Atestado)</option>
+            <option value="Licença Maternidade">Licença Maternidade</option>
+            <option value="Licença Paternidade">Licença Paternidade</option>
+            <option value="Acidente de Trabalho">Acidente de Trabalho</option>
+            <option value="Sem Remuneração">Licença sem Vencimentos</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data Início *</label>
+            <input type="date" id="leave-inicio" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data Término</label>
+            <input type="date" id="leave-fim" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Motivo / Observações</label>
+          <textarea id="leave-motivo" rows="2" placeholder="Observações médicas ou justificativa formal" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+        </div>
+        <div class="pt-4 border-t border-slate-200 flex justify-end space-x-2">
+          <button type="button" onclick="closeLeaveModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-sm">Gravar Afastamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Simulação de Férias e 13º Salário (RF-052) -->
+  <div id="modal-simulation" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
+      <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <h3 class="text-base font-bold text-slate-900">Simulador de Férias e 13º Salário (RF-052)</h3>
+        <button onclick="closeSimulationModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+      <div class="p-6 space-y-4 text-sm">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Colaborador</label>
+            <select id="sim-emp-id" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Modalidade</label>
+            <select id="sim-modalidade" onchange="toggleSimFields()" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+              <option value="ferias">Férias (com 1/3 Constitucional)</option>
+              <option value="13_1">13º Salário (1ª Parcela - 50%)</option>
+              <option value="13_2">13º Salário (2ª Parcela - Quitação)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="sim-ferias-options" class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Dias de Gozo</label>
+            <input type="number" id="sim-dias" value="30" min="1" max="30" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+        </div>
+
+        <button onclick="runSimulation()" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm">
+          Calcular Simulação
+        </button>
+
+        <!-- Resultado da Simulação -->
+        <div id="sim-result-box" class="hidden bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2 text-xs">
+          <h4 class="font-bold text-slate-800 border-b border-slate-200 pb-1">Memória de Cálculo da Simulação:</h4>
+          <div id="sim-result-details" class="space-y-1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Frontend -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
