@@ -1,6 +1,7 @@
 ## Spec
 SPEC-X.Y – título · Item X
 Cartão no Trello: <link>
+Link do PR: <link>
 
 ## O que foi feito
 (resumo em 2 ou 3 linhas)
