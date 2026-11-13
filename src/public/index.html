@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAGAMENTUS | Contabilidade e Financeiro</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .badge-ativo { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-passivo { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-pl { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-receita { background-color: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+    .badge-despesa { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .badge-sintetica { background-color: #f1f5f9; color: #475569; font-weight: 600; }
+    .badge-analitica { background-color: #e2e8f0; color: #1e293b; }
+    .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 600; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+
+  <!-- Mobile Topbar -->
+  <div class="lg:hidden bg-slate-900 text-white flex items-center justify-between p-4 shadow-md sticky top-0 z-50">
+    <div class="flex items-center space-x-2">
+      <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">PAGAMENTUS</span>
+      <span class="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded font-mono">ITEM 2</span>
+    </div>
+    <button id="btn-toggle-menu" class="p-2 text-slate-300 hover:text-white focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+  </div>
+
+  <div class="flex-1 flex overflow-hidden">
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-200 ease-in-out flex flex-col shadow-xl">
+      <!-- Sidebar Header -->
+      <div class="p-6 border-b border-slate-800">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            P
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-white tracking-tight">PAGAMENTUS</h1>
+            <p class="text-xs text-slate-400">Contábil & Financeiro</p>
+          </div>
+        </div>
+        <div class="mt-4 px-3 py-1.5 rounded-md bg-slate-800/80 border border-slate-700/50 flex items-center justify-between text-xs">
+          <span class="text-slate-400">Responsável:</span>
+          <span class="font-medium text-emerald-400">Ítalo (Item 2)</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-1 px-4 py-6 space-y-1.5">
+        <button onclick="navegarPara('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-white bg-blue-600 shadow-sm">
+          <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+          <span>Painel Financeiro</span>
+        </button>
+
+        <button onclick="navegarPara('plano-contas')" id="nav-plano-contas" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          <span>Plano de Contas</span>
+          <span class="ml-auto text-xs bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">SPEC-2.1</span>
+        </button>
+
+        <button onclick="navegarPara('lancamentos')" id="nav-lancamentos" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+          <span>Lançamentos (Dobrados)</span>
+          <span class="ml-auto text-xs bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">SPEC-2.2</span>
+        </button>
+
+        <button onclick="navegarPara('titulos')" id="nav-titulos" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          <span>Contas a Pagar / Receber</span>
+          <span class="ml-auto text-xs bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">SPEC-2.3</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="p-4 border-t border-slate-800 text-xs text-slate-500 flex flex-col space-y-1">
+        <div class="flex items-center space-x-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-slate-300">Organização: <strong>Matriz (Demo)</strong></span>
+        </div>
+        <span>SDD v1.0 • GTI 2º Período</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto bg-slate-50">
+      <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+
+        <!-- ================= SEÇÃO: DASHBOARD FINANCEIRO ================= -->
+        <section id="sec-dashboard" class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl font-bold tracking-tight text-slate-900">Visão Geral Contábil & Financeira</h2>
+              <p class="text-sm text-slate-500">Acompanhamento consolidado de títulos, obrigações e lançamentos patrimoniais.</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="abrirModalTitulo()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center space-x-2 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Novo Título</span>
+              </button>
+              <button onclick="abrirModalLancamento()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center space-x-2 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <span>Novo Lançamento</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">A Pagar (Pendente)</span>
+              <p id="kpi-pagar-pendente" class="text-2xl font-bold text-rose-600 mt-2">R$ 0,00</p>
+              <div class="mt-2 text-xs text-slate-400 flex justify-between">
+                <span>Quitado:</span>
+                <span id="kpi-pagar-quitado" class="font-medium text-slate-600">R$ 0,00</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">A Receber (Pendente)</span>
+              <p id="kpi-receber-pendente" class="text-2xl font-bold text-emerald-600 mt-2">R$ 0,00</p>
+              <div class="mt-2 text-xs text-slate-400 flex justify-between">
+                <span>Quitado:</span>
+                <span id="kpi-receber-quitado" class="font-medium text-slate-600">R$ 0,00</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Saldo Líquido Previsto</span>
+              <p id="kpi-saldo-liquido" class="text-2xl font-bold text-blue-600 mt-2">R$ 0,00</p>
+              <p class="mt-2 text-xs text-slate-400">(A Receber - A Pagar)</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Conformidade Contábil</span>
+              <p class="text-2xl font-bold text-slate-800 mt-2 flex items-center space-x-1.5">
+                <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-base text-emerald-600">RB-001 Ativa</span>
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Partidas dobradas balanceadas</p>
+            </div>
+          </div>
+
+          <!-- Ações Rápidas & Resumo Recente -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Últimos Lançamentos Contábeis -->
+            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 space-y-4">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-slate-800 flex items-center space-x-2">
+                  <span>⚖️ Lançamentos Recentes</span>
+                </h3>
+                <button onclick="navegarPara('lancamentos')" class="text-xs text-blue-600 hover:underline">Ver todos</button>
+              </div>
+              <div id="dashboard-recent-lancamentos" class="divide-y divide-slate-100 text-sm">
+                <!-- Inserido dinamicamente -->
+              </div>
+            </div>
+
+            <!-- Próximos Vencimentos Financeiros -->
+            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 space-y-4">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-slate-800 flex items-center space-x-2">
+                  <span>📅 Próximos Vencimentos</span>
+                </h3>
+                <button onclick="navegarPara('titulos')" class="text-xs text-blue-600 hover:underline">Ver todos</button>
+              </div>
+              <div id="dashboard-recent-vencimentos" class="divide-y divide-slate-100 text-sm">
+                <!-- Inserido dinamicamente -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SEÇÃO: PLANO DE CONTAS (SPEC-2.1) ================= -->
+        <section id="sec-plano-contas" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">Plano de Contas Contábil</h2>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-800">SPEC-2.1</span>
+              </div>
+              <p class="text-sm text-slate-500">Organização hierárquica por natureza. Lançamentos permitidos exclusivamente em contas analíticas.</p>
+            </div>
+            <button onclick="abrirModalConta()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center space-x-2 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              <span>Nova Conta Contábil</span>
+            </button>
+          </div>
+
+          <!-- Filtros e Modos de Visualização -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center space-x-2 flex-1 max-w-md">
+              <input id="busca-contas" type="text" placeholder="Buscar por código ou nome..." oninput="filtrarContas()" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="alternarModoVisualizacaoContas('arvore')" id="btn-modo-arvore" class="px-3 py-1.5 text-xs font-medium rounded-md bg-blue-50 text-blue-700 border border-blue-200">Visão em Árvore</button>
+              <button onclick="alternarModoVisualizacaoContas('tabela')" id="btn-modo-tabela" class="px-3 py-1.5 text-xs font-medium rounded-md text-slate-600 hover:bg-slate-100">Visão em Tabela</button>
+            </div>
+          </div>
+
+          <!-- Visualização em Árvore -->
+          <div id="container-arvore-contas" class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-2">
+            <!-- Árvore injetada via JS -->
+          </div>
+
+          <!-- Visualização em Tabela -->
+          <div id="container-tabela-contas" class="hidden bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr>
+                    <th class="px-4 py-3">Código</th>
+                    <th class="px-4 py-3">Nome da Conta</th>
+                    <th class="px-4 py-3">Natureza</th>
+                    <th class="px-4 py-3">Tipo</th>
+                    <th class="px-4 py-3">Nível</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-contas" class="divide-y divide-slate-100">
+                  <!-- Linhas injetadas via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SEÇÃO: LANÇAMENTOS CONTÁBEIS (SPEC-2.2) ================= -->
+        <section id="sec-lancamentos" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">Lançamentos Contábeis</h2>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">SPEC-2.2 • RB-001</span>
+              </div>
+              <p class="text-sm text-slate-500">Partidas dobradas equilibradas. Bloqueio estrito de desbalanceamento.</p>
+            </div>
+            <button onclick="abrirModalLancamento()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center space-x-2 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              <span>Novo Lançamento</span>
+            </button>
+          </div>
+
+          <!-- Tabela de Lançamentos -->
+          <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-200/80 flex flex-col sm:flex-row justify-between items-center gap-3">
+              <input id="busca-lancamentos" type="text" placeholder="Buscar por histórico ou número..." oninput="carregarLancamentos()" class="text-sm px-3 py-2 border border-slate-300 rounded-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <span class="text-xs text-slate-500 font-medium">Lançamentos em contas analíticas</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr>
+                    <th class="px-4 py-3">Nº</th>
+                    <th class="px-4 py-3">Data</th>
+                    <th class="px-4 py-3">Competência</th>
+                    <th class="px-4 py-3">Histórico</th>
+                    <th class="px-4 py-3">Partidas (Débito / Crédito)</th>
+                    <th class="px-4 py-3 text-right">Valor Total</th>
+                    <th class="px-4 py-3 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-lancamentos" class="divide-y divide-slate-100">
+                  <!-- Linhas injetadas via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SEÇÃO: CONTAS A PAGAR E RECEBER (SPEC-2.3) ================= -->
+        <section id="sec-titulos" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">Contas a Pagar e a Receber</h2>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">SPEC-2.3</span>
+              </div>
+              <p class="text-sm text-slate-500">Gestão de títulos, parcelamento e baixas parciais ou totais.</p>
+            </div>
+            <button onclick="abrirModalTitulo()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center space-x-2 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              <span>Cadastrar Título</span>
+            </button>
+          </div>
+
+          <!-- Filtros de Títulos -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-2">
+              <button onclick="filtrarTipoTitulos('')" id="btn-filtro-tipo-todos" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-blue-600 text-white">Todos</button>
+              <button onclick="filtrarTipoTitulos('PAGAR')" id="btn-filtro-tipo-pagar" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">A Pagar</button>
+              <button onclick="filtrarTipoTitulos('RECEBER')" id="btn-filtro-tipo-receber" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">A Receber</button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <select id="filtro-status-titulo" onchange="carregarTitulos()" class="text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none">
+                <option value="">Todos os status</option>
+                <option value="PENDENTE">Pendentes</option>
+                <option value="PARCIAL">Parcialmente Pagos</option>
+                <option value="PAGO">Quitados (Pagos)</option>
+              </select>
+              <input id="busca-titulos" type="text" placeholder="Buscar por descrição ou pessoa..." oninput="carregarTitulos()" class="text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none w-56">
+            </div>
+          </div>
+
+          <!-- Tabela de Títulos -->
+          <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr>
+                    <th class="px-4 py-3">Tipo</th>
+                    <th class="px-4 py-3">Pessoa / Fornecedor</th>
+                    <th class="px-4 py-3">Descrição</th>
+                    <th class="px-4 py-3">Emissão</th>
+                    <th class="px-4 py-3">Valor Total</th>
+                    <th class="px-4 py-3">Quitado</th>
+                    <th class="px-4 py-3">Saldo Aberto</th>
+                    <th class="px-4 py-3 text-center">Status</th>
+                    <th class="px-4 py-3 text-right">Parcelas / Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-titulos" class="divide-y divide-slate-100">
+                  <!-- Inserido dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= MODAL: NOVA CONTA CONTÁBIL (SPEC-2.1) ================= -->
+  <div id="modal-conta" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-lg font-bold text-slate-900">Cadastrar Conta Contábil</h3>
+        <button onclick="fecharModal('modal-conta')" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <form id="form-conta" onsubmit="salvarConta(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Classificação da Conta *</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center space-x-2 border border-slate-200 rounded-lg p-3 cursor-pointer hover:bg-slate-50">
+              <input type="radio" name="tipo" value="SINTETICA" onchange="atualizarInstrucaoTipoConta()" checked class="text-blue-600">
+              <div>
+                <span class="block text-sm font-semibold text-slate-800">Sintética</span>
+                <span class="block text-xs text-slate-500">Agrupadora (não recebe lançamentos)</span>
+              </div>
+            </label>
+            <label class="flex items-center space-x-2 border border-slate-200 rounded-lg p-3 cursor-pointer hover:bg-slate-50">
+              <input type="radio" name="tipo" value="ANALITICA" onchange="atualizarInstrucaoTipoConta()" class="text-blue-600">
+              <div>
+                <span class="block text-sm font-semibold text-slate-800">Analítica</span>
+                <span class="block text-xs text-slate-500">Operacional (recebe lançamentos)</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Código Contábil *</label>
+            <input type="text" id="conta-codigo" placeholder="ex: 1.1.01.003" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Natureza *</label>
+            <select id="conta-natureza" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+              <option value="ATIVO">ATIVO</option>
+              <option value="PASSIVO">PASSIVO</option>
+              <option value="PATRIMONIO_LIQUIDO">PATRIMÔNIO LÍQUIDO</option>
+              <option value="RECEITA">RECEITA</option>
+              <option value="DESPESA">DESPESA</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nome da Conta *</label>
+          <input type="text" id="conta-nome" placeholder="ex: Aplicações de Liquidez Imediata" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Conta Pai (Obrigatória para Analítica / Subcontas)</label>
+          <select id="conta-pai-id" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Nenhuma (Conta Raiz)</option>
+            <!-- Preenchido via JS com contas sintéticas -->
+          </select>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end space-x-3">
+          <button type="button" onclick="fecharModal('modal-conta')" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-sm">Salvar Conta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: NOVO LANÇAMENTO CONTÁBIL (SPEC-2.2 - PARTIDAS DOBRADAS) ================= -->
+  <div id="modal-lancamento" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 space-y-5 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Novo Lançamento Contábil</h3>
+          <p class="text-xs text-slate-500">Método das partidas dobradas (RB-001) • Contas Analíticas</p>
+        </div>
+        <button onclick="fecharModal('modal-lancamento')" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <form id="form-lancamento" onsubmit="salvarLancamento(event)" class="space-y-4 flex-1 overflow-y-auto pr-1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data do Lançamento *</label>
+            <input type="date" id="lanc-data" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Competência (Mês/Ano)</label>
+            <input type="text" id="lanc-competencia" placeholder="YYYY-MM (ex: 2026-11)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Histórico do Lançamento *</label>
+          <input type="text" id="lanc-historico" placeholder="ex: Pagamento de fornecedor ref NF 9821 via Banco" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <!-- Grade de Partidas (Débitos e Créditos) -->
+        <div class="space-y-3 pt-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Partidas Contábeis (Mínimo 1 Débito e 1 Crédito)</span>
+            <button type="button" onclick="adicionarLinhaPartida()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center space-x-1">
+              <span>+ Adicionar Partida</span>
+            </button>
+          </div>
+
+          <div id="container-partidas" class="space-y-2">
+            <!-- Linhas de partidas dinâmicas injetadas via JS -->
+          </div>
+        </div>
+
+        <!-- Barra de Equilíbrio em Tempo Real (Regra Fundamental RB-001) -->
+        <div id="barra-equilibrio" class="p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 border-slate-200">
+          <div class="flex items-center space-x-4 text-xs font-medium">
+            <div>
+              <span class="text-slate-500">Total Débitos:</span>
+              <span id="calc-total-debitos" class="text-sm font-bold text-slate-900 block">R$ 0,00</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Total Créditos:</span>
+              <span id="calc-total-creditos" class="text-sm font-bold text-slate-900 block">R$ 0,00</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Diferença:</span>
+              <span id="calc-diferenca" class="text-sm font-bold text-slate-900 block">R$ 0,00</span>
+            </div>
+          </div>
+
+          <div id="status-equilibrio-badge" class="px-3 py-1.5 rounded-full text-xs font-bold flex items-center space-x-1.5 bg-amber-100 text-amber-800 border border-amber-200">
+            <span>⚠️ Aguardando partidas</span>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end space-x-3">
+          <button type="button" onclick="fecharModal('modal-lancamento')" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50">Cancelar</button>
+          <button type="submit" id="btn-salvar-lancamento" disabled class="px-4 py-2 bg-indigo-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-sm transition">
+            Efetivar Lançamento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: NOVO TÍTULO FINANCEIRO (SPEC-2.3) ================= -->
+  <div id="modal-titulo" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-lg font-bold text-slate-900">Cadastrar Título Financeiro</h3>
+        <button onclick="fecharModal('modal-titulo')" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <form id="form-titulo" onsubmit="salvarTitulo(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Título *</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center space-x-2 border border-slate-200 rounded-lg p-3 cursor-pointer hover:bg-slate-50">
+              <input type="radio" name="tipo_titulo" value="PAGAR" checked class="text-rose-600">
+              <div>
+                <span class="block text-sm font-semibold text-rose-700">Conta a Pagar</span>
+                <span class="block text-xs text-slate-500">Fornecedor / Obrigação</span>
+              </div>
+            </label>
+            <label class="flex items-center space-x-2 border border-slate-200 rounded-lg p-3 cursor-pointer hover:bg-slate-50">
+              <input type="radio" name="tipo_titulo" value="RECEBER" class="text-emerald-600">
+              <div>
+                <span class="block text-sm font-semibold text-emerald-700">Conta a Receber</span>
+                <span class="block text-xs text-slate-500">Cliente / Faturamento</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Favorecido / Pessoa / Fornecedor *</label>
+          <input type="text" id="titulo-pessoa" placeholder="ex: Fornecedor de Equipamentos Beta Ltda" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Descrição do Título *</label>
+          <input type="text" id="titulo-descricao" placeholder="ex: Aquisição de Computadores para o Escritório" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Valor Total (R$) *</label>
+            <input type="number" step="0.01" min="0.01" id="titulo-valor" placeholder="ex: 4500.00" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Parcelamento *</label>
+            <select id="titulo-parcelas" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+              <option value="1">1x (À vista)</option>
+              <option value="2">2x mensais</option>
+              <option value="3">3x mensais</option>
+              <option value="4">4x mensais</option>
+              <option value="5">5x mensais</option>
+              <option value="6">6x mensais</option>
+              <option value="10">10x mensais</option>
+              <option value="12">12x mensais</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data de Emissão</label>
+            <input type="date" id="titulo-emissao" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">1º Vencimento *</label>
+            <input type="date" id="titulo-vencimento" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end space-x-3">
+          <button type="button" onclick="fecharModal('modal-titulo')" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-sm">Cadastrar Título</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: BAIXA DE PARCELA (SPEC-2.3 - TOTAL OU PARCIAL) ================= -->
+  <div id="modal-baixa" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-lg font-bold text-slate-900">Efetuar Baixa de Parcela</h3>
+        <button onclick="fecharModal('modal-baixa')" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <form id="form-baixa" onsubmit="confirmarBaixa(event)" class="space-y-4">
+        <input type="hidden" id="baixa-parcela-id">
+
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1.5">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Parcela:</span>
+            <span id="baixa-info-numero" class="font-semibold text-slate-800">1/1</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Valor Original:</span>
+            <span id="baixa-info-original" class="font-semibold text-slate-800">R$ 0,00</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Já Amortizado:</span>
+            <span id="baixa-info-pago" class="font-semibold text-emerald-600">R$ 0,00</span>
+          </div>
+          <div class="flex justify-between pt-1 border-t border-slate-200 text-sm">
+            <span class="font-bold text-slate-700">Saldo Pendente:</span>
+            <span id="baixa-info-pendente" class="font-bold text-rose-600">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Valor da Baixa (R$) *</label>
+          <div class="flex items-center space-x-2">
+            <input type="number" step="0.01" min="0.01" id="baixa-valor" required class="flex-1 text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-semibold text-slate-900">
+            <button type="button" onclick="preencherBaixaTotal()" class="px-3 py-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium">Baixa Total</button>
+          </div>
+          <span class="text-xs text-slate-400 mt-1 block">Informe valor parcial ou clique em 'Baixa Total'</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data do Pagamento *</label>
+            <input type="date" id="baixa-data" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Forma de Pagamento</label>
+            <select id="baixa-forma" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+              <option value="PIX">PIX</option>
+              <option value="TRANSFERENCIA">Transferência / TED</option>
+              <option value="BOLETO">Boleto Bancário</option>
+              <option value="DINHEIRO">Dinheiro</option>
+              <option value="CARTAO">Cartão de Crédito/Débito</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Observações / Comprovante</label>
+          <input type="text" id="baixa-observacao" placeholder="ex: Comprovante autenticado no banco" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end space-x-3">
+          <button type="button" onclick="fecharModal('modal-baixa')" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow-sm">Confirmar Baixa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: DETALHES DAS PARCELAS DE UM TÍTULO ================= -->
+  <div id="modal-detalhes-titulo" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 id="detalhe-titulo-nome" class="text-lg font-bold text-slate-900">Detalhes do Título</h3>
+          <p id="detalhe-titulo-sub" class="text-xs text-slate-500"></p>
+        </div>
+        <button onclick="fecharModal('modal-detalhes-titulo')" class="text-slate-400 hover:text-slate-600">✕</button>
+      </div>
+
+      <div class="overflow-y-auto flex-1">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">
+            <tr>
+              <th class="px-3 py-2">Parc.</th>
+              <th class="px-3 py-2">Vencimento</th>
+              <th class="px-3 py-2">Valor</th>
+              <th class="px-3 py-2">Pago</th>
+              <th class="px-3 py-2">Pendente</th>
+              <th class="px-3 py-2">Status</th>
+              <th class="px-3 py-2 text-right">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-detalhe-parcelas" class="divide-y divide-slate-100">
+            <!-- Linhas de parcelas injetadas via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 flex justify-end">
+        <button onclick="fecharModal('modal-detalhes-titulo')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Frontend Logic -->
+  <script src="/app.js"></script>
+</body>
+</html>
