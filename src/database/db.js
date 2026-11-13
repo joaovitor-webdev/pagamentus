@@ -108,6 +108,12 @@ function saveDatabase() {
 }
 
 // Helpers para consultas
+function rawRun(sql, params = []) {
+  if (!dbInstance) throw new Error("Database not initialized");
+  dbInstance.run(sql, params);
+  return { changes: dbInstance.getRowsModified() };
+}
+
 async function all(sql, params = []) {
   const db = await getDatabase();
   const stmt = db.prepare(sql);
@@ -126,17 +132,21 @@ async function get(sql, params = []) {
 }
 
 async function run(sql, params = []) {
-  const db = await getDatabase();
-  db.run(sql, params);
+  await getDatabase();
+  const res = rawRun(sql, params);
   saveDatabase();
-  return { changes: db.getRowsModified() };
+  return res;
 }
 
 async function transaction(workFn) {
   const db = await getDatabase();
   db.run("BEGIN TRANSACTION;");
   try {
-    const result = await workFn({ run, get, all });
+    const result = await workFn({
+      run: (sql, params) => rawRun(sql, params),
+      get,
+      all
+    });
     db.run("COMMIT;");
     saveDatabase();
     return result;

@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const db = require('../src/database/db');
 const planoContasService = require('../src/modules/contabilidade/planoContasService');
 
-const ORG_TEST = 'org-test-spec-21';
+const ORG_TEST = 'org-test-spec-21-' + Date.now();
 
 test.before(async () => {
   // Garante que o banco está pronto
