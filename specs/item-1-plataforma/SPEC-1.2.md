@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 1 – Plataforma | @joaovitor-webdev | A definir | A definir | Fazendo |
+| 1 – Plataforma | @joaovitor-webdev | A definir | https://trello.com/c/LuEhsgst | Revisando |
 
 ## 1. Contexto e objetivo
 Definir a arquitetura tecnológica, a stack oficial de desenvolvimento e a estratégia de segregação de ambientes do projeto por meio de um registro de decisão arquitetural (ADR). O objetivo é garantir capacidade de escalabilidade para suportar o crescimento da aplicação e assegurar o isolamento estrito entre o ambiente de testes/desenvolvimento e o ambiente de produção.
