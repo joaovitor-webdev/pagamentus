@@ -1,0 +1,24 @@
+{
+  "name": "pagamentus-contabilidade-financeiro",
+  "version": "1.0.0",
+  "description": "Sistema Integrado de Contabilidade, Fiscal e IR - Módulo Item 2: Contabilidade e Financeiro",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "contabilidade",
+    "partidas-dobradas",
+    "plano-de-contas",
+    "contas-a-pagar",
+    "contas-a-receber"
+  ],
+  "author": "Ítalo",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "sql.js": "^1.16.0"
+  }
+}
