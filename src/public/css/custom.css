@@ -16,6 +16,18 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Restrição de largura de inputs nativos de data/mês no mobile */
+input[type="month"] {
+  max-width: 110px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  input[type="month"] {
+    max-width: none;
+  }
+}
+
 body {
   padding-bottom: calc(68px + var(--sab));
 }

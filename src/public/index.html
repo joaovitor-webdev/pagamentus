@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#2563eb">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -13,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/custom.css">
+  <link rel="stylesheet" href="/css/custom.css?v=2.1.0">
   <script>
     tailwind.config = {
       theme: {
@@ -230,11 +233,11 @@
             </div>
             <p class="text-xs text-slate-500 mt-0.5">Siga as etapas para processar, conferir e fechar a folha pelo celular.</p>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button onclick="switchTab('payroll')" class="touch-target flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center space-x-1.5">
+          <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+            <button onclick="switchTab('payroll')" class="touch-target px-3 sm:px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold rounded-xl text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center space-x-1 sm:space-x-1.5 truncate">
               <span>🧮 Abrir Conferência</span>
             </button>
-            <button onclick="openSimulationModal()" class="touch-target px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-semibold rounded-xl text-sm transition-all border border-slate-300 flex items-center justify-center space-x-1">
+            <button onclick="openSimulationModal()" class="touch-target px-3 sm:px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 font-semibold rounded-xl text-xs sm:text-sm transition-all border border-slate-300 flex items-center justify-center space-x-1 truncate">
               <span>🌴 Simular</span>
             </button>
           </div>
@@ -1281,6 +1284,6 @@
   </div>
 
   <!-- JavaScript Frontend Integrado -->
-  <script src="/js/app.js"></script>
+  <script src="/js/app.js?v=2.1.0"></script>
 </body>
 </html>
