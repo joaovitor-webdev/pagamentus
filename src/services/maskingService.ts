@@ -7,6 +7,7 @@ declare global {
       userRole?: UserRole;
       isRhAdmin?: boolean;
       organizationId?: number;
+      clientId?: number;
     }
   }
 }
@@ -106,6 +107,8 @@ export function roleMiddleware(req: Request, res: Response, next: NextFunction):
   // Extrai organization_id para isolamento multi-inquilino (SPEC-1.2)
   const orgHeader = (req.headers['x-organization-id'] || req.query.org_id || '1') as string;
   req.organizationId = parseInt(orgHeader, 10) || 1;
+  const clientHeader = (req.headers['x-client-id'] || req.query.client_id || '1') as string;
+  req.clientId = parseInt(clientHeader, 10) || 1;
 
   next();
 }
