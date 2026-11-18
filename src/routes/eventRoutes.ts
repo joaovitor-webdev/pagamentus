@@ -74,6 +74,16 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Bloqueia lançamento de eventos se a competência já estiver fechada
+    const runCheck = await query(
+      `SELECT id, status FROM payroll_runs WHERE organization_id = $1 AND competencia = $2 AND tipo = 'mensal'`,
+      [orgId, competencia]
+    );
+    if (runCheck.rows.length > 0 && runCheck.rows[0].status === 'fechada') {
+      res.status(409).json({ error: `A competência ${competencia} está fechada e imutável. Não é permitido adicionar eventos.` });
+      return;
+    }
+
     const empRes = await query<Employee>(
       'SELECT id, nome, salario_base, jornada FROM employees WHERE organization_id = $1 AND id = $2',
       [orgId, Number(employee_id)]
@@ -132,6 +142,77 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// PUT /api/events/:id - Atualiza evento variável existente
+router.put('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orgId = req.organizationId || 1;
+    const { id } = req.params;
+    const { descricao, quantidade, percentual, valor } = req.body;
+
+    const findRes = await query('SELECT * FROM variable_events WHERE organization_id = $1 AND id = $2', [orgId, id]);
+    if (findRes.rows.length === 0) {
+      res.status(404).json({ error: 'Evento não encontrado.' });
+      return;
+    }
+
+    const currentEv = findRes.rows[0];
+
+    // Bloqueia edição se a competência estiver fechada
+    const runCheck = await query(
+      `SELECT id, status FROM payroll_runs WHERE organization_id = $1 AND competencia = $2 AND tipo = 'mensal'`,
+      [orgId, currentEv.competencia]
+    );
+    if (runCheck.rows.length > 0 && runCheck.rows[0].status === 'fechada') {
+      res.status(409).json({ error: `A competência ${currentEv.competencia} está fechada e imutável. Não é permitido editar eventos.` });
+      return;
+    }
+
+    let finalValue = valor !== undefined ? Number(valor) : parseFloat(currentEv.valor);
+    const finalQty = quantidade !== undefined ? Number(quantidade) : parseFloat(currentEv.quantidade);
+    const finalPerc = percentual !== undefined ? Number(percentual) : parseFloat(currentEv.percentual);
+
+    if (valor === undefined && finalQty > 0) {
+      const empRes = await query<Employee>(
+        'SELECT salario_base, jornada FROM employees WHERE organization_id = $1 AND id = $2',
+        [orgId, currentEv.employee_id]
+      );
+      if (empRes.rows.length > 0) {
+        const emp = empRes.rows[0];
+        const divisor = emp.jornada.includes('40h') ? 200 : 220;
+        const valorHora = parseFloat(String(emp.salario_base)) / divisor;
+        if (currentEv.tipo === 'hora_extra') {
+          const fator = 1 + ((finalPerc || 50) / 100);
+          finalValue = Number((valorHora * fator * finalQty).toFixed(2));
+        } else if (currentEv.tipo === 'falta') {
+          const valorDia = parseFloat(String(emp.salario_base)) / 30;
+          finalValue = Number((valorDia * finalQty).toFixed(2));
+        }
+      }
+    }
+
+    const updateRes = await query(`
+      UPDATE variable_events
+      SET descricao = COALESCE($1, descricao),
+          quantidade = $2,
+          percentual = $3,
+          valor = $4
+      WHERE organization_id = $5 AND id = $6
+      RETURNING *
+    `, [
+      descricao ? String(descricao).trim() : null,
+      finalQty,
+      finalPerc,
+      finalValue,
+      orgId,
+      id
+    ]);
+
+    res.json(maskObject(updateRes.rows[0], req.isRhAdmin));
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // DELETE /api/events/:id - Remove evento variável
 router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -141,6 +222,18 @@ router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
     const findRes = await query('SELECT * FROM variable_events WHERE organization_id = $1 AND id = $2', [orgId, id]);
     if (findRes.rows.length === 0) {
       res.status(404).json({ error: 'Evento não encontrado.' });
+      return;
+    }
+
+    const currentEv = findRes.rows[0];
+
+    // Bloqueia exclusão se a competência estiver fechada
+    const runCheck = await query(
+      `SELECT id, status FROM payroll_runs WHERE organization_id = $1 AND competencia = $2 AND tipo = 'mensal'`,
+      [orgId, currentEv.competencia]
+    );
+    if (runCheck.rows.length > 0 && runCheck.rows[0].status === 'fechada') {
+      res.status(409).json({ error: `A competência ${currentEv.competencia} está fechada e imutável. Não é permitido excluir eventos.` });
       return;
     }
 

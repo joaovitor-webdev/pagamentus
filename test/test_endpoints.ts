@@ -1,9 +1,8 @@
 import http from 'http';
-import fs from 'fs';
 import { app, startServer } from '../src/server';
 import { pool } from '../src/db/database';
 
-const TEST_SOCKET = '/tmp/express_test.sock';
+let testPort = 0;
 
 function makeRequest(method: string, path: string, body: any = null, headers: Record<string, string> = {}): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -13,7 +12,8 @@ function makeRequest(method: string, path: string, body: any = null, headers: Re
     };
 
     const options = {
-      socketPath: TEST_SOCKET,
+      hostname: '127.0.0.1',
+      port: testPort,
       path,
       method,
       headers: defaultHeaders
@@ -57,8 +57,10 @@ async function runTests() {
   let server: any = null;
 
   try {
-    if (fs.existsSync(TEST_SOCKET)) fs.unlinkSync(TEST_SOCKET);
-    server = await startServer(TEST_SOCKET);
+    server = await startServer(0);
+    const addr = server.address();
+    testPort = typeof addr === 'object' && addr ? addr.port : 3000;
+    console.log(`  [INFO] Servidor de testes iniciado na porta TCP ${testPort}`);
 
     // 1. Healthcheck & Stack
     const health = await makeRequest('GET', '/api/health');
@@ -175,7 +177,6 @@ async function runTests() {
     failures++;
   } finally {
     if (server) server.close();
-    if (fs.existsSync(TEST_SOCKET)) fs.unlinkSync(TEST_SOCKET);
     await pool.end();
     process.exit(failures === 0 ? 0 : 1);
   }

@@ -2,15 +2,18 @@
   "name": "pagamentus",
   "version": "1.0.0",
   "description": "Sistema Integrado de Contabilidade, Fiscal e Imposto de Renda",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
     "migrate": "ts-node src/database/migrate.ts",
     "test:integrity": "ts-node src/tests/integrity.test.ts",
     "test:unit": "jest",
-    "test": "npm run test:unit"
+    "test:endpoints": "ts-node test/test_endpoints.ts",
+    "test:features": "ts-node test/test_new_features.ts",
+    "test:mobile": "ts-node test/test_mobile_contracts.ts",
+    "test": "npm run test:endpoints && npm run test:features && npm run test:mobile"
   },
   "repository": {
     "type": "git",

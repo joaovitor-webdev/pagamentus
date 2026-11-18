@@ -1,4 +1,4 @@
-import { Pool, QueryResult, QueryResultRow } from 'pg';
+import { Pool, PoolConfig, QueryResult, QueryResultRow } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -6,20 +6,53 @@ dotenv.config();
 const isTest = process.env.NODE_ENV === 'test';
 const targetDb = isTest ? 'pagamentus_test' : 'pagamentus_prod';
 
-// Configura pool suportando tanto URL quanto conexão local por socket /tmp ou TCP
-const poolConfig = process.env.DATABASE_URL
-  ? { connectionString: isTest ? (process.env.DATABASE_URL_TEST || process.env.DATABASE_URL) : process.env.DATABASE_URL }
+const connectionString = isTest
+  ? (process.env.DATABASE_URL_TEST || process.env.DATABASE_URL)
+  : process.env.DATABASE_URL;
+
+const isRemoteUrl = Boolean(
+  connectionString &&
+  !connectionString.includes('localhost') &&
+  !connectionString.includes('127.0.0.1')
+);
+
+const poolConfig: PoolConfig = connectionString
+  ? {
+      connectionString,
+      ssl: isRemoteUrl || process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false,
+      max: parseInt(process.env.PG_POOL_MAX || '10', 10),
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+      options: '-c search_path=pagamentus,public',
+    }
   : {
       host: process.env.PGHOST || '/tmp',
       port: parseInt(process.env.PGPORT || '5432', 10),
       database: targetDb,
       user: process.env.PGUSER || 'doug12',
+      password: process.env.PGPASSWORD,
+      max: parseInt(process.env.PG_POOL_MAX || '10', 10),
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+      options: '-c search_path=pagamentus,public',
     };
 
 export const pool = new Pool(poolConfig);
 
+let initPromise: Promise<void> | null = null;
+
 export async function query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
   return pool.query<T>(text, params);
+}
+
+export async function ensureDatabaseInitialized(): Promise<void> {
+  if (!initPromise) {
+    initPromise = initDatabase().catch((err) => {
+      initPromise = null;
+      throw err;
+    });
+  }
+  return initPromise;
 }
 
 export async function initDatabase(): Promise<void> {
@@ -31,6 +64,35 @@ export async function initDatabase(): Promise<void> {
     await client.query(`
       CREATE SCHEMA IF NOT EXISTS pagamentus;
       SET search_path TO pagamentus, public;
+    `);
+
+    // Tabela de Configuração da Empresa / Empregador
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS companies (
+        id SERIAL PRIMARY KEY,
+        organization_id INTEGER NOT NULL DEFAULT 1,
+        razao_social VARCHAR(255) NOT NULL,
+        nome_fantasia VARCHAR(255) NOT NULL,
+        cnpj VARCHAR(20) NOT NULL,
+        inscricao_estadual VARCHAR(50),
+        inscricao_municipal VARCHAR(50),
+        cnae_principal VARCHAR(20),
+        endereco VARCHAR(255),
+        numero VARCHAR(20),
+        bairro VARCHAR(100),
+        cidade VARCHAR(100),
+        uf VARCHAR(2),
+        cep VARCHAR(10),
+        telefone VARCHAR(20),
+        email VARCHAR(150),
+        responsavel_rh VARCHAR(150),
+        aliquota_fpas NUMERIC(6, 4) DEFAULT 0.2000,
+        aliquota_rat NUMERIC(6, 4) DEFAULT 0.0200,
+        aliquota_fap NUMERIC(6, 4) DEFAULT 1.0000,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT uq_companies_org UNIQUE (organization_id)
+      );
     `);
 
     // Tabela de Parâmetros de Cálculo Fictícios (RF-052)
@@ -55,9 +117,55 @@ export async function initDatabase(): Promise<void> {
         data_admissao DATE NOT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'ativo',
         dependentes INTEGER NOT NULL DEFAULT 0,
+        departamento VARCHAR(150) DEFAULT 'Geral',
+        regime_contratual VARCHAR(100) DEFAULT 'CLT',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT uq_emp_org_cpf UNIQUE (organization_id, cpf)
+      );
+    `);
+
+    // Assegura colunas departamento e regime_contratual caso a tabela já existisse
+    await client.query(`
+      ALTER TABLE employees ADD COLUMN IF NOT EXISTS departamento VARCHAR(150) DEFAULT 'Geral';
+      ALTER TABLE employees ADD COLUMN IF NOT EXISTS regime_contratual VARCHAR(100) DEFAULT 'CLT';
+    `);
+
+    // Tabela de Benefícios por Empregado (RF-053)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS benefits (
+        id BIGSERIAL PRIMARY KEY,
+        organization_id INTEGER NOT NULL DEFAULT 1,
+        employee_id INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        tipo VARCHAR(50) NOT NULL,
+        descricao VARCHAR(255),
+        valor NUMERIC(12, 2) NOT NULL DEFAULT 0,
+        desconto_empregado NUMERIC(12, 2) NOT NULL DEFAULT 0,
+        data_inicio DATE NOT NULL DEFAULT CURRENT_DATE,
+        data_fim DATE,
+        ativo BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Tabela de Registro de Ponto / Espelho de Ponto (RF-053)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS time_records (
+        id BIGSERIAL PRIMARY KEY,
+        organization_id INTEGER NOT NULL DEFAULT 1,
+        employee_id INTEGER NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        data DATE NOT NULL,
+        entrada TIME,
+        saida_almoco TIME,
+        retorno_almoco TIME,
+        saida TIME,
+        horas_trabalhadas NUMERIC(5, 2) NOT NULL DEFAULT 8.00,
+        horas_extras NUMERIC(5, 2) NOT NULL DEFAULT 0,
+        observacao TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT uq_time_records_org_employee_date UNIQUE (organization_id, employee_id, data)
       );
     `);
 
@@ -121,10 +229,14 @@ export async function initDatabase(): Promise<void> {
         total_liquido NUMERIC(14, 2) NOT NULL DEFAULT 0,
         total_encargos NUMERIC(14, 2) NOT NULL DEFAULT 0,
         total_provisoes NUMERIC(14, 2) NOT NULL DEFAULT 0,
+        closed_at TIMESTAMP WITH TIME ZONE,
+        closed_by VARCHAR(150),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT uq_run_org_comp_tipo UNIQUE (organization_id, competencia, tipo)
       );
+      ALTER TABLE payroll_runs ADD COLUMN IF NOT EXISTS closed_at TIMESTAMP WITH TIME ZONE;
+      ALTER TABLE payroll_runs ADD COLUMN IF NOT EXISTS closed_by VARCHAR(150);
     `);
 
     // Itens Calculados por Empregado na Folha (RF-052 & RF-055)
@@ -150,10 +262,12 @@ export async function initDatabase(): Promise<void> {
         inss_patronal NUMERIC(12, 2) NOT NULL,
         provisao_13 NUMERIC(12, 2) NOT NULL DEFAULT 0,
         provisao_ferias NUMERIC(12, 2) NOT NULL DEFAULT 0,
+        conferido BOOLEAN NOT NULL DEFAULT FALSE,
         detalhes_json JSONB,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT uq_item_org_run_emp UNIQUE (organization_id, payroll_run_id, employee_id)
       );
+      ALTER TABLE payroll_items ADD COLUMN IF NOT EXISTS conferido BOOLEAN NOT NULL DEFAULT FALSE;
     `);
 
     // Trilha de Auditoria e Aprovação de Folha (RF-056 & RNF-004)
@@ -171,10 +285,22 @@ export async function initDatabase(): Promise<void> {
       );
     `);
 
+    // Índices de otimização de consulta e multi-inquilino
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS ix_variable_events_emp_comp ON variable_events (organization_id, employee_id, competencia);
+      CREATE INDEX IF NOT EXISTS ix_leaves_emp_period ON leaves (organization_id, employee_id, data_inicio, data_fim);
+      CREATE INDEX IF NOT EXISTS ix_contract_changes_emp ON contract_changes (organization_id, employee_id, data_alteracao DESC);
+      CREATE INDEX IF NOT EXISTS ix_benefits_emp ON benefits (organization_id, employee_id, ativo);
+      CREATE INDEX IF NOT EXISTS ix_payroll_runs_comp ON payroll_runs (organization_id, competencia, tipo);
+      CREATE INDEX IF NOT EXISTS ix_payroll_items_run ON payroll_items (organization_id, payroll_run_id);
+    `);
+
     await client.query('COMMIT');
 
+    await seedDefaultCompany();
     await seedDefaultParameters();
     await seedFictionalEmployees();
+    await seedDefaultBenefits();
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -262,5 +388,53 @@ async function seedFictionalEmployees(): Promise<void> {
     `);
 
     console.log('PostgreSQL inicializado e populado com sucesso.');
+  }
+}
+
+async function seedDefaultCompany(): Promise<void> {
+  const res = await query('SELECT count(*) as total FROM companies WHERE organization_id = 1');
+  if (parseInt(res.rows[0].total, 10) === 0) {
+    await query(`
+      INSERT INTO companies (
+        organization_id, razao_social, nome_fantasia, cnpj,
+        inscricao_estadual, inscricao_municipal, cnae_principal,
+        endereco, numero, bairro, cidade, uf, cep, telefone, email, responsavel_rh,
+        aliquota_fpas, aliquota_rat, aliquota_fap
+      ) VALUES (
+        1,
+        'Audicon Contabilidade e Gestão Empresarial Ltda',
+        'Audicon Contabilidade',
+        '12.345.678/0001-90',
+        '123.456.789.111',
+        '98765432-1',
+        '6920-6/01',
+        'Avenida Paulista',
+        '1500, Conjunto 82',
+        'Bela Vista',
+        'São Paulo',
+        'SP',
+        '01310-200',
+        '(11) 3456-7890',
+        'rh@audiconcontabilidade.com.br',
+        'Mariana Beatriz Oliveira',
+        0.2000,
+        0.0200,
+        1.0000
+      ) ON CONFLICT (organization_id) DO NOTHING
+    `);
+  }
+}
+
+async function seedDefaultBenefits(): Promise<void> {
+  const res = await query('SELECT count(*) as total FROM benefits WHERE organization_id = 1');
+  if (parseInt(res.rows[0].total, 10) === 0) {
+    await query(`
+      INSERT INTO benefits (organization_id, employee_id, tipo, descricao, valor, desconto_empregado, data_inicio, ativo)
+      VALUES
+        (1, 1, 'vale_refeicao', 'VR Alelo R$ 30/dia', 660.00, 132.00, '2024-02-15', true),
+        (1, 1, 'vale_transporte', 'VT Municipal 2 conduções', 220.00, 171.00, '2024-02-15', true),
+        (1, 2, 'plano_saude', 'Unimed Nacional Coparticipativo', 450.00, 120.00, '2023-08-01', true),
+        (1, 3, 'plano_saude', 'Unimed Nacional Executivo', 750.00, 150.00, '2022-05-10', true)
+    `);
   }
 }

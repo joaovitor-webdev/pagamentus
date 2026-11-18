@@ -70,7 +70,10 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
 router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const orgId = req.organizationId || 1;
-    const { nome, cpf, cargo, salario_base, jornada, data_admissao, status, dependentes } = req.body;
+    const {
+      nome, cpf, cargo, salario_base, jornada, data_admissao, status, dependentes,
+      departamento, regime_contratual
+    } = req.body;
 
     if (!nome || !cpf || !cargo || salario_base === undefined || !jornada || !data_admissao) {
       res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos.' });
@@ -88,8 +91,8 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     }
 
     const insertRes = await query(`
-      INSERT INTO employees (organization_id, nome, cpf, cargo, salario_base, jornada, data_admissao, status, dependentes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO employees (organization_id, nome, cpf, cargo, salario_base, jornada, data_admissao, status, dependentes, departamento, regime_contratual)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `, [
       orgId,
@@ -100,7 +103,9 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       jornada.trim(),
       data_admissao,
       status || 'ativo',
-      Number(dependentes) || 0
+      Number(dependentes) || 0,
+      departamento ? departamento.trim() : 'Geral',
+      regime_contratual ? regime_contratual.trim() : 'CLT'
     ]);
 
     const created = insertRes.rows[0];
@@ -138,7 +143,10 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
     }
 
     const current = currentRes.rows[0];
-    const { nome, cpf, cargo, salario_base, jornada, data_admissao, status, dependentes } = req.body;
+    const {
+      nome, cpf, cargo, salario_base, jornada, data_admissao, status, dependentes,
+      departamento, regime_contratual
+    } = req.body;
 
     const novoSalario = Number(salario_base);
     const novoCargo = cargo ? cargo.trim() : current.cargo;
@@ -170,8 +178,10 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
           data_admissao = COALESCE($6, data_admissao),
           status = COALESCE($7, status),
           dependentes = COALESCE($8, dependentes),
+          departamento = COALESCE($9, departamento),
+          regime_contratual = COALESCE($10, regime_contratual),
           updated_at = CURRENT_TIMESTAMP
-      WHERE organization_id = $9 AND id = $10
+      WHERE organization_id = $11 AND id = $12
       RETURNING *
     `, [
       nome ? nome.trim() : null,
@@ -182,6 +192,8 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
       data_admissao || null,
       status || null,
       dependentes !== undefined ? Number(dependentes) : null,
+      departamento ? departamento.trim() : null,
+      regime_contratual ? regime_contratual.trim() : null,
       orgId,
       id
     ]);
@@ -327,6 +339,34 @@ router.post('/:id/benefits', async (req: Request, res: Response): Promise<void> 
       res.status(400).json({ error: 'O benefício viola uma regra de validação.' });
       return;
     }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/employees/:id/benefits/:benefitId - Desativa/remove benefício do colaborador
+router.delete('/:id/benefits/:benefitId', async (req: Request, res: Response): Promise<void> => {
+  const organizationId = req.organizationId || 1;
+  const employeeId = Number(req.params.id);
+  const benefitId = Number(req.params.benefitId);
+
+  try {
+    const benRes = await query(
+      'SELECT id FROM benefits WHERE organization_id = $1 AND employee_id = $2 AND id = $3',
+      [organizationId, employeeId, benefitId]
+    );
+
+    if (benRes.rows.length === 0) {
+      res.status(404).json({ error: 'Benefício não encontrado para este colaborador.' });
+      return;
+    }
+
+    await query(
+      'UPDATE benefits SET ativo = FALSE, updated_at = CURRENT_TIMESTAMP WHERE organization_id = $1 AND employee_id = $2 AND id = $3',
+      [organizationId, employeeId, benefitId]
+    );
+
+    res.json({ success: true, message: 'Benefício desativado com sucesso.', id: benefitId });
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });

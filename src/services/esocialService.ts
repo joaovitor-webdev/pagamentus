@@ -16,10 +16,18 @@ export async function generateEsocialPayload(competencia: string, organizationId
   `, [organizationId]);
   const leaves = leavesRes.rows;
 
+  const compRes = await query('SELECT * FROM companies WHERE organization_id = $1 LIMIT 1', [organizationId]);
+  const company = compRes.rows[0] || {
+    razao_social: 'Audicon Contabilidade & Gestão Empresarial Ltda',
+    cnpj: '12.345.678/0001-90'
+  };
+
+  const cleanCnpj = (company.cnpj || '12345678000190').replace(/\D/g, '');
+
   const empregador = {
     tpInsc: 1, // 1 = CNPJ
-    nrInsc: '00123456000178',
-    razaoSocial: 'Audicon Contabilidade & Gestão Empresarial Ltda',
+    nrInsc: cleanCnpj,
+    razaoSocial: company.razao_social || 'Audicon Contabilidade & Gestão Empresarial Ltda',
     classificacaoTributaria: '99 - Pessoas Jurídicas em Geral',
     versaoLeiaute: 'S-1.2 (Simulado para Conferência)',
     ambiente: 'Homologação/Testes (Ambiente Local)',
@@ -27,7 +35,7 @@ export async function generateEsocialPayload(competencia: string, organizationId
   };
 
   const eventoS1000 = {
-    eventoId: `ID100123456000178${competencia.replace('-', '')}00001`,
+    eventoId: `ID1${cleanCnpj}${competencia.replace('-', '')}00001`,
     tipoEvento: 'S-1000',
     descricao: 'Informações do Empregador / Contribuinte',
     ideEmpregador: {

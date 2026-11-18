@@ -1,5 +1,24 @@
-/* Estilos customizados e regras de impressão para Holerite (RF-055) */
+/* Estilos customizados e regras de acessibilidade e Mobile First */
 
+/* Suporte a Safe Area para Smartphones Modernos (iPhone Notch e Android Gesture Bar) */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+body {
+  padding-bottom: calc(64px + var(--sab));
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-bottom: 0;
+  }
+}
+
+/* Regras de Impressão para Holerite (RF-055) */
 @media print {
   body * {
     visibility: hidden;
@@ -14,15 +33,148 @@
     width: 100%;
     margin: 0;
     padding: 10px;
+    border: none !important;
+    box-shadow: none !important;
   }
   .no-print {
     display: none !important;
   }
 }
 
+/* Área de toque acessível (mínimo 44x44px CSS) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Barra de Navegação Inferior Fixa para Mobile */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(60px + var(--sab));
+  padding-bottom: var(--sab);
+  background-color: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 40;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.15s ease-in-out;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.95);
+}
+
+.bottom-nav-item.active {
+  color: #2563eb;
+}
+
+.bottom-nav-item.active .nav-icon {
+  background-color: #eff6ff;
+  border-radius: 12px;
+  padding: 2px 10px;
+}
+
 /* Transições suaves */
 .tab-content {
-  transition: opacity 0.2s ease-in-out;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Accordion de Detalhes da Folha */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s cubic-bezier(0, 1, 0, 1);
+}
+
+.accordion-content.expanded {
+  max-height: 1000px;
+  transition: max-height 0.3s ease-in-out;
+}
+
+/* Card Mobile com elevação suave */
+.mobile-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mobile-card:active {
+  background-color: #f8fafc;
+}
+
+/* Stepper de Fechamento de Folha */
+.stepper-item {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.stepper-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 0 auto 4px auto;
+  transition: all 0.2s;
+}
+
+.stepper-circle.active {
+  background-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.stepper-circle.completed {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.stepper-circle.pending {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+/* Prevenção de Auto-Zoom no iOS Safari para inputs */
+@media screen and (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* Scrollbar estilizada */

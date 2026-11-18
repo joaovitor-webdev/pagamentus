@@ -138,6 +138,28 @@ export async function calculateMonthlyPayroll(
   usuario: string = 'Douglas (RH)',
   organizationId: number = 1
 ) {
+  // Verificação de Imutabilidade da Competência Fechada
+  const runCheck = await query(
+    `SELECT id, status FROM payroll_runs WHERE organization_id = $1 AND competencia = $2 AND tipo = 'mensal'`,
+    [organizationId, competencia]
+  );
+  if (saveToDatabase && runCheck.rows.length > 0 && runCheck.rows[0].status === 'fechada') {
+    const err: any = new Error(`A folha da competência ${competencia} está fechada e imutável. Para recalcular, realize a reabertura formal.`);
+    err.statusCode = 409;
+    throw err;
+  }
+
+  // Carrega dados da empresa de forma dinâmica
+  const compRes = await query(
+    `SELECT * FROM companies WHERE organization_id = $1 LIMIT 1`,
+    [organizationId]
+  );
+  const company = compRes.rows[0] || {
+    razao_social: 'Audicon Contabilidade & Gestão Empresarial Ltda',
+    cnpj: '12.345.678/0001-90',
+    endereco: 'Avenida Paulista, 1500, Conjunto 82 - Bela Vista, São Paulo/SP'
+  };
+
   const empRes = await query<Employee>(
     `SELECT * FROM employees WHERE organization_id = $1 AND status != 'inativo' ORDER BY id ASC`,
     [organizationId]
@@ -155,6 +177,8 @@ export async function calculateMonthlyPayroll(
   let folhaTotalLiquido = 0;
   let folhaTotalEncargos = 0;
   let folhaTotalProvisoes = 0;
+  let folhaTotalProv13 = 0;
+  let folhaTotalProvFerias = 0;
 
   for (const emp of employees) {
     const salarioBase = parseFloat(String(emp.salario_base));
@@ -212,6 +236,26 @@ export async function calculateMonthlyPayroll(
       }
     }
 
+    // Integração com Benefícios Ativos (RF-053)
+    const benRes = await query(
+      `SELECT * FROM benefits WHERE organization_id = $1 AND employee_id = $2 AND ativo = true`,
+      [organizationId, emp.id]
+    );
+    let totalBeneficiosDesconto = 0;
+    for (const ben of benRes.rows) {
+      const descVal = parseFloat(String(ben.desconto_empregado || 0));
+      if (descVal > 0) {
+        totalBeneficiosDesconto += descVal;
+        listaDescontos.push({
+          codigo: '250',
+          descricao: `Benefício: ${ben.descricao || ben.tipo}`,
+          referencia: '-',
+          valor: descVal
+        });
+      }
+    }
+    outrosDescontos = Number((outrosDescontos + totalBeneficiosDesconto).toFixed(2));
+
     const totalProventos = Number((salarioBase + horasExtrasTotal + adicionaisTotal).toFixed(2));
     const baseTributavel = Math.max(0, totalProventos - faltasTotal);
 
@@ -246,9 +290,28 @@ export async function calculateMonthlyPayroll(
 
     const provisoes = await calculateProvisions(salarioBase);
 
+    // Alertas de conferência por colaborador
+    const alertas: string[] = [];
+    if (salarioLiquido <= 0) {
+      alertas.push('Salário líquido zerado ou negativo');
+    }
+    if (horasExtrasTotal > salarioBase * 0.5) {
+      alertas.push('Horas extras expressivas (>50% do salário base)');
+    }
+    if (faltasTotal > 0) {
+      alertas.push(`Desconto por faltas: R$ ${faltasTotal.toFixed(2)}`);
+    }
+    if (totalDescontos > totalProventos * 0.4) {
+      alertas.push('Descontos expressivos (>40% dos proventos)');
+    }
+    if (alertas.length === 0) {
+      alertas.push('Cálculo consistente sem inconsistências');
+    }
+
     const detalhes = {
-      empresa: 'Audicon Contabilidade & Gestão Empresarial Ltda',
-      cnpj: '00.123.456/0001-78',
+      empresa: company.razao_social || company.nome_fantasia,
+      cnpj: company.cnpj,
+      endereco: `${company.endereco || ''} ${company.numero || ''} ${company.cidade || ''}/${company.uf || ''}`.trim(),
       competencia,
       proventos: listaProventos,
       descontos: listaDescontos,
@@ -262,7 +325,8 @@ export async function calculateMonthlyPayroll(
         terceiros,
         totalEncargos: totalEncargosItem
       },
-      provisoes
+      provisoes,
+      alertas
     };
 
     items.push({
@@ -286,6 +350,8 @@ export async function calculateMonthlyPayroll(
       inss_patronal: inssEmpresa,
       provisao_13: provisoes.provisao13Total,
       provisao_ferias: provisoes.provisaoFeriasTotal,
+      conferido: false,
+      alertas,
       detalhes_json: detalhes
     });
 
@@ -294,18 +360,22 @@ export async function calculateMonthlyPayroll(
     folhaTotalLiquido += salarioLiquido;
     folhaTotalEncargos += totalEncargosItem;
     folhaTotalProvisoes += provisoes.totalProvisoesComEncargos;
+    folhaTotalProv13 += provisoes.provisao13Total;
+    folhaTotalProvFerias += provisoes.provisaoFeriasTotal;
   }
 
   const resumo: any = {
     competencia,
     tipo: 'mensal',
-    status: 'rascunho',
+    status: runCheck.rows.length > 0 ? runCheck.rows[0].status : 'rascunho',
     total_colaboradores: employees.length,
     total_proventos: Number(folhaTotalProventos.toFixed(2)),
     total_descontos: Number(folhaTotalDescontos.toFixed(2)),
     total_liquido: Number(folhaTotalLiquido.toFixed(2)),
     total_encargos: Number(folhaTotalEncargos.toFixed(2)),
     total_provisoes: Number(folhaTotalProvisoes.toFixed(2)),
+    total_provisao_13: Number(folhaTotalProv13.toFixed(2)),
+    total_provisao_ferias: Number(folhaTotalProvFerias.toFixed(2)),
     custo_total_empresa: Number((folhaTotalProventos + folhaTotalEncargos + folhaTotalProvisoes).toFixed(2)),
     itens: items
   };
@@ -322,6 +392,9 @@ export async function calculateMonthlyPayroll(
 
       let runId: number;
       if (existingRes.rows.length > 0) {
+        if (existingRes.rows[0].status === 'fechada') {
+          throw new Error(`A folha da competência ${competencia} está fechada e não pode ser sobrescrita sem reabertura.`);
+        }
         runId = existingRes.rows[0].id;
         await client.query(`
           UPDATE payroll_runs
@@ -346,13 +419,13 @@ export async function calculateMonthlyPayroll(
             organization_id, payroll_run_id, employee_id, salario_base, horas_extras_total, adicionais_total,
             faltas_total, desconto_inss, desconto_irrf, outros_descontos, total_proventos,
             total_descontos, salario_liquido, base_inss, base_fgts, valor_fgts,
-            inss_patronal, provisao_13, provisao_ferias, detalhes_json
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+            inss_patronal, provisao_13, provisao_ferias, conferido, detalhes_json
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
         `, [
           organizationId, runId, it.employee_id, it.salario_base, it.horas_extras_total, it.adicionais_total,
           it.faltas_total, it.desconto_inss, it.desconto_irrf, it.outros_descontos, it.total_proventos,
           it.total_descontos, it.salario_liquido, it.base_inss, it.base_fgts, it.valor_fgts,
-          it.inss_patronal, it.provisao_13, it.provisao_ferias, JSON.stringify(it.detalhes_json)
+          it.inss_patronal, it.provisao_13, it.provisao_ferias, it.conferido, JSON.stringify(it.detalhes_json)
         ]);
       }
 
@@ -487,10 +560,16 @@ export async function approvePayroll(
   }
 
   const run = res.rows[0];
+  const isClosed = novoStatus === 'fechada';
 
   await query(
-    'UPDATE payroll_runs SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-    [novoStatus, run.id]
+    `UPDATE payroll_runs
+     SET status = $1,
+         closed_at = CASE WHEN $2 = true THEN CURRENT_TIMESTAMP ELSE NULL END,
+         closed_by = CASE WHEN $2 = true THEN $3 ELSE NULL END,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $4`,
+    [novoStatus, isClosed, usuario, run.id]
   );
 
   await query(`
@@ -505,5 +584,58 @@ export async function approvePayroll(
     justificativa || `Aprovação formal da competência ${competencia}`
   ]);
 
-  return { success: true, status: novoStatus };
+  return {
+    success: true,
+    status: novoStatus,
+    closed_at: isClosed ? new Date().toISOString() : null,
+    closed_by: isClosed ? usuario : null
+  };
+}
+
+export async function reopenPayroll(
+  competencia: string,
+  usuario: string,
+  justificativa: string,
+  organizationId: number = 1
+) {
+  if (!justificativa || !justificativa.trim()) {
+    throw new Error('Justificativa é obrigatória para reabertura de folha de pagamento.');
+  }
+
+  const res = await query(
+    'SELECT * FROM payroll_runs WHERE organization_id = $1 AND competencia = $2 AND tipo = $3',
+    [organizationId, competencia, 'mensal']
+  );
+  if (res.rows.length === 0) {
+    throw new Error('Folha não encontrada para esta competência.');
+  }
+
+  const run = res.rows[0];
+
+  await query(
+    `UPDATE payroll_runs
+     SET status = 'em_revisao',
+         closed_at = NULL,
+         closed_by = NULL,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1`,
+    [run.id]
+  );
+
+  await query(`
+    INSERT INTO payroll_approval_logs (organization_id, payroll_run_id, competencia, usuario, perfil, acao, detalhes)
+    VALUES ($1, $2, $3, $4, 'RH/Admin', 'REABERTURA DE FOLHA', $5)
+  `, [
+    organizationId,
+    run.id,
+    competencia,
+    usuario,
+    `Folha reaberta para revisão. Justificativa: ${justificativa.trim()}`
+  ]);
+
+  return {
+    success: true,
+    status: 'em_revisao',
+    message: `Competência ${competencia} reaberta para revisão com sucesso.`
+  };
 }

@@ -4,7 +4,8 @@ import {
   calculateMonthlyPayroll,
   calculateVacation,
   calculate13Salary,
-  approvePayroll
+  approvePayroll,
+  reopenPayroll
 } from '../services/payrollService';
 import { maskObject } from '../services/maskingService';
 import { Employee } from '../types';
@@ -25,6 +26,24 @@ router.post('/calculate', async (req: Request, res: Response): Promise<void> => 
     const result = await calculateMonthlyPayroll(competencia, shouldPersist, usuario || 'Douglas (RH)', orgId);
 
     res.json(maskObject(result, req.isRhAdmin));
+  } catch (error: any) {
+    if (error.statusCode === 409 || (error.message && error.message.includes('fechada e imutável'))) {
+      res.status(409).json({ error: error.message });
+      return;
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/payroll/runs - Lista todas as folhas calculadas e fechadas (histórico)
+router.get('/runs', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orgId = req.organizationId || 1;
+    const result = await query(
+      'SELECT * FROM payroll_runs WHERE organization_id = $1 ORDER BY competencia DESC, id DESC',
+      [orgId]
+    );
+    res.json(maskObject(result.rows, req.isRhAdmin));
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -62,6 +81,8 @@ router.get('/preview/:competencia', async (req: Request, res: Response): Promise
       competencia: run.competencia,
       tipo: run.tipo,
       status: run.status,
+      closed_at: run.closed_at,
+      closed_by: run.closed_by,
       total_colaboradores: itemsRes.rows.length,
       total_proventos: parseFloat(run.total_proventos),
       total_descontos: parseFloat(run.total_descontos),
@@ -77,7 +98,8 @@ router.get('/preview/:competencia', async (req: Request, res: Response): Promise
         salario_liquido: parseFloat(it.salario_liquido),
         desconto_inss: parseFloat(it.desconto_inss),
         desconto_irrf: parseFloat(it.desconto_irrf),
-        valor_fgts: parseFloat(it.valor_fgts)
+        valor_fgts: parseFloat(it.valor_fgts),
+        conferido: Boolean(it.conferido)
       }))
     };
 
@@ -173,11 +195,19 @@ router.get('/receipt/:competencia/:employeeId', async (req: Request, res: Respon
       ? JSON.parse(item.detalhes_json)
       : item.detalhes_json || {};
 
+    const compRes = await query('SELECT * FROM companies WHERE organization_id = $1 LIMIT 1', [orgId]);
+    const company = compRes.rows[0] || {
+      razao_social: 'Audicon Contabilidade & Gestão Empresarial Ltda',
+      nome_fantasia: 'Audicon Contabilidade',
+      cnpj: '12.345.678/0001-90',
+      endereco: 'Avenida Paulista, 1500, Conj 82 - Bela Vista, São Paulo/SP'
+    };
+
     const holerite = {
       empresa: {
-        razaoSocial: 'Audicon Contabilidade & Gestão Empresarial Ltda',
-        cnpj: '00.123.456/0001-78',
-        endereco: 'Av. Agamenon Magalhães, 1200 - Recife/PE'
+        razaoSocial: company.razao_social || company.nome_fantasia,
+        cnpj: company.cnpj,
+        endereco: `${company.endereco || ''} ${company.numero || ''} ${company.cidade || ''}/${company.uf || ''}`.trim()
       },
       colaborador: {
         id: emp.id,
@@ -238,6 +268,64 @@ router.post('/approve', async (req: Request, res: Response): Promise<void> => {
 
     const result = await approvePayroll(competencia, novoStatus, user, justificativa, orgId);
     res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/payroll/reopen - Reabertura formal de competência fechada (RF-056)
+router.post('/reopen', async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.isRhAdmin) {
+      res.status(403).json({
+        error: 'Acesso Negado: Apenas usuários com perfil RH/Admin podem reabrir uma folha fechada.'
+      });
+      return;
+    }
+
+    const orgId = req.organizationId || 1;
+    const { competencia, justificativa, usuario } = req.body;
+
+    if (!competencia) {
+      res.status(400).json({ error: 'Competência é obrigatória.' });
+      return;
+    }
+    if (!justificativa || !justificativa.trim()) {
+      res.status(400).json({ error: 'Justificativa é obrigatória para registrar a reabertura na trilha de auditoria.' });
+      return;
+    }
+
+    const user = usuario || 'Douglas (Gestor de RH)';
+    const result = await reopenPayroll(competencia, user, justificativa, orgId);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PATCH /api/payroll/items/:id/check - Alterna status de conferência de um item da folha
+router.patch('/items/:id/check', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orgId = req.organizationId || 1;
+    const { id } = req.params;
+
+    const currentRes = await query(
+      'SELECT id, conferido FROM payroll_items WHERE organization_id = $1 AND id = $2',
+      [orgId, id]
+    );
+
+    if (currentRes.rows.length === 0) {
+      res.status(404).json({ error: 'Item de folha não encontrado.' });
+      return;
+    }
+
+    const newStatus = !currentRes.rows[0].conferido;
+    const updateRes = await query(
+      'UPDATE payroll_items SET conferido = $1 WHERE organization_id = $2 AND id = $3 RETURNING id, conferido',
+      [newStatus, orgId, id]
+    );
+
+    res.json({ success: true, item: updateRes.rows[0] });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

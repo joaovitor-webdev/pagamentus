@@ -2,13 +2,15 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import { roleMiddleware } from './services/maskingService';
-import { initDatabase } from './db/database';
+import { initDatabase, ensureDatabaseInitialized } from './db/database';
 import employeeRoutes from './routes/employeeRoutes';
 import eventRoutes from './routes/eventRoutes';
 import timeRecordRoutes from './routes/timeRecordRoutes';
 import payrollRoutes from './routes/payrollRoutes';
 import esocialRoutes from './routes/esocialRoutes';
 import parameterRoutes from './routes/parameterRoutes';
+import companyRoutes from './routes/companyRoutes';
+import { criarApp } from './app';
 
 dotenv.config();
 
@@ -21,13 +23,22 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware de RBAC e Mascaramento (RF-056)
 app.use('/api', roleMiddleware);
 
-// Rotas da API RESTful
+// Rotas da API RESTful de Folha de Pagamento & RH
+app.use('/api/company', companyRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/time-records', timeRecordRoutes);
 app.use('/api/payroll', payrollRoutes);
 app.use('/api/esocial', esocialRoutes);
 app.use('/api/parameters', parameterRoutes);
+
+// Coexistência com Módulos Contábeis e Plataforma (SPEC-1 e SPEC-2)
+try {
+  const { app: accountingApp } = criarApp();
+  app.use(accountingApp);
+} catch (e) {
+  console.warn('Aviso: módulo contábil não montado:', e);
+}
 
 // Healthcheck
 app.get('/api/health', (req: Request, res: Response) => {
@@ -53,7 +64,7 @@ app.use((req: Request, res: Response) => {
 let serverInstance: any = null;
 
 export async function startServer(bindTarget: string | number = PORT) {
-  await initDatabase();
+  await ensureDatabaseInitialized();
   return new Promise((resolve) => {
     serverInstance = app.listen(bindTarget, () => {
       console.log(`=======================================================`);
