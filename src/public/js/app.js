@@ -1787,3 +1787,28 @@ function hideAlert() {
   const banner = document.getElementById('alert-banner');
   if (banner) banner.classList.add('hidden');
 }
+
+// Modal Mais Opções (Mobile Bottom Sheet)
+function openMoreMenuModal() {
+  const m = document.getElementById('modal-more-menu');
+  if (m) m.classList.remove('hidden');
+}
+
+function closeMoreMenuModal() {
+  const m = document.getElementById('modal-more-menu');
+  if (m) m.classList.add('hidden');
+}
+
+// Fechamento de modais com clique fora (backdrop) e tecla ESC
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.classList && e.target.classList.contains('fixed') && e.target.id && e.target.id.startsWith('modal-')) {
+    e.target.classList.add('hidden');
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const openModals = document.querySelectorAll("div[id^='modal-']:not(.hidden)");
+    openModals.forEach(modal => modal.classList.add('hidden'));
+  }
+});

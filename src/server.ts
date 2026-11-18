@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { roleMiddleware } from './services/maskingService';
@@ -52,13 +53,27 @@ app.get('/api/health', (req: Request, res: Response) => {
   });
 });
 
-// Arquivos estáticos do Frontend
-const publicDir = path.join(__dirname, 'public');
+// Arquivos estáticos do Frontend (Resolução robusta para ts-node e dist compilado)
+let publicDir = path.join(__dirname, 'public');
+if (!fs.existsSync(publicDir)) {
+  const srcPublic = path.join(__dirname, '../src/public');
+  const cwdPublic = path.join(process.cwd(), 'src/public');
+  if (fs.existsSync(srcPublic)) {
+    publicDir = srcPublic;
+  } else if (fs.existsSync(cwdPublic)) {
+    publicDir = cwdPublic;
+  }
+}
 app.use(express.static(publicDir));
 
 // Fallback SPA
 app.use((req: Request, res: Response) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+  const indexPath = path.join(publicDir, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('Página não encontrada.');
+  }
 });
 
 let serverInstance: any = null;

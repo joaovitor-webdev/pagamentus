@@ -41,60 +41,67 @@
 
   <!-- ==================== HEADER COMPACTO MOBILE & DESKTOP ==================== -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-14 sm:h-16 items-center">
+    <div class="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-14 sm:h-16 items-center gap-1.5 sm:gap-2">
         <!-- Logo & Empresa Contextual -->
-        <div class="flex items-center space-x-2.5">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-extrabold text-base sm:text-lg shadow-md shadow-blue-200">
+        <div class="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-extrabold text-sm sm:text-lg shadow-md shadow-blue-200 shrink-0">
             FP
           </div>
-          <div>
-            <div class="flex items-center space-x-1.5">
-              <span id="header-company-name" class="font-bold text-slate-900 text-sm sm:text-base truncate max-w-[170px] sm:max-w-xs">Audicon Contabilidade</span>
-              <button onclick="openCompanyModal()" title="Configurações da Empresa" class="text-slate-400 hover:text-blue-600 transition-colors p-1">
+          <div class="min-w-0">
+            <div class="flex items-center space-x-1">
+              <span id="header-company-name" class="font-bold text-slate-900 text-xs sm:text-base truncate max-w-[85px] xs:max-w-[120px] sm:max-w-xs">Audicon Contabilidade</span>
+              <button onclick="openCompanyModal()" title="Configurações da Empresa" class="text-slate-400 hover:text-blue-600 transition-colors p-1 shrink-0">
                 ⚙️
               </button>
             </div>
-            <p class="text-[11px] text-slate-500 hidden sm:block">Folha de Pagamento & Atendimento · CLT / eSocial</p>
+            <p class="text-[10px] sm:text-[11px] text-slate-500 hidden sm:block truncate">Folha de Pagamento & Atendimento · CLT / eSocial</p>
           </div>
         </div>
 
-        <!-- Seletor de Perfil Simulado (RF-056 / RBAC) -->
-        <div class="flex items-center space-x-2 bg-slate-100 p-1 sm:p-1.5 rounded-xl border border-slate-200">
-          <select id="role-selector" aria-label="Perfil de Acesso Simulado" class="text-xs font-semibold rounded-lg px-2 py-1 sm:py-1.5 border border-slate-300 bg-white text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
-            <option value="rh_admin">🛡️ RH / Admin</option>
-            <option value="consulta_assistente">👁️ Consulta</option>
-          </select>
-          <span id="role-badge" class="text-[11px] px-2 py-0.5 sm:py-1 rounded-md font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 hidden xs:inline-block">
-            Acesso Total
-          </span>
+        <!-- Ações do Header: Perfil Simulado + Botão Menu Mobile -->
+        <div class="flex items-center space-x-1 sm:space-x-2 shrink-0">
+          <div class="flex items-center bg-slate-100 p-0.5 sm:p-1 rounded-xl border border-slate-200">
+            <select id="role-selector" aria-label="Perfil de Acesso Simulado" class="text-xs font-semibold rounded-lg px-1 py-1 border border-slate-300 bg-white text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[90px] xs:max-w-[110px] sm:max-w-none cursor-pointer">
+              <option value="rh_admin">🛡️ RH / Admin</option>
+              <option value="consulta_assistente">👁️ Consulta</option>
+            </select>
+            <span id="role-badge" class="text-[11px] px-2 py-0.5 sm:py-1 rounded-md font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 hidden sm:inline-block ml-1">
+              Acesso Total
+            </span>
+          </div>
+
+          <!-- Botão Menu Rápido Mobile (Acesso a eSocial, Auditoria, Empresa, Simulação) -->
+          <button onclick="openMoreMenuModal()" title="Mais Módulos e Opções" class="touch-target md:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 flex items-center justify-center font-bold text-sm sm:text-base border border-slate-200 shadow-sm shrink-0">
+            ☰
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Barra de Competência Global Persistente (Fixa e Acessível em Qualquer Tela) -->
-    <div class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white px-3 sm:px-6 lg:px-8 py-2">
-      <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
-        <div class="flex items-center space-x-1.5 sm:space-x-3">
+    <div class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white px-2.5 sm:px-6 lg:px-8 py-1.5 sm:py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-1 sm:gap-2">
+        <div class="flex items-center space-x-1 sm:space-x-2">
           <span class="text-xs font-medium text-blue-200 hidden sm:inline">Competência:</span>
           <!-- Botão Mês Anterior -->
-          <button onclick="changeCompetenceMonth(-1)" aria-label="Mês Anterior" class="touch-target w-8 h-8 rounded-lg bg-blue-800 hover:bg-blue-700 active:scale-95 text-white flex items-center justify-center font-bold text-sm transition-all shadow-inner">
+          <button onclick="changeCompetenceMonth(-1)" aria-label="Mês Anterior" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-800 hover:bg-blue-700 active:scale-95 text-white flex items-center justify-center font-bold text-sm transition-all shadow-inner shrink-0">
             ‹
           </button>
-          <input type="month" id="global-competencia" aria-label="Selecionar Mês da Competência" class="bg-white text-slate-900 font-bold text-xs sm:text-sm px-2.5 py-1 rounded-lg border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-sm">
+          <input type="month" id="global-competencia" aria-label="Selecionar Mês da Competência" class="bg-white text-slate-900 font-bold text-xs sm:text-sm px-1 sm:px-2.5 py-1 rounded-lg border border-blue-400 focus:outline-none w-[100px] sm:w-auto shadow-sm">
           <!-- Botão Próximo Mês -->
-          <button onclick="changeCompetenceMonth(1)" aria-label="Próximo Mês" class="touch-target w-8 h-8 rounded-lg bg-blue-800 hover:bg-blue-700 active:scale-95 text-white flex items-center justify-center font-bold text-sm transition-all shadow-inner">
+          <button onclick="changeCompetenceMonth(1)" aria-label="Próximo Mês" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-800 hover:bg-blue-700 active:scale-95 text-white flex items-center justify-center font-bold text-sm transition-all shadow-inner shrink-0">
             ›
           </button>
         </div>
 
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
           <!-- Badge de Status da Folha -->
-          <span id="global-folha-badge" class="text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-amber-400 text-amber-950 shadow-sm">
+          <span id="global-folha-badge" class="text-[10px] sm:text-xs px-1.5 py-0.5 sm:py-1 rounded-full font-bold uppercase tracking-wider bg-amber-400 text-amber-950 shadow-sm truncate max-w-[75px] xs:max-w-[85px] sm:max-w-none">
             RASCUNHO
           </span>
           <!-- Botão de Sincronizar / Atualizar -->
-          <button onclick="refreshActiveTabData()" title="Atualizar dados da competência" class="touch-target w-8 h-8 rounded-lg bg-blue-800 hover:bg-blue-700 text-white flex items-center justify-center text-xs transition-all">
+          <button onclick="refreshActiveTabData()" title="Atualizar dados da competência" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-800 hover:bg-blue-700 text-white flex items-center justify-center text-xs transition-all shrink-0">
             🔄
           </button>
         </div>
@@ -129,19 +136,22 @@
     </div>
   </header>
 
-  <!-- Notification Banner -->
-  <div id="alert-banner" class="hidden max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-3 no-print">
-    <div class="p-3 rounded-xl flex items-center justify-between text-xs sm:text-sm shadow-sm" id="alert-content">
+  <!-- Notification Banner (Toast Flutuante Acessível) -->
+  <div id="alert-banner" class="hidden fixed top-3 left-3 right-3 sm:left-auto sm:right-4 sm:max-w-md z-50 no-print transition-all duration-300">
+    <div class="p-3 rounded-xl flex items-center justify-between text-xs sm:text-sm shadow-xl border bg-white" id="alert-content">
       <span id="alert-message" class="font-medium"></span>
       <button onclick="hideAlert()" class="touch-target text-sm font-bold ml-4">✕</button>
     </div>
   </div>
 
   <!-- Stepper de Jornada Mensal (Visível no Mobile e Desktop) -->
-  <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-1 no-print">
-    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-      <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-2">
-        <span>Guia Passo a Passo da Folha</span>
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-1 no-print">
+    <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5 sm:mb-2">
+        <span class="flex items-center space-x-1">
+          <span>Guia da Folha</span>
+          <span class="text-[10px] text-slate-400 hidden sm:inline">· 5 Etapas</span>
+        </span>
         <span id="stepper-progress-text" class="text-blue-600 font-bold">Passo 1 de 5</span>
       </div>
       <div class="flex items-center justify-between relative">
@@ -229,6 +239,38 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- Acesso Rápido a Módulos do Sistema (Mobile & Desktop) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <button onclick="switchTab('esocial')" class="touch-target p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-left shadow-sm flex flex-col justify-between">
+          <span class="text-xl">🏛️</span>
+          <div>
+            <h4 class="font-bold text-slate-900 text-xs mt-1">eSocial</h4>
+            <p class="text-[10px] text-slate-500">Eventos S-1000/1200</p>
+          </div>
+        </button>
+        <button onclick="switchTab('audit')" class="touch-target p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-left shadow-sm flex flex-col justify-between">
+          <span class="text-xl">📝</span>
+          <div>
+            <h4 class="font-bold text-slate-900 text-xs mt-1">Auditoria</h4>
+            <p class="text-[10px] text-slate-500">Trilha e Parâmetros</p>
+          </div>
+        </button>
+        <button onclick="openSimulationModal()" class="touch-target p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-left shadow-sm flex flex-col justify-between">
+          <span class="text-xl">🌴</span>
+          <div>
+            <h4 class="font-bold text-slate-900 text-xs mt-1">Simulador</h4>
+            <p class="text-[10px] text-slate-500">Férias e 13º Salário</p>
+          </div>
+        </button>
+        <button onclick="openCompanyModal()" class="touch-target p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-left shadow-sm flex flex-col justify-between">
+          <span class="text-xl">🏢</span>
+          <div>
+            <h4 class="font-bold text-slate-900 text-xs mt-1">Empresa</h4>
+            <p class="text-[10px] text-slate-500">CNPJ e Endereço</p>
+          </div>
+        </button>
       </div>
 
       <!-- Resumo Técnico de Conformidade e Persistência Neon -->
@@ -520,41 +562,43 @@
           <h2 class="text-lg sm:text-xl font-bold text-slate-900">Demonstrativo de Pagamento (Holerite)</h2>
           <p class="text-xs text-slate-500">Emissão e consulta de recibos mensais (RF-055)</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- Navegação Anterior/Próximo Colaborador -->
-          <div class="flex items-center space-x-1">
-            <button onclick="navigateReceiptEmployee(-1)" title="Colaborador Anterior" class="touch-target w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 font-bold text-slate-700 flex items-center justify-center border border-slate-300">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <!-- Navegação Anterior/Próximo Colaborador com Select truncado -->
+          <div class="flex items-center space-x-1 flex-1 sm:flex-initial min-w-0 w-full sm:w-auto">
+            <button onclick="navigateReceiptEmployee(-1)" title="Colaborador Anterior" class="touch-target w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 font-bold text-slate-700 flex items-center justify-center border border-slate-300 shrink-0">
               ‹
             </button>
-            <select id="receipt-emp-selector" onchange="loadReceipt()" aria-label="Selecionar Colaborador para Holerite" class="text-xs sm:text-sm font-semibold rounded-xl px-2.5 py-2 border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select id="receipt-emp-selector" onchange="loadReceipt()" aria-label="Selecionar Colaborador para Holerite" class="flex-1 min-w-0 max-w-[calc(100vw-120px)] sm:max-w-xs text-xs sm:text-sm font-semibold rounded-xl px-2.5 py-2 border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 truncate cursor-pointer">
               <option value="">Selecione o Colaborador...</option>
             </select>
-            <button onclick="navigateReceiptEmployee(1)" title="Próximo Colaborador" class="touch-target w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 font-bold text-slate-700 flex items-center justify-center border border-slate-300">
+            <button onclick="navigateReceiptEmployee(1)" title="Próximo Colaborador" class="touch-target w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 font-bold text-slate-700 flex items-center justify-center border border-slate-300 shrink-0">
               ›
             </button>
           </div>
           <!-- Ações de Compartilhar e Imprimir -->
-          <button onclick="shareReceipt()" title="Compartilhar pelo celular" class="touch-target px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold rounded-xl text-xs shadow-sm flex items-center space-x-1">
-            <span>📲 Compartilhar</span>
-          </button>
-          <button onclick="window.print()" title="Imprimir holerite formal" class="touch-target px-3.5 py-2 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white font-semibold rounded-xl text-xs shadow-sm flex items-center space-x-1">
-            <span>🖨️ Imprimir</span>
-          </button>
+          <div class="flex items-center space-x-2 w-full sm:w-auto">
+            <button onclick="shareReceipt()" title="Compartilhar pelo celular" class="touch-target flex-1 sm:flex-initial px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1">
+              <span>📲 Compartilhar</span>
+            </button>
+            <button onclick="window.print()" title="Imprimir holerite formal" class="touch-target flex-1 sm:flex-initial px-3.5 py-2 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white font-semibold rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1">
+              <span>🖨️ Imprimir</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Estrutura do Holerite (100% Responsivo e Otimizado para Impressão) -->
       <div id="printable-holerite" class="bg-white p-4 sm:p-8 rounded-xl border border-slate-300 shadow-sm max-w-4xl mx-auto space-y-4 sm:space-y-6 text-slate-900">
         <!-- Cabeçalho da Empresa -->
-        <div class="border-b-2 border-slate-800 pb-3 flex justify-between items-start">
-          <div>
-            <h1 id="holerite-empresa-razao" class="text-sm sm:text-base font-extrabold uppercase tracking-tight text-slate-900">Audicon Contabilidade & Gestão Empresarial Ltda</h1>
-            <p id="holerite-empresa-cnpj" class="text-[11px] text-slate-600">CNPJ: 12.345.678/0001-90</p>
-            <p class="text-[11px] text-slate-500">Recibo de Pagamento de Salário · CLT / Mensalista</p>
+        <div class="border-b-2 border-slate-800 pb-3 flex justify-between items-start gap-2">
+          <div class="min-w-0 flex-1">
+            <h1 id="holerite-empresa-razao" class="text-xs sm:text-base font-extrabold uppercase tracking-tight text-slate-900 truncate">Audicon Contabilidade & Gestão Empresarial Ltda</h1>
+            <p id="holerite-empresa-cnpj" class="text-[10px] sm:text-[11px] text-slate-600">CNPJ: 12.345.678/0001-90</p>
+            <p class="text-[10px] sm:text-[11px] text-slate-500">Recibo de Pagamento de Salário · CLT / Mensalista</p>
           </div>
-          <div class="text-right">
-            <span class="text-[10px] font-semibold uppercase text-slate-400 block">Referência</span>
-            <span id="holerite-comp" class="text-sm sm:text-base font-extrabold text-blue-600">2026-11</span>
+          <div class="text-right shrink-0">
+            <span class="text-[9px] sm:text-[10px] font-semibold uppercase text-slate-400 block">Referência</span>
+            <span id="holerite-comp" class="text-xs sm:text-base font-extrabold text-blue-600">2026-11</span>
           </div>
         </div>
 
@@ -562,7 +606,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200 text-xs">
           <div>
             <span class="text-slate-400 block text-[10px]">Nome Completo</span>
-            <span id="holerite-nome" class="font-bold text-slate-900 text-xs sm:text-sm">--</span>
+            <span id="holerite-nome" class="font-bold text-slate-900 text-xs sm:text-sm truncate block">--</span>
           </div>
           <div>
             <span class="text-slate-400 block text-[10px]">CPF</span>
@@ -570,7 +614,7 @@
           </div>
           <div>
             <span class="text-slate-400 block text-[10px]">Cargo</span>
-            <span id="holerite-cargo" class="font-medium">--</span>
+            <span id="holerite-cargo" class="font-medium truncate block">--</span>
           </div>
           <div>
             <span class="text-slate-400 block text-[10px]">Admissão / Dep</span>
@@ -578,8 +622,8 @@
           </div>
         </div>
 
-        <!-- Tabela de Rubricas -->
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
+        <!-- Tabela de Rubricas com Scroll Horizontal Interno Seguro -->
+        <div class="border border-slate-200 rounded-xl overflow-x-auto w-full">
           <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
               <tr>
@@ -620,7 +664,7 @@
           <div><span class="block text-slate-400">Base INSS</span><span id="holerite-base-inss" class="font-bold text-slate-800">--</span></div>
           <div><span class="block text-slate-400">Base FGTS</span><span id="holerite-base-fgts" class="font-bold text-slate-800">--</span></div>
           <div><span class="block text-slate-400">FGTS do Mês (8%)</span><span id="holerite-val-fgts" class="font-bold text-slate-800">--</span></div>
-          <div><span class="block text-slate-400">Base IRRF</span><span id="holerite-base-irrf" class="font-bold text-slate-800">--</span></div>
+          <div class="col-span-2 sm:col-span-1"><span class="block text-slate-400">Base IRRF</span><span id="holerite-base-irrf" class="font-bold text-slate-800">--</span></div>
         </div>
 
         <!-- Assinatura -->
@@ -774,16 +818,16 @@
     </button>
   </nav>
 
-  <!-- ==================== MODAIS ==================== -->
+  <!-- ==================== MODAIS (BOTTOM SHEETS ACESSÍVEIS MOBILE) ==================== -->
 
   <!-- Modal 1: Empregado (Novo / Editar) com Departamento e Regime -->
-  <div id="modal-employee" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-200">
-      <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+  <div id="modal-employee" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-lg w-full max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
         <h3 id="modal-employee-title" class="text-sm sm:text-base font-bold text-slate-900">Novo Colaborador</h3>
         <button onclick="closeEmployeeModal()" class="touch-target text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
-      <form id="form-employee" onsubmit="handleEmployeeSubmit(event)" class="p-5 space-y-3.5 text-sm">
+      <form id="form-employee" onsubmit="handleEmployeeSubmit(event)" class="flex-1 overflow-y-auto p-5 space-y-3.5 text-sm overscroll-contain">
         <input type="hidden" id="emp-id">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Nome Completo *</label>
@@ -847,7 +891,7 @@
             </select>
           </div>
         </div>
-        <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
+        <div class="shrink-0 pt-3 border-t border-slate-200 flex justify-end space-x-2 sticky bottom-0 bg-white">
           <button type="button" onclick="closeEmployeeModal()" class="touch-target px-4 py-2 border border-slate-300 rounded-xl text-slate-700 font-medium">Cancelar</button>
           <button type="submit" class="touch-target px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm">Salvar</button>
         </div>
@@ -856,13 +900,13 @@
   </div>
 
   <!-- Modal 2: Evento Variável com Prévia em Tempo Real -->
-  <div id="modal-event" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-      <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+  <div id="modal-event" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
         <h3 id="modal-event-title" class="text-sm sm:text-base font-bold text-slate-900">Lançar Evento de Folha</h3>
         <button onclick="closeEventModal()" class="touch-target text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
-      <form id="form-event" onsubmit="handleEventSubmit(event)" class="p-5 space-y-3.5 text-sm">
+      <form id="form-event" onsubmit="handleEventSubmit(event)" class="flex-1 overflow-y-auto p-5 space-y-3.5 text-sm overscroll-contain">
         <input type="hidden" id="event-id">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Colaborador *</label>
@@ -913,7 +957,7 @@
           <p id="event-preview-formula" class="text-[11px] text-blue-600">Selecione o empregado e a quantidade para calcular.</p>
         </div>
 
-        <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
+        <div class="shrink-0 pt-3 border-t border-slate-200 flex justify-end space-x-2 sticky bottom-0 bg-white">
           <button type="button" onclick="closeEventModal()" class="touch-target px-4 py-2 border border-slate-300 rounded-xl text-slate-700 font-medium">Cancelar</button>
           <button type="submit" class="touch-target px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm">Lançar</button>
         </div>
@@ -922,13 +966,13 @@
   </div>
 
   <!-- Modal 3: Afastamentos e Licenças -->
-  <div id="modal-leave" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-      <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+  <div id="modal-leave" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
         <h3 class="text-sm sm:text-base font-bold text-slate-900">Registrar Afastamento / Licença</h3>
         <button onclick="closeLeaveModal()" class="touch-target text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
-      <form id="form-leave" onsubmit="handleLeaveSubmit(event)" class="p-5 space-y-3.5 text-sm">
+      <form id="form-leave" onsubmit="handleLeaveSubmit(event)" class="flex-1 overflow-y-auto p-5 space-y-3.5 text-sm overscroll-contain">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Colaborador *</label>
           <select id="leave-emp-id" required class="w-full border border-slate-300 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm">
@@ -960,7 +1004,7 @@
           <label class="block text-xs font-semibold text-slate-700 mb-1">Motivo / Justificativa *</label>
           <textarea id="leave-motivo" rows="2" required placeholder="Atestado médico, CID ou justificativa" class="w-full border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
         </div>
-        <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
+        <div class="shrink-0 pt-3 border-t border-slate-200 flex justify-end space-x-2 sticky bottom-0 bg-white">
           <button type="button" onclick="closeLeaveModal()" class="touch-target px-4 py-2 border border-slate-300 rounded-xl text-slate-700 font-medium">Cancelar</button>
           <button type="submit" class="touch-target px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm">Gravar</button>
         </div>
@@ -969,16 +1013,16 @@
   </div>
 
   <!-- Modal 4: Gestão de Benefícios do Colaborador (RF-053) -->
-  <div id="modal-benefits" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-200">
-      <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+  <div id="modal-benefits" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-lg w-full max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
         <div>
           <h3 class="text-sm sm:text-base font-bold text-slate-900">Benefícios de <span id="modal-benefits-emp-name" class="text-blue-600">--</span></h3>
           <p class="text-[11px] text-slate-500">Gestão de VT, VR, VA e Plano de Saúde com desconto em folha</p>
         </div>
         <button onclick="closeBenefitsModal()" class="touch-target text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
-      <div class="p-5 space-y-4 text-xs">
+      <div class="flex-1 overflow-y-auto p-5 space-y-4 text-xs overscroll-contain">
         <!-- Lista de Benefícios Atuais -->
         <div>
           <h4 class="font-bold text-slate-800 mb-2">Benefícios Ativos no Contrato:</h4>
@@ -1017,7 +1061,7 @@
                 <input type="number" step="0.01" min="0" id="benefit-desconto" required placeholder="Ex: 132.00" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-semibold">
               </div>
             </div>
-            <div class="flex justify-end">
+            <div class="flex justify-end pt-1">
               <button type="submit" class="touch-target px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow-sm">
                 ➕ Adicionar Benefício
               </button>
@@ -1029,16 +1073,16 @@
   </div>
 
   <!-- Modal 5: Configuração e Dados Cadastrais da Empresa -->
-  <div id="modal-company" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-200">
-      <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+  <div id="modal-company" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-lg w-full max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
         <div>
           <h3 class="text-sm sm:text-base font-bold text-slate-900">Dados da Empresa / Empregador</h3>
           <p class="text-[11px] text-slate-500">Configuração cadastral e alíquotas patronais</p>
         </div>
         <button onclick="closeCompanyModal()" class="touch-target text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
-      <form id="form-company" onsubmit="handleCompanySubmit(event)" class="p-5 space-y-3 text-xs">
+      <form id="form-company" onsubmit="handleCompanySubmit(event)" class="flex-1 overflow-y-auto p-5 space-y-3 text-xs overscroll-contain">
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Razão Social *</label>
           <input type="text" id="comp-razao-social" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold">
@@ -1081,7 +1125,7 @@
             <input type="text" id="comp-telefone" class="w-full border border-slate-300 rounded-xl px-2.5 py-2 text-xs">
           </div>
         </div>
-        <div class="pt-3 border-t border-slate-200 flex justify-end space-x-2">
+        <div class="shrink-0 pt-3 border-t border-slate-200 flex justify-end space-x-2 sticky bottom-0 bg-white">
           <button type="button" onclick="closeCompanyModal()" class="touch-target px-4 py-2 border border-slate-300 rounded-xl text-slate-700 font-medium">Cancelar</button>
           <button type="submit" class="touch-target px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm">Salvar Dados</button>
         </div>
@@ -1090,13 +1134,13 @@
   </div>
 
   <!-- Modal 6: Fechamento de Folha Acessível Mobile (Substitui window.prompt) -->
-  <div id="modal-close-payroll" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-      <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-900 text-white flex justify-between items-center">
+  <div id="modal-close-payroll" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 bg-slate-900 text-white flex justify-between items-center sticky top-0 z-10">
         <h3 class="text-sm sm:text-base font-bold">🔒 Fechar Folha de Pagamento</h3>
         <button onclick="closeCloseModal()" class="touch-target text-slate-400 hover:text-white text-lg">✕</button>
       </div>
-      <div class="p-5 space-y-3.5 text-xs sm:text-sm">
+      <div class="flex-1 overflow-y-auto p-5 space-y-3.5 text-xs sm:text-sm overscroll-contain">
         <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 space-y-1">
           <span class="font-bold block">Atenção ao Fechamento Formal:</span>
           <p class="text-xs">Ao fechar a competência <strong id="close-modal-comp" class="text-blue-700">2026-11</strong>, ela se tornará <strong>imutável</strong>. Novos lançamentos de eventos ou alterações só serão permitidos após reabertura formal registrada na auditoria.</p>
@@ -1113,7 +1157,7 @@
           <textarea id="close-modal-justificativa" rows="2" class="w-full border border-slate-300 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-500">Conferência completa de encargos, proventos e eventos executada sem divergências.</textarea>
         </div>
 
-        <div class="pt-2 flex space-x-2">
+        <div class="shrink-0 pt-3 border-t border-slate-200 flex space-x-2 sticky bottom-0 bg-white">
           <button type="button" onclick="closeCloseModal()" class="touch-target flex-1 py-2.5 border border-slate-300 rounded-xl text-slate-700 font-semibold">Cancelar</button>
           <button type="button" onclick="confirmClosePayroll()" class="touch-target flex-1 py-2.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl shadow-sm">Confirmar Fechamento</button>
         </div>
@@ -1122,13 +1166,13 @@
   </div>
 
   <!-- Modal 7: Reabertura Formal de Folha (RF-056) -->
-  <div id="modal-reopen-payroll" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-      <div class="px-5 py-3.5 border-b border-slate-200 bg-amber-600 text-white flex justify-between items-center">
+  <div id="modal-reopen-payroll" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 bg-amber-600 text-white flex justify-between items-center sticky top-0 z-10">
         <h3 class="text-sm sm:text-base font-bold">🔓 Reabrir Folha Fechada</h3>
         <button onclick="closeReopenModal()" class="touch-target text-amber-200 hover:text-white text-lg">✕</button>
       </div>
-      <div class="p-5 space-y-3.5 text-xs sm:text-sm">
+      <div class="flex-1 overflow-y-auto p-5 space-y-3.5 text-xs sm:text-sm overscroll-contain">
         <p class="text-xs text-slate-600">
           A reabertura da competência <strong id="reopen-modal-comp" class="text-blue-700">2026-11</strong> altera o status para <strong>EM REVISÃO</strong> e permite ajustes de eventos e novo cálculo.
         </p>
@@ -1138,7 +1182,7 @@
           <textarea id="reopen-modal-justificativa" rows="3" required placeholder="Descreva formalmente o motivo da retificação (ex: atestado médico tardio, reajuste retroativo)" class="w-full border border-slate-300 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-500"></textarea>
         </div>
 
-        <div class="pt-2 flex space-x-2">
+        <div class="shrink-0 pt-3 border-t border-slate-200 flex space-x-2 sticky bottom-0 bg-white">
           <button type="button" onclick="closeReopenModal()" class="touch-target flex-1 py-2.5 border border-slate-300 rounded-xl text-slate-700 font-semibold">Cancelar</button>
           <button type="button" onclick="confirmReopenPayroll()" class="touch-target flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-sm">Confirmar Reabertura</button>
         </div>
@@ -1147,13 +1191,13 @@
   </div>
 
   <!-- Modal 8: Simulação de Férias e 13º Salário (RF-052) -->
-  <div id="modal-simulation" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-200">
-      <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+  <div id="modal-simulation" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-lg w-full max-h-[88dvh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
         <h3 class="text-sm sm:text-base font-bold text-slate-900">Simulador de Férias & 13º (RF-052)</h3>
         <button onclick="closeSimulationModal()" class="touch-target text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
-      <div class="p-5 space-y-3.5 text-xs sm:text-sm">
+      <div class="flex-1 overflow-y-auto p-5 space-y-3.5 text-xs sm:text-sm overscroll-contain">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Colaborador</label>
@@ -1185,6 +1229,53 @@
           <h4 class="font-bold text-slate-800 border-b border-slate-200 pb-1">Memória de Cálculo da Simulação:</h4>
           <div id="sim-result-details" class="space-y-1"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 9: Menu Rápido Mobile (Acesso Direto a Todos os Módulos) -->
+  <div id="modal-more-menu" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-sm w-full max-h-[85dvh] flex flex-col overflow-hidden border border-slate-200 modal-sheet-dialog">
+      <div class="shrink-0 px-5 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+        <h3 class="text-sm sm:text-base font-bold text-slate-900">Módulos & Ferramentas</h3>
+        <button onclick="closeMoreMenuModal()" class="touch-target text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-2.5 text-xs sm:text-sm overscroll-contain">
+        <button onclick="switchTab('receipts'); closeMoreMenuModal();" class="touch-target w-full p-3 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center space-x-3 text-left transition-all">
+          <span class="text-2xl">📄</span>
+          <div>
+            <div class="font-bold text-slate-900 text-xs sm:text-sm">Holerites & Recibos</div>
+            <div class="text-[11px] text-slate-500">Visualização e compartilhamento de recibos</div>
+          </div>
+        </button>
+        <button onclick="switchTab('esocial'); closeMoreMenuModal();" class="touch-target w-full p-3 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center space-x-3 text-left transition-all">
+          <span class="text-2xl">🏛️</span>
+          <div>
+            <div class="font-bold text-slate-900 text-xs sm:text-sm">eSocial Simulado</div>
+            <div class="text-[11px] text-slate-500">Eventos oficiais S-1000, S-2200, S-1200</div>
+          </div>
+        </button>
+        <button onclick="switchTab('audit'); closeMoreMenuModal();" class="touch-target w-full p-3 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center space-x-3 text-left transition-all">
+          <span class="text-2xl">📝</span>
+          <div>
+            <div class="font-bold text-slate-900 text-xs sm:text-sm">Auditoria & Parâmetros</div>
+            <div class="text-[11px] text-slate-500">Trilha imutável e alíquotas do sistema</div>
+          </div>
+        </button>
+        <button onclick="closeMoreMenuModal(); openSimulationModal();" class="touch-target w-full p-3 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center space-x-3 text-left transition-all">
+          <span class="text-2xl">🌴</span>
+          <div>
+            <div class="font-bold text-slate-900 text-xs sm:text-sm">Simulador de Férias e 13º</div>
+            <div class="text-[11px] text-slate-500">Cálculo prévio com 1/3 e parcelas</div>
+          </div>
+        </button>
+        <button onclick="closeMoreMenuModal(); openCompanyModal();" class="touch-target w-full p-3 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center space-x-3 text-left transition-all">
+          <span class="text-2xl">🏢</span>
+          <div>
+            <div class="font-bold text-slate-900 text-xs sm:text-sm">Dados da Empresa</div>
+            <div class="text-[11px] text-slate-500">Configurações fiscais e alíquotas</div>
+          </div>
+        </button>
       </div>
     </div>
   </div>
