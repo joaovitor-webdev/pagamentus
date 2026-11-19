@@ -9,6 +9,7 @@ import timeRecordRoutes from './routes/timeRecordRoutes';
 import payrollRoutes from './routes/payrollRoutes';
 import esocialRoutes from './routes/esocialRoutes';
 import parameterRoutes from './routes/parameterRoutes';
+import clientDocumentRoutes from './routes/clientDocumentRoutes';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/time-records', timeRecordRoutes);
 app.use('/api/payroll', payrollRoutes);
 app.use('/api/esocial', esocialRoutes);
 app.use('/api/parameters', parameterRoutes);
+app.use('/api/client-documents', clientDocumentRoutes);
 
 // Healthcheck
 app.get('/api/health', (req: Request, res: Response) => {

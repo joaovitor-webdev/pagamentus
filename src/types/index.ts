@@ -3,7 +3,7 @@
  * Suporte a TypeScript rigoroso e Multi-inquilino (organization_id).
  */
 
-export type UserRole = 'rh_admin' | 'consulta_assistente';
+export type UserRole = 'rh_admin' | 'consulta_assistente' | 'cliente';
 
 export interface Employee {
   id: number;

@@ -1,8 +1,10 @@
-import { app } from './app';
+export { app, startServer } from './server';
 
-const PORT = process.env.PORT || 3000;
+import { startServer } from './server';
 
-app.listen(PORT, () => {
-  console.log(`[Pagamentus API] Servidor iniciado na porta ${PORT}`);
-  console.log(`[Plano de Contas] Módulo contábil ativo (SPEC-2.1)`);
-});
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error('Falha ao iniciar o servidor:', error);
+    process.exit(1);
+  });
+}

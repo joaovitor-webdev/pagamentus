@@ -162,7 +162,7 @@ router.get('/leaves', async (req: Request, res: Response): Promise<void> => {
       WHERE l.organization_id = $1
       ORDER BY l.data_inicio DESC
     `, [orgId]);
-    res.json(result.rows);
+    res.json(maskObject(result.rows, req.isRhAdmin));
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

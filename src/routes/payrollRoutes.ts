@@ -4,7 +4,8 @@ import {
   calculateMonthlyPayroll,
   calculateVacation,
   calculate13Salary,
-  approvePayroll
+  approvePayroll,
+  registerDeniedPayrollApproval
 } from '../services/payrollService';
 import { maskObject } from '../services/maskingService';
 import { Employee } from '../types';
@@ -57,6 +58,14 @@ router.get('/preview/:competencia', async (req: Request, res: Response): Promise
       ORDER BY e.id ASC
     `, [orgId, run.id]);
 
+    const accountingEntryRes = await query(
+      `SELECT id, dados_lancamento
+       FROM payroll_accounting_entries
+       WHERE organization_id = $1 AND payroll_run_id = $2`,
+      [orgId, run.id]
+    );
+    const accountingEntry = accountingEntryRes.rows[0];
+
     const fullResult = {
       runId: run.id,
       competencia: run.competencia,
@@ -69,6 +78,14 @@ router.get('/preview/:competencia', async (req: Request, res: Response): Promise
       total_encargos: parseFloat(run.total_encargos),
       total_provisoes: parseFloat(run.total_provisoes),
       custo_total_empresa: Number((parseFloat(run.total_proventos) + parseFloat(run.total_encargos) + parseFloat(run.total_provisoes)).toFixed(2)),
+      lancamento_contabil: accountingEntry
+        ? {
+            ...accountingEntry.dados_lancamento,
+            id: accountingEntry.id,
+            payroll_run_id: run.id,
+            status: 'integrado_a_folha'
+          }
+        : null,
       itens: itemsRes.rows.map(it => ({
         ...it,
         salario_base: parseFloat(it.salario_base),
@@ -219,7 +236,19 @@ router.get('/receipt/:competencia/:employeeId', async (req: Request, res: Respon
 // POST /api/payroll/approve - Aprovação formal da folha (RF-056)
 router.post('/approve', async (req: Request, res: Response): Promise<void> => {
   try {
+    const { competencia, status, justificativa, usuario } = req.body;
+    if (typeof competencia !== 'string' || !competencia) {
+      res.status(400).json({ error: 'Competência é obrigatória.' });
+      return;
+    }
+
     if (!req.isRhAdmin) {
+      await registerDeniedPayrollApproval(
+        competencia,
+        usuario || req.userRole || 'não identificado',
+        req.userRole || 'não autorizado',
+        req.organizationId || 1
+      );
       res.status(403).json({
         error: 'Acesso Negado: Apenas usuários autorizados com perfil RH/Admin podem aprovar ou fechar a folha (RF-056).'
       });
@@ -227,12 +256,6 @@ router.post('/approve', async (req: Request, res: Response): Promise<void> => {
     }
 
     const orgId = req.organizationId || 1;
-    const { competencia, status, justificativa, usuario } = req.body;
-    if (!competencia) {
-      res.status(400).json({ error: 'Competência é obrigatória.' });
-      return;
-    }
-
     const novoStatus = status || 'aprovada';
     const user = usuario || 'Douglas (Gestor de RH)';
 
@@ -246,6 +269,11 @@ router.post('/approve', async (req: Request, res: Response): Promise<void> => {
 // GET /api/payroll/audit-logs - Trilha de aprovação e auditoria
 router.get('/audit-logs', async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.isRhAdmin) {
+      res.status(403).json({ error: 'Acesso negado à trilha de auditoria.' });
+      return;
+    }
+
     const orgId = req.organizationId || 1;
     const result = await query(
       'SELECT * FROM payroll_approval_logs WHERE organization_id = $1 ORDER BY id DESC LIMIT 50',
