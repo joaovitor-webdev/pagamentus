@@ -57,6 +57,14 @@ router.get('/preview/:competencia', async (req: Request, res: Response): Promise
       ORDER BY e.id ASC
     `, [orgId, run.id]);
 
+    const accountingEntryRes = await query(
+      `SELECT id, dados_lancamento
+       FROM payroll_accounting_entries
+       WHERE organization_id = $1 AND payroll_run_id = $2`,
+      [orgId, run.id]
+    );
+    const accountingEntry = accountingEntryRes.rows[0];
+
     const fullResult = {
       runId: run.id,
       competencia: run.competencia,
@@ -69,6 +77,14 @@ router.get('/preview/:competencia', async (req: Request, res: Response): Promise
       total_encargos: parseFloat(run.total_encargos),
       total_provisoes: parseFloat(run.total_provisoes),
       custo_total_empresa: Number((parseFloat(run.total_proventos) + parseFloat(run.total_encargos) + parseFloat(run.total_provisoes)).toFixed(2)),
+      lancamento_contabil: accountingEntry
+        ? {
+            ...accountingEntry.dados_lancamento,
+            id: accountingEntry.id,
+            payroll_run_id: run.id,
+            status: 'integrado_a_folha'
+          }
+        : null,
       itens: itemsRes.rows.map(it => ({
         ...it,
         salario_base: parseFloat(it.salario_base),

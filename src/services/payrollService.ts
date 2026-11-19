@@ -132,6 +132,26 @@ export async function calculateProvisions(salarioBase: number) {
   };
 }
 
+function prepararLancamentoContabil(resumo: {
+  competencia: string;
+  total_proventos: number;
+  total_descontos: number;
+  total_liquido: number;
+  total_encargos: number;
+  total_provisoes: number;
+}) {
+  // Mantém a integração vinculada aos totais da folha sem presumir contas contábeis.
+  return {
+    competencia: resumo.competencia,
+    status: 'preparado',
+    total_proventos: resumo.total_proventos,
+    total_descontos: resumo.total_descontos,
+    total_liquido: resumo.total_liquido,
+    total_encargos: resumo.total_encargos,
+    total_provisoes: resumo.total_provisoes
+  };
+}
+
 export async function calculateMonthlyPayroll(
   competencia: string,
   saveToDatabase: boolean = false,
@@ -307,7 +327,15 @@ export async function calculateMonthlyPayroll(
     total_encargos: Number(folhaTotalEncargos.toFixed(2)),
     total_provisoes: Number(folhaTotalProvisoes.toFixed(2)),
     custo_total_empresa: Number((folhaTotalProventos + folhaTotalEncargos + folhaTotalProvisoes).toFixed(2)),
-    itens: items
+    itens: items,
+    lancamento_contabil: prepararLancamentoContabil({
+      competencia,
+      total_proventos: Number(folhaTotalProventos.toFixed(2)),
+      total_descontos: Number(folhaTotalDescontos.toFixed(2)),
+      total_liquido: Number(folhaTotalLiquido.toFixed(2)),
+      total_encargos: Number(folhaTotalEncargos.toFixed(2)),
+      total_provisoes: Number(folhaTotalProvisoes.toFixed(2))
+    })
   };
 
   if (saveToDatabase) {
@@ -356,6 +384,20 @@ export async function calculateMonthlyPayroll(
         ]);
       }
 
+      const accountingEntry = resumo.lancamento_contabil;
+      const accountingEntryRes = await client.query(`
+        INSERT INTO payroll_accounting_entries (
+          organization_id, payroll_run_id, competencia, dados_lancamento, updated_at
+        )
+        VALUES ($1, $2, $3, $4::jsonb, CURRENT_TIMESTAMP)
+        ON CONFLICT (organization_id, payroll_run_id)
+        DO UPDATE SET
+          competencia = EXCLUDED.competencia,
+          dados_lancamento = EXCLUDED.dados_lancamento,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING id
+      `, [organizationId, runId, competencia, JSON.stringify(accountingEntry)]);
+
       await client.query(`
         INSERT INTO payroll_approval_logs (organization_id, payroll_run_id, competencia, usuario, perfil, acao, detalhes)
         VALUES ($1, $2, $3, $4, 'RH/Admin', 'Cálculo de Folha', $5)
@@ -363,6 +405,12 @@ export async function calculateMonthlyPayroll(
 
       await client.query('COMMIT');
       resumo.runId = runId;
+      resumo.lancamento_contabil = {
+        ...accountingEntry,
+        id: accountingEntryRes.rows[0].id,
+        payroll_run_id: runId,
+        status: 'integrado_a_folha'
+      };
       if (existingRes.rows.length > 0) resumo.status = existingRes.rows[0].status;
     } catch (e) {
       await client.query('ROLLBACK');

@@ -7,6 +7,7 @@
 const state = {
   activeTab: 'dashboard',
   currentRole: localStorage.getItem('user_role') || 'rh_admin',
+  currentClientId: Number(localStorage.getItem('client_id') || 1),
   currentCompetencia: '2026-11',
   employees: [],
   payrollData: null,
@@ -70,6 +71,8 @@ function updateRoleVisuals(role) {
 async function apiFetch(url, options = {}) {
   const headers = options.headers || {};
   headers['X-User-Role'] = state.currentRole;
+  headers['X-Organization-ID'] = '1';
+  headers['X-Client-ID'] = String(state.currentClientId);
   options.headers = headers;
 
   const response = await fetch(url, options);
@@ -176,6 +179,10 @@ function refreshActiveTabData() {
     case 'audit':
       loadAuditLogs();
       loadParameters();
+      break;
+    case 'documents':
+      loadClientDocuments();
+      loadClientDocumentRequests();
       break;
   }
 }
@@ -626,6 +633,18 @@ function renderPayrollResults(payroll) {
   document.getElementById('tot-encargos').innerText = formatCurrency(payroll.total_encargos);
   document.getElementById('tot-provisoes').innerText = formatCurrency(payroll.total_provisoes);
 
+  const accountingSummary = document.getElementById('payroll-accounting-summary');
+  if (payroll.lancamento_contabil) {
+    const entry = payroll.lancamento_contabil;
+    const status = entry.status === 'integrado_a_folha' ? 'Integrado à folha' : 'Prévia não persistida';
+    accountingSummary.innerText = `${status} — competência ${entry.competencia}. ` +
+      `Proventos: ${formatCurrency(entry.total_proventos)}; descontos: ${formatCurrency(entry.total_descontos)}; ` +
+      `líquido: ${formatCurrency(entry.total_liquido)}; encargos: ${formatCurrency(entry.total_encargos)}; ` +
+      `provisões: ${formatCurrency(entry.total_provisoes)}.`;
+  } else {
+    accountingSummary.innerText = 'Calcule e grave a folha para associar seus totais contábeis.';
+  }
+
   const statusBadge = document.getElementById('payroll-status-badge');
   const status = payroll.status || 'rascunho';
   statusBadge.innerText = status.toUpperCase();
@@ -968,4 +987,155 @@ function showAlert(message, type = 'info') {
 
 function hideAlert() {
   document.getElementById('alert-banner').classList.add('hidden');
+}
+
+async function loadClientDocuments() {
+  const exercise = document.getElementById('document-exercise')?.value;
+  const competence = document.getElementById('document-competence')?.value;
+  const type = document.getElementById('document-type')?.value;
+  const process = document.getElementById('document-process')?.value;
+  const params = new URLSearchParams();
+  if (exercise) params.set('exercise', exercise);
+  if (competence) params.set('competence', competence);
+  if (type) params.set('type', type);
+  if (process) params.set('process', process);
+
+  try {
+    const documents = await apiFetch(`/api/client-documents?${params.toString()}`);
+    const tbody = document.getElementById('client-documents-table');
+    if (!documents.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">Nenhum documento encontrado.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = documents.map((document) => `
+      <tr>
+        <td class="py-2 px-3">${escapeHtml(document.file_name)}</td>
+        <td class="py-2 px-3">${escapeHtml(document.exercise || '-')}</td>
+        <td class="py-2 px-3">${escapeHtml(document.competence || '-')}</td>
+        <td class="py-2 px-3">${escapeHtml(document.type)}</td>
+        <td class="py-2 px-3">${escapeHtml(document.status)}</td>
+        <td class="py-2 px-3">
+          <button onclick="downloadClientDocument(${document.id}, '${escapeHtml(document.file_name).replace(/'/g, '\\&#039;')}')" class="text-blue-600 font-semibold">Baixar</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (error) {
+    showAlert(error.message, 'error');
+  }
+}
+
+async function downloadClientDocument(documentId, fileName) {
+  try {
+    const response = await fetch(`/api/client-documents/${documentId}/download`, {
+      headers: {
+        'X-User-Role': state.currentRole,
+        'X-Organization-ID': '1',
+        'X-Client-ID': String(state.currentClientId)
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Documento não encontrado ou acesso não autorizado.');
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || 'documento';
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    showAlert(error.message, 'error');
+  }
+}
+
+async function uploadClientDocument() {
+  const fileInput = document.getElementById('upload-file');
+  const exercise = document.getElementById('upload-exercise').value;
+  const competence = document.getElementById('upload-competence').value;
+  const type = document.getElementById('upload-type').value;
+  const process = document.getElementById('upload-process').value;
+  const file = fileInput.files?.[0];
+
+  if (!file) {
+    showAlert('Selecione um arquivo.', 'error');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const base64 = String(reader.result).split(',')[1];
+    try {
+      await apiFetch('/api/client-documents/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          exercise,
+          competence,
+          type,
+          process,
+          file_name: file.name,
+          content_type: file.type,
+          file_content_base64: base64
+        })
+      });
+      showAlert('Documento enviado.', 'success');
+      fileInput.value = '';
+      loadClientDocuments();
+      loadClientDocumentRequests();
+    } catch (error) {
+      showAlert(error.message, 'error');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function loadClientDocumentRequests() {
+  try {
+    const requests = await apiFetch('/api/client-documents/requests/list');
+    const container = document.getElementById('client-document-requests');
+    if (!requests.length) {
+      container.innerHTML = '<p class="text-slate-400">Nenhuma solicitação pendente.</p>';
+      return;
+    }
+    container.innerHTML = requests.map((request) => `
+      <div class="border border-slate-200 rounded-lg p-3">
+        <p class="font-semibold">${escapeHtml(request.title)}</p>
+        <p class="text-xs text-slate-500">${escapeHtml(request.status)}${request.comments ? ` · ${escapeHtml(request.comments)}` : ''}</p>
+        ${state.currentRole === 'rh_admin' ? `
+          <div class="flex gap-2 mt-2">
+            <button onclick="confirmClientDocumentRequest(${request.id})" class="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded">Confirmar</button>
+            <button onclick="requestClientDocumentCorrection(${request.id})" class="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded">Corrigir</button>
+          </div>
+        ` : ''}
+      </div>
+    `).join('');
+  } catch (error) {
+    showAlert(error.message, 'error');
+  }
+}
+
+async function confirmClientDocumentRequest(requestId) {
+  try {
+    await apiFetch(`/api/client-documents/requests/${requestId}/confirm`, { method: 'POST' });
+    showAlert('Recebimento confirmado.', 'success');
+    loadClientDocumentRequests();
+  } catch (error) {
+    showAlert(error.message, 'error');
+  }
+}
+
+async function requestClientDocumentCorrection(requestId) {
+  const comments = window.prompt('Informe o comentário da correção.');
+  if (!comments) return;
+  try {
+    await apiFetch(`/api/client-documents/requests/${requestId}/correction`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comments })
+    });
+    showAlert('Correção solicitada.', 'success');
+    loadClientDocumentRequests();
+  } catch (error) {
+    showAlert(error.message, 'error');
+  }
 }
