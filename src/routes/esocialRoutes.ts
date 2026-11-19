@@ -19,6 +19,11 @@ router.get('/preview/:competencia', async (req: Request, res: Response): Promise
 // GET /api/esocial/download/:competencia - Download do arquivo estruturado (JSON ou TXT)
 router.get('/download/:competencia', async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.isRhAdmin) {
+      res.status(403).json({ error: 'Acesso negado a dados salariais e de saúde.' });
+      return;
+    }
+
     const orgId = req.organizationId || 1;
     const competencia = String(req.params.competencia);
     const format = ((req.query.format as string) || 'json').toLowerCase();

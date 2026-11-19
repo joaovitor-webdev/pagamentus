@@ -156,6 +156,20 @@ export async function initDatabase(): Promise<void> {
       );
     `);
 
+    // Guarda a integração dos totais contábeis com a folha calculada.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS payroll_accounting_entries (
+        id SERIAL PRIMARY KEY,
+        organization_id INTEGER NOT NULL,
+        payroll_run_id INTEGER NOT NULL REFERENCES payroll_runs(id) ON DELETE CASCADE,
+        competencia VARCHAR(7) NOT NULL,
+        dados_lancamento JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT uq_payroll_accounting_entry_org_run UNIQUE (organization_id, payroll_run_id)
+      );
+    `);
+
     // Trilha de Auditoria e Aprovação de Folha (RF-056 & RNF-004)
     await client.query(`
       CREATE TABLE IF NOT EXISTS payroll_approval_logs (
@@ -167,8 +181,75 @@ export async function initDatabase(): Promise<void> {
         perfil VARCHAR(100) NOT NULL,
         acao VARCHAR(100) NOT NULL,
         detalhes TEXT,
+        resultado VARCHAR(20) NOT NULL DEFAULT 'sucesso',
         data_hora TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+    await client.query(`
+      ALTER TABLE payroll_approval_logs
+      ADD COLUMN IF NOT EXISTS resultado VARCHAR(20) NOT NULL DEFAULT 'sucesso';
+    `);
+
+    // Portal de documentos do cliente (SPEC-4.3)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS client_documents (
+        id BIGSERIAL PRIMARY KEY,
+        organization_id INTEGER NOT NULL,
+        client_id INTEGER NOT NULL,
+        exercise VARCHAR(4),
+        competence VARCHAR(7),
+        type VARCHAR(100) NOT NULL,
+        process VARCHAR(255),
+        file_name VARCHAR(255) NOT NULL,
+        content_type VARCHAR(255),
+        file_size INTEGER NOT NULL,
+        file_content BYTEA NOT NULL,
+        status VARCHAR(30) NOT NULL DEFAULT 'recebido',
+        uploaded_by VARCHAR(150),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS client_document_requests (
+        id BIGSERIAL PRIMARY KEY,
+        organization_id INTEGER NOT NULL,
+        client_id INTEGER NOT NULL,
+        exercise VARCHAR(4),
+        competence VARCHAR(7),
+        type VARCHAR(100) NOT NULL,
+        process VARCHAR(255),
+        title VARCHAR(255) NOT NULL,
+        comments TEXT,
+        status VARCHAR(30) NOT NULL DEFAULT 'pendente',
+        document_id BIGINT REFERENCES client_documents(id) ON DELETE SET NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS client_document_audit (
+        id BIGSERIAL PRIMARY KEY,
+        organization_id INTEGER NOT NULL,
+        client_id INTEGER,
+        document_id BIGINT,
+        user_name VARCHAR(150) NOT NULL,
+        operation VARCHAR(100) NOT NULL,
+        result VARCHAR(30) NOT NULL,
+        details TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS ix_client_documents_org_client
+        ON client_documents (organization_id, client_id);
+      CREATE INDEX IF NOT EXISTS ix_client_documents_filters
+        ON client_documents (organization_id, client_id, exercise, competence, type, process);
+      CREATE INDEX IF NOT EXISTS ix_client_document_requests_org_client
+        ON client_document_requests (organization_id, client_id, status);
     `);
 
     await client.query('COMMIT');

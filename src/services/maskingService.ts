@@ -7,6 +7,7 @@ declare global {
       userRole?: UserRole;
       isRhAdmin?: boolean;
       organizationId?: number;
+      clientId?: number;
     }
   }
 }
@@ -38,6 +39,8 @@ const SENSITIVE_MONEY_FIELDS = new Set([
   'totalBruto', 'salarioFerias', 'tercoConstitucional', 'valorIntegral', 'saldoBruto', 'adiantamentoDeduzido'
 ]);
 
+const RESTRICTED_VALUE = 'Dados restritos';
+
 export function maskCpf(cpf: string | null | undefined): string {
   if (!cpf || typeof cpf !== 'string') return '***.***.***-**';
   const clean = cpf.replace(/\D/g, '');
@@ -61,6 +64,25 @@ export function maskObject<T = any>(obj: T, isRhAdmin?: boolean): T {
   const cloned: any = { ...obj };
 
   if (!isRhAdmin) {
+    // Oculta motivo e tipo de afastamento, que podem revelar informações de saúde.
+    if ('employee_id' in cloned && 'data_inicio' in cloned && 'motivo' in cloned) {
+      cloned.tipo = RESTRICTED_VALUE;
+      cloned.motivo = RESTRICTED_VALUE;
+    }
+
+    // Benefícios de saúde e eventos de afastamento não expõem detalhes médicos.
+    if (cloned.tipo === 'plano_saude') {
+      cloned.tipo = RESTRICTED_VALUE;
+      if ('descricao' in cloned) cloned.descricao = RESTRICTED_VALUE;
+    }
+    if (cloned.tipoEvento === 'S-2230' && cloned.infoAfastamento) {
+      cloned.infoAfastamento = {
+        ...cloned.infoAfastamento,
+        codMotAfast: RESTRICTED_VALUE,
+        observacao: RESTRICTED_VALUE
+      };
+    }
+
     if ('cpf' in cloned) {
       cloned.cpf = maskCpf(cloned.cpf);
     }
@@ -99,13 +121,15 @@ export function isRhRole(role?: string): boolean {
 }
 
 export function roleMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const roleHeader = (req.headers['x-user-role'] || req.headers['user-role'] || req.query.role || 'rh_admin') as string;
+  const roleHeader = (req.headers['x-user-role'] || req.headers['user-role'] || req.query.role || 'consulta_assistente') as string;
   req.userRole = roleHeader.toLowerCase() as UserRole;
   req.isRhAdmin = isRhRole(req.userRole);
 
   // Extrai organization_id para isolamento multi-inquilino (SPEC-1.2)
   const orgHeader = (req.headers['x-organization-id'] || req.query.org_id || '1') as string;
   req.organizationId = parseInt(orgHeader, 10) || 1;
+  const clientHeader = (req.headers['x-client-id'] || req.query.client_id || '1') as string;
+  req.clientId = parseInt(clientHeader, 10) || 1;
 
   next();
 }

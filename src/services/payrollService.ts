@@ -132,6 +132,26 @@ export async function calculateProvisions(salarioBase: number) {
   };
 }
 
+function prepararLancamentoContabil(resumo: {
+  competencia: string;
+  total_proventos: number;
+  total_descontos: number;
+  total_liquido: number;
+  total_encargos: number;
+  total_provisoes: number;
+}) {
+  // Mantém a integração vinculada aos totais da folha sem presumir contas contábeis.
+  return {
+    competencia: resumo.competencia,
+    status: 'preparado',
+    total_proventos: resumo.total_proventos,
+    total_descontos: resumo.total_descontos,
+    total_liquido: resumo.total_liquido,
+    total_encargos: resumo.total_encargos,
+    total_provisoes: resumo.total_provisoes
+  };
+}
+
 export async function calculateMonthlyPayroll(
   competencia: string,
   saveToDatabase: boolean = false,
@@ -307,7 +327,15 @@ export async function calculateMonthlyPayroll(
     total_encargos: Number(folhaTotalEncargos.toFixed(2)),
     total_provisoes: Number(folhaTotalProvisoes.toFixed(2)),
     custo_total_empresa: Number((folhaTotalProventos + folhaTotalEncargos + folhaTotalProvisoes).toFixed(2)),
-    itens: items
+    itens: items,
+    lancamento_contabil: prepararLancamentoContabil({
+      competencia,
+      total_proventos: Number(folhaTotalProventos.toFixed(2)),
+      total_descontos: Number(folhaTotalDescontos.toFixed(2)),
+      total_liquido: Number(folhaTotalLiquido.toFixed(2)),
+      total_encargos: Number(folhaTotalEncargos.toFixed(2)),
+      total_provisoes: Number(folhaTotalProvisoes.toFixed(2))
+    })
   };
 
   if (saveToDatabase) {
@@ -356,6 +384,20 @@ export async function calculateMonthlyPayroll(
         ]);
       }
 
+      const accountingEntry = resumo.lancamento_contabil;
+      const accountingEntryRes = await client.query(`
+        INSERT INTO payroll_accounting_entries (
+          organization_id, payroll_run_id, competencia, dados_lancamento, updated_at
+        )
+        VALUES ($1, $2, $3, $4::jsonb, CURRENT_TIMESTAMP)
+        ON CONFLICT (organization_id, payroll_run_id)
+        DO UPDATE SET
+          competencia = EXCLUDED.competencia,
+          dados_lancamento = EXCLUDED.dados_lancamento,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING id
+      `, [organizationId, runId, competencia, JSON.stringify(accountingEntry)]);
+
       await client.query(`
         INSERT INTO payroll_approval_logs (organization_id, payroll_run_id, competencia, usuario, perfil, acao, detalhes)
         VALUES ($1, $2, $3, $4, 'RH/Admin', 'Cálculo de Folha', $5)
@@ -363,6 +405,12 @@ export async function calculateMonthlyPayroll(
 
       await client.query('COMMIT');
       resumo.runId = runId;
+      resumo.lancamento_contabil = {
+        ...accountingEntry,
+        id: accountingEntryRes.rows[0].id,
+        payroll_run_id: runId,
+        status: 'integrado_a_folha'
+      };
       if (existingRes.rows.length > 0) resumo.status = existingRes.rows[0].status;
     } catch (e) {
       await client.query('ROLLBACK');
@@ -478,32 +526,62 @@ export async function approvePayroll(
   justificativa?: string,
   organizationId: number = 1
 ) {
-  const res = await query(
-    'SELECT * FROM payroll_runs WHERE organization_id = $1 AND competencia = $2 AND tipo = $3',
-    [organizationId, competencia, 'mensal']
-  );
-  if (res.rows.length === 0) {
-    throw new Error('Folha não encontrada para esta competência. Calcule a folha primeiro.');
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const res = await client.query(
+      'SELECT * FROM payroll_runs WHERE organization_id = $1 AND competencia = $2 AND tipo = $3 FOR UPDATE',
+      [organizationId, competencia, 'mensal']
+    );
+    if (res.rows.length === 0) {
+      throw new Error('Folha não encontrada para esta competência. Calcule a folha primeiro.');
+    }
+
+    const run = res.rows[0];
+    await client.query(
+      'UPDATE payroll_runs SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE organization_id = $2 AND id = $3',
+      [novoStatus, organizationId, run.id]
+    );
+
+    await client.query(`
+      INSERT INTO payroll_approval_logs (
+        organization_id, payroll_run_id, competencia, usuario, perfil, acao, detalhes, resultado
+      )
+      VALUES ($1, $2, $3, $4, 'RH/Admin', $5, $6, 'sucesso')
+    `, [
+      organizationId,
+      run.id,
+      competencia,
+      usuario,
+      `Status alterado para ${novoStatus.toUpperCase()}`,
+      justificativa || `Aprovação formal da competência ${competencia}`
+    ]);
+
+    await client.query('COMMIT');
+    return { success: true, status: novoStatus };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
   }
+}
 
-  const run = res.rows[0];
-
-  await query(
-    'UPDATE payroll_runs SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-    [novoStatus, run.id]
-  );
-
+export async function registerDeniedPayrollApproval(
+  competencia: string,
+  usuario: string,
+  perfil: string,
+  organizationId: number = 1
+): Promise<void> {
   await query(`
-    INSERT INTO payroll_approval_logs (organization_id, payroll_run_id, competencia, usuario, perfil, acao, detalhes)
-    VALUES ($1, $2, $3, $4, 'RH/Admin', $5, $6)
-  `, [
-    organizationId,
-    run.id,
-    competencia,
-    usuario,
-    `Status alterado para ${novoStatus.toUpperCase()}`,
-    justificativa || `Aprovação formal da competência ${competencia}`
-  ]);
-
-  return { success: true, status: novoStatus };
+    INSERT INTO payroll_approval_logs (
+      organization_id, payroll_run_id, competencia, usuario, perfil, acao, detalhes, resultado
+    )
+    VALUES (
+      $1,
+      (SELECT id FROM payroll_runs WHERE organization_id = $1 AND competencia = $2 AND tipo = 'mensal'),
+      $2, $3, $4, 'Tentativa de aprovação negada', 'Permissão insuficiente para aprovar a folha.', 'negado'
+    )
+  `, [organizationId, competencia, usuario, perfil]);
 }
