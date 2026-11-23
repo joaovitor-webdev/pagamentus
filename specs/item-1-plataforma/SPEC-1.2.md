@@ -2,69 +2,82 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 1 – Plataforma | @joaovitor-webdev | A definir | https://trello.com/c/LuEhsgst | Revisando |
+| 1 – Plataforma | @joaovitor-webdev | A definir | https://trello.com/c/LuEhsgst | Fazendo |
 
 ## 1. Contexto e objetivo
-Definir a arquitetura tecnológica, a stack oficial de desenvolvimento e a estratégia de segregação de ambientes do projeto por meio de um registro de decisão arquitetural (ADR). O objetivo é garantir capacidade de escalabilidade para suportar o crescimento da aplicação e assegurar o isolamento estrito entre o ambiente de testes/desenvolvimento e o ambiente de produção.
+
+Registrar a stack usada pelo projeto, as decisões que orientam sua evolução e a configuração dos ambientes de desenvolvimento, teste e produção. A configuração deve impedir que testes usem acidentalmente o banco destinado à aplicação fora do ambiente de teste.
 
 ## 2. Requisitos relacionados
-- **RF-079**: Manter ambiente de testes separado do ambiente de produção.
-- **RNF-007 — Escalabilidade**: Suportar crescimento de clientes, documentos, lançamentos e usuários sem degradação inaceitável.
+
+- **RF-079:** Manter ambiente de testes separado do ambiente de produção.
+- **RNF-007 — Escalabilidade:** Suportar crescimento de clientes, documentos, lançamentos e usuários sem degradação inaceitável. O requisito não define metas quantitativas de carga ou latência.
 
 ## 3. Escopo
-- **Dentro do escopo:**
-  - Elaboração de Architecture Decision Record (`docs/arquitetura/ADR-001-stack-e-ambientes.md`) detalhando a stack escolhida (backend, frontend, banco de dados, containerização) e suas justificativas frente à escalabilidade.
-  - Especificação e documentação formal do isolamento entre ambiente de teste/desenvolvimento e ambiente de produção (bancos de dados isolados, configurações via variáveis de ambiente e regras de acesso).
-  - Atualização do arquivo de variáveis de ambiente modelo (`.env.example`) refletindo a separação e parâmetros necessários por ambiente.
-- **Fora do escopo:**
-  - Provisionamento de infraestrutura em nuvem paga ou criação de clusters de produção nesta etapa.
-  - Implementação de código de regras de negócio de domínios contábeis, fiscais ou folha de pagamento.
-  - Implementação de testes de carga e estresse (pertencente às specs de validação de qualidade/performance).
+
+### Dentro do escopo
+
+- Registrar a stack atual e as decisões de arquitetura relacionadas à escalabilidade.
+- Documentar a separação de configuração entre desenvolvimento, teste e produção.
+- Validar a escolha do banco conforme `NODE_ENV`, sem permitir fallback de teste para `DATABASE_URL`.
+- Documentar exemplos fictícios de configuração por ambiente.
+
+### Fora do escopo
+
+- Provisionar ou operar infraestrutura de produção.
+- Definir metas de capacidade, latência ou volume não especificadas no requisito.
+- Implementar regras de negócio contábeis, fiscais ou de folha.
+- Adotar framework de frontend, ORM, filas ou cache que não estejam estabelecidos no projeto.
 
 ## 4. Comportamento esperado
-- **Fluxo normal (Separação de ambientes):** Ao executar testes ou desenvolver novas funcionalidades, o sistema conecta-se exclusivamente a instâncias de banco de dados e serviços designados para teste/desenvolvimento, sem compartilhamento de dados ou interferência nos dados de produção.
-- **Fluxo de restrição/erro:** Tentativas de executar rotinas de teste utilizando variáveis ou credenciais apontando para a base de produção devem ser impedidas por validação de ambiente (`APP_ENV` / configurações de conexão), evitando corrupção ou contaminação de dados.
+
+- **Execução normal:** a aplicação usa `DATABASE_URL` em desenvolvimento e produção; testes usam exclusivamente `DATABASE_URL_TEST`.
+- **Configuração inválida:** a inicialização do acesso ao banco falha com mensagem explícita quando a variável exigida estiver ausente, a URL for inválida ou o nome do banco não corresponder ao ambiente.
+- **Separação local:** os bancos `pagamentus_dev`, `pagamentus_test` e `pagamentus_prod` podem existir no PostgreSQL local para desenvolvimento; isso não representa provisionamento de produção.
+- **Escalabilidade:** as decisões documentadas indicam mecanismos disponíveis na stack e registram que o requisito não informa limites quantitativos nem evidências de teste de carga.
 
 ## 5. Critérios de aceite
-- **CA-1:** Dado o diretório `docs/arquitetura/`, quando inspecionado, então deve existir o documento `ADR-001-stack-e-ambientes.md` contendo a stack tecnológica selecionada, as justificativas técnicas e a estratégia para atender ao requisito de escalabilidade (RNF-007).
-- **CA-2:** Dado o documento `ADR-001-stack-e-ambientes.md` e a documentação do projeto, quando verificada a seção de ambientes, então deve haver a especificação detalhada da separação entre ambiente de testes e ambiente de produção (RF-079), abrangendo isolamento de banco de dados, variáveis de ambiente e fluxo de execução.
-- **CA-3:** Dado o arquivo `.env.example`, quando analisado, então deve conter a parametrização necessária para segregação de ambientes (`APP_ENV` ou equivalente) com exemplos distintos para execução em modo de teste e em produção, utilizando exclusivamente dados fictícios.
+
+- **CA-1:** Dado o diretório `docs/arquitetura/`, quando o ADR-001 for consultado, então ele deve registrar a stack efetivamente adotada, suas justificativas e as decisões relacionadas à escalabilidade, sem apresentar alternativas como escolhas já concluídas.
+- **CA-2:** Dado o ADR-001, quando a seção de ambientes for consultada, então ela deve descrever o uso de `NODE_ENV`, `DATABASE_URL` e `DATABASE_URL_TEST`, os bancos esperados e o fluxo de seleção sem expor credenciais reais.
+- **CA-3:** Dado o arquivo `.env.example`, quando ele for consultado, então deve conter exemplos distintos para desenvolvimento, teste e produção, com valores exclusivamente fictícios e indicação de quais variáveis devem ser fornecidas por ambiente.
+- **CA-4:** Dado o processo iniciado com `NODE_ENV=test`, quando o acesso ao banco for configurado, então deve usar `DATABASE_URL_TEST`, exigir o banco `pagamentus_test` e falhar explicitamente se a variável estiver ausente ou apontar para outro banco, sem recorrer a `DATABASE_URL`.
+- **CA-5:** Dado o processo iniciado com `NODE_ENV=development` ou `NODE_ENV=production`, quando o acesso ao banco for configurado, então deve usar `DATABASE_URL`, exigir respectivamente `pagamentus_dev` ou `pagamentus_prod` e falhar explicitamente se a configuração estiver ausente ou apontar para outro banco.
 
 ## 6. Plano técnico
-- **Documentação de Arquitetura:**
-  - Criar `docs/arquitetura/ADR-001-stack-e-ambientes.md` estruturado com: Título, Data, Status, Contexto, Decisão (Stack, Escalabilidade e Segregação de Ambientes) e Consequências.
-  - Definir stack modular e escalável:
-    - Backend: Node.js (TypeScript) com Express ou NestJS / Python FastAPI (definido no ADR).
-    - Banco de Dados: PostgreSQL com suporte a isolamento por esquemas/multi-inquilino.
-    - Ambientes: Separação física/lógica de bancos (`pagamentus_test` e `pagamentus_prod`), flags de ambiente (`NODE_ENV` / `APP_ENV`) e containerização via Docker Compose.
-- **Configuração de Ambientes:**
-  - Atualizar `.env.example` para contemplar as chaves de configuração dos ambientes separados.
+
+- Registrar no ADR a stack identificada no projeto: Node.js 20, TypeScript, Express, PostgreSQL 16, driver `pg`, npm, Jest, Supertest e Docker Compose. O frontend existente usa HTML, CSS e JavaScript sem framework definido.
+- Documentar escalabilidade sem prometer desempenho não medido: I/O assíncrono, pool de conexões PostgreSQL e possibilidade de múltiplas instâncias, condicionada ao compartilhamento de estado e à configuração da infraestrutura.
+- Criar um resolvedor compartilhado de configuração PostgreSQL para as duas implementações de conexão existentes.
+- Validar ambiente, URL e nome do banco antes de criar pools; exigir `DATABASE_URL_TEST` no modo de teste.
+- Provisionar os três bancos lógicos no Compose local e atualizar as instruções de execução.
 
 ## 7. Tarefas de implementação
-- [x] Criar branch de trabalho `spec/1.2-decisao-stack` a partir da `main`
-- [x] Criar especificação `specs/item-1-plataforma/SPEC-1.2.md`
-- [x] Elaborar `docs/arquitetura/ADR-001-stack-e-ambientes.md` com stack, justificativas e segregação de ambientes
-- [x] Atualizar `.env.example` com as configurações de ambientes separados
-- [x] Atualizar `CHANGELOG.md` na seção `[Não lançado]`
-- [ ] Abrir Pull Request com o template oficial para validação do 4º período
+
+- [ ] Atualizar o ADR-001 com a stack efetiva, decisões e limites conhecidos.
+- [ ] Implementar a validação compartilhada das conexões PostgreSQL.
+- [ ] Aplicar a validação às duas implementações de pool.
+- [ ] Ajustar a inicialização local dos bancos de desenvolvimento, teste e produção simulada.
+- [ ] Atualizar `.env.example` e as instruções de execução.
+- [ ] Testar os caminhos válidos e inválidos de configuração.
+- [ ] Registrar evidências por critério e abrir PR para revisão.
 
 ## 8. Dependências
-- `SPEC-1.1` (Repositório, documentação e padrões de contribuição).
+
+- `SPEC-1.1` — Repositório, documentação e padrões de contribuição.
 
 ## 9. Como validar
-1. **Validação do ADR e Escalabilidade (CA-1):**
-   - Verificar a existência do arquivo `docs/arquitetura/ADR-001-stack-e-ambientes.md`.
-   - Ler o documento e confirmar a presença da justificativa técnica da stack e os pilares de escalabilidade alinhados ao RNF-007.
-2. **Validação da Separação de Ambientes (CA-2):**
-   - Verificar no ADR a seção dedicada ao RF-079 comprovando a distinção entre bancos de dados, chaves e serviços de teste vs. produção.
-3. **Validação das Variáveis de Ambiente (CA-3):**
-   - Inspecionar `.env.example` e verificar as variáveis de controle de ambiente e conexões segregadas com dados 100% fictícios.
 
-## 10. Evidências (preencher ao concluir)
-- **CA-1 (ADR e Escalabilidade):** Arquivo `docs/arquitetura/ADR-001-stack-e-ambientes.md` criado, detalhando Node.js (TypeScript), PostgreSQL, Express/Fastify e estratégias de escala horizontal (stateless, JWT, filas assíncronas).
-- **CA-2 (Separação de Ambientes):** Seção 2.3 do `ADR-001-stack-e-ambientes.md` documenta isolamento estrito de bases (`pagamentus_test` vs `pagamentus_prod`), flags de ambiente (`NODE_ENV`) e mocks para serviços externos.
-- **CA-3 (Variáveis segregadas):** Arquivo `.env.example` atualizado com seções explícitas de controle de ambiente (`NODE_ENV`), conexões de banco separadas para teste e produção, e flags de mock sem expor dados reais.
+1. **CA-1:** conferir as tecnologias e justificativas no ADR-001.
+2. **CA-2:** verificar o fluxo de seleção por `NODE_ENV` e as variáveis de conexão no ADR-001.
+3. **CA-3:** conferir os exemplos fictícios e distintos em `.env.example`.
+4. **CA-4:** executar `npm run build` e `npm run test:unit -- --runTestsByPath tests/databaseEnvironment.test.ts`; os casos devem demonstrar seleção exclusiva de `DATABASE_URL_TEST` e rejeição de configuração ausente ou incompatível.
+5. **CA-5:** executar os mesmos testes focados e verificar a seleção e rejeição das URLs de desenvolvimento e produção.
+
+## 10. Evidências
+
+A preencher após implementação e validação.
 
 ## 11. Histórico de revisão
-*Nenhuma ressalva registrada até o momento.*
 
+Nenhuma revisão registrada para esta reimplementação.

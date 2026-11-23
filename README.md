@@ -94,11 +94,11 @@ O módulo do Item 4 (Folha de Pagamento) foi migrado e implementado estritamente
 - **Conteinerização:** `docker-compose.yml` e `Dockerfile`
 - **Frontend:** HTML5, Vanilla JS e Tailwind CSS via CDN
 
-### Opção A: Execução via Docker Compose (Recomendada para Produção)
+### Opção A: Execução local via Docker Compose (não é implantação de produção)
 ```bash
 docker compose up --build
 ```
-A aplicação iniciará na porta `3000` (`http://localhost:3000`) com PostgreSQL provisionado e bancos inicializados automaticamente.
+A aplicação de demonstração iniciará na porta `3000` (`http://localhost:3000`). O Compose local cria bancos lógicos separados para desenvolvimento, teste e demonstração; ele não provisiona infraestrutura de produção.
 
 ### Opção B: Execução Local com Node.js e TypeScript
 
@@ -107,22 +107,26 @@ A aplicação iniciará na porta `3000` (`http://localhost:3000`) com PostgreSQL
    npm install
    ```
 
-2. **Compilar TypeScript:**
+2. **Configurar o ambiente:**
+   - Copie `.env.example` para `.env`.
+   - Para desenvolvimento, mantenha `NODE_ENV=development` e configure `DATABASE_URL` para `pagamentus_dev`.
+   - Para testes com PostgreSQL, configure `NODE_ENV=test` e `DATABASE_URL_TEST` para `pagamentus_test`. O modo de teste não usa `DATABASE_URL` como alternativa.
+   - Em produção, configure `NODE_ENV=production` e `DATABASE_URL` no ambiente de implantação, apontando para `pagamentus_prod`. Não versione credenciais reais.
+
+3. **Compilar TypeScript:**
    ```bash
    npm run build
    ```
 
-3. **Iniciar o servidor:**
+4. **Iniciar o servidor:**
    ```bash
-   npm start        # Produção compilada
-   # ou
-   npm run dev      # Modo desenvolvimento via tsx
+   node dist/server.js  # Módulo do Item 4 com PostgreSQL
    ```
    Acesse no navegador: `http://localhost:3000`
 
-4. **Executar a suíte de testes automatizados:**
+5. **Executar a suíte de testes automatizados:**
    ```bash
    npm test
    ```
-   Executa 19 testes automatizados com banco isolado `pagamentus_test`.
+   Os testes de integração PostgreSQL exigem `NODE_ENV=test` e uma `DATABASE_URL_TEST` configurada para `pagamentus_test`.
 

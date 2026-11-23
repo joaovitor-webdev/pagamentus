@@ -1,93 +1,64 @@
-# ADR-001: Definição da Stack Tecnológica, Escalabilidade e Segregação de Ambientes
+# ADR-001: Stack tecnológica e segregação de ambientes
 
-- **Status:** Aprovado
-- **Data:** 13/11/2026
-- **Autor:** João Vitor (@joaovitor-webdev) - 2º Período de GTI
-- **Revisores:** 4º Período de GTI
-- **Requisitos Relacionados:** RF-079 (Ambientes separados), RNF-007 (Escalabilidade)
-
----
+- **Status:** Proposto para revisão
+- **Data:** 23/11/2026
+- **Autor:** João Vitor (@joaovitor-webdev)
+- **Requisitos relacionados:** RF-079, RNF-007
 
 ## 1. Contexto
 
-O **Sistema Integrado de Contabilidade, Fiscal e Imposto de Renda** atende escritórios contábeis, contadores autônomos e empresas de diversos portes. A plataforma necessita:
-1. Suportar um volume crescente de clientes, documentos fiscais, partidas contábeis e usuários simultâneos sem degradação inaceitável de performance (**RNF-007 — Escalabilidade**).
-2. Garantir o estrito isolamento entre o ambiente de testes/desenvolvimento e o ambiente de produção (**RF-079**), prevenindo riscos de vazamento, corrupção ou perda de dados reais.
+O projeto precisa manter os testes separados do ambiente de produção e registrar uma stack comum para as frentes de desenvolvimento. O RNF-007 não especifica volume de dados, concorrência, latência ou critérios mensuráveis de degradação; portanto, esta decisão registra a arquitetura atual e não declara capacidade de carga já comprovada.
 
----
+## 2. Decisões
 
-## 2. Decisão Arquitetural
+### 2.1 Stack adotada
 
-### 2.1 Stack Tecnológica Selecionada
+| Camada | Tecnologia atual | Justificativa |
+|---|---|---|
+| Runtime | Node.js 20 | Versão usada nas imagens de aplicação do repositório. |
+| Linguagem | TypeScript 5 | Tipagem estática e compilação para JavaScript. |
+| API | Express 4 | Framework usado nas rotas e no servidor. |
+| Banco de dados | PostgreSQL 16 | Banco relacional usado pelo módulo persistido. |
+| Acesso ao banco | Driver `pg` | Driver PostgreSQL usado pelo projeto; não há ORM adotado. |
+| Interface existente | HTML, CSS e JavaScript | Interface sem framework padrão de frontend estabelecido. |
+| Testes | Jest e Supertest | Ferramentas presentes para testes automatizados e HTTP. |
+| Ambiente local | Docker Compose | Provisiona a aplicação e o PostgreSQL para execução local. |
 
-Para atender à modularidade, tipagem estrita e escalabilidade horizontal, adotamos a seguinte stack:
+Não fazem parte desta decisão a adoção de NestJS, Fastify, Prisma, Knex, Redis, filas ou framework adicional de frontend.
 
-| Camada | Tecnologia | Justificativa Técnica |
-| :--- | :--- | :--- |
-| **Linguagem & Runtime** | **Node.js (TypeScript)** | Tipagem estática em tempo de compilação, prevenindo erros em cálculos e regras contábeis/fiscais. Ecossistema consolidado e assíncrono para operações de I/O em lote. |
-| **Backend / API** | **Express / Fastify (REST API)** | Arquitetura desacoplada e modular baseada em rotas, middlewares de autenticação/autorização e validação de esquemas (Zod/Joi). Baixa sobrecarga e facilidade para escala horizontal. |
-| **Banco de Dados Relacional** | **PostgreSQL (v15+)** | Banco de dados relacional robusto com conformidade estrita ACID, suporte nativo a transações complexas para partidas dobradas, indexação eficiente (B-Tree, GIN para JSONB) e particionamento de tabelas. |
-| **Gerenciador de Migrações / Acesso** | **Prisma ORM ou Knex.js** | Migrações de banco declarativas, versionadas no Git, garantindo reprodutibilidade idêntica de esquemas entre ambientes. |
-| **Containerização** | **Docker & Docker Compose** | Padronização dos serviços auxiliares (PostgreSQL, Redis para cache/filas), garantindo paridade entre desenvolvimento, testes automatizados e produção. |
+### 2.2 Escalabilidade (RNF-007)
 
----
+- O acesso assíncrono de Node.js e o pool de conexões do PostgreSQL permitem atender operações de I/O sem bloquear uma thread por requisição.
+- A aplicação pode ser executada em mais de uma instância quando configuração, persistência e estado compartilhado forem compatíveis com esse modo de operação.
+- Consultas, índices, particionamento, réplicas e processamento em background devem ser avaliados conforme dados medidos; não são apresentados como recursos integralmente configurados ou validados neste ADR.
+- A equipe precisa definir metas de carga e executar testes de desempenho antes de afirmar um limite suportado. Esses valores não estão definidos no RNF-007.
 
-### 2.2 Estratégia de Escalabilidade (RNF-007)
+### 2.3 Segregação de ambientes (RF-079)
 
-Para assegurar o crescimento sustentável de clientes, documentos e lançamentos:
+`NODE_ENV` identifica o modo de execução:
 
-1. **Escala Horizontal da Aplicação:**
-   - O backend opera de forma *stateless* (sem estado em sessão de memória local).
-   - Autenticação via tokens JWT com assinatura criptográfica, permitindo múltiplas instâncias da API atrás de um balanceador de carga (*reverse proxy* / *load balancer*).
+| `NODE_ENV` | Variável de conexão | Banco esperado |
+|---|---|---|
+| `development` | `DATABASE_URL` | `pagamentus_dev` |
+| `test` | `DATABASE_URL_TEST` | `pagamentus_test` |
+| `production` | `DATABASE_URL` | `pagamentus_prod` |
 
-2. **Otimização e Isolamento no Banco de Dados:**
-   - Isolamento multi-inquilino (*multi-tenant*) com chave de partição por organização (`organization_id`) indexada em todas as tabelas transacionais.
-   - Suporte futuro a réplicas de leitura (*read replicas*) para desonerar a base primária durante geração de relatórios pesados e apurações anuais de IR.
+O resolvedor de configuração valida a URL e o nome do banco antes de criar o pool. No modo `test`, `DATABASE_URL` não é alternativa para `DATABASE_URL_TEST`: se a variável de teste estiver ausente ou indicar outro banco, a inicialização falha explicitamente.
 
-3. **Processamento Assíncrono para Cargas Pesadas:**
-   - Importações massivas de documentos fiscais (XML/SPED) e cálculos de fechamento de folha são projetados para execução em fila de tarefas em background, impedindo o bloqueio do ciclo de requisições HTTP da API.
+O Compose local pode manter bancos lógicos separados no mesmo servidor PostgreSQL para desenvolvimento e testes. Essa conveniência local não substitui a configuração de infraestrutura isolada para produção. A URL de produção e suas credenciais devem ser fornecidas pelo ambiente de implantação ou por um gerenciador de segredos; não devem ser incluídas no repositório.
 
----
-
-### 2.3 Segregação de Ambientes (RF-079)
-
-Para cumprir estritamente o **RF-079**, são instituídos dois ambientes formalmente isolados:
-
-```text
-+-----------------------------------+      +-----------------------------------+
-|      Ambiente de Testes (TEST)     |      |    Ambiente de Produção (PROD)    |
-|                                   |      |                                   |
-| - NODE_ENV=test / development     |      | - NODE_ENV=production            |
-| - Banco: pagamentus_test          |      | - Banco: pagamentus_prod          |
-| - Dados 100% fictícios            |      | - Dados reais criptografados      |
-| - Mocks de integrações externos   |      | - Conexões oficiais homologadas   |
-| - Limpeza controlada entre testes |      | - Trilha de auditoria e backup    |
-+-----------------------------------+      +-----------------------------------+
-```
-
-#### Regras de Segregação:
-
-1. **Isolamento de Base de Dados:**
-   - O ambiente de testes utiliza uma base separada (`pagamentus_test`), seja em container local ou instância de teste isolada.
-   - É terminantemente proibido apontar rotinas de teste unitário, integração ou carga para a base de produção (`pagamentus_prod`).
-   - A rotina de teardown de testes possui verificação mandatória: se `NODE_ENV === 'production'`, qualquer operação de limpeza ou truncamento de tabelas é imediatamente abortada com exceção fatal.
-
-2. **Isolamento via Variáveis de Ambiente:**
-   - O controle de comportamento é orientado pela variável `NODE_ENV` (`development`, `test`, `production`).
-   - Nenhuma credencial ou URL de conexão de produção é versionada no repositório. O arquivo `.env.example` fornece exclusivamente parâmetros de simulação/teste com valores fictícios.
-
-3. **Integrações Externas (Mocks e Sandboxes):**
-   - No ambiente de testes, chamadas a órgãos públicos (Receita Federal, eSocial, Prefeituras) utilizam adaptadores *Mock* ou ambientes *Sandbox* oficiais, conforme sinalizado pelas flags `RECEITA_FEDERAL_API_MOCK=true` e `ESOCIAL_SANDBOX=true`.
-
----
+O arquivo `.env.example` contém apenas endereços e credenciais fictícios de exemplo. Cada ambiente deve receber sua própria configuração antes de iniciar a aplicação ou os testes.
 
 ## 3. Consequências
 
-- **Positivas:**
-  - Garantia de manutenibilidade com TypeScript e tipagem estrita.
-  - Segurança jurídica e operacional ao impedir a contaminação ou perda de dados de produção durante testes.
-  - Base arquitetural preparada para suportar grande volumetria sem necessidade de reescrita estrutural.
-- **Limitações / Atenções:**
-  - Exige rigor da equipe no versionamento correto de migrações (`migrations`) para manter os esquemas de teste e produção sincronizados.
-  - Obrigatoriedade de manter o `.env` de cada desenvolvedor e ambiente configurado conforme as diretrizes do `.env.example`.
+### Positivas
 
+- A stack fica documentada sem manter alternativas incompatíveis como decisões em aberto.
+- A seleção explícita do banco reduz o risco de uma execução de teste gravar no banco de desenvolvimento ou produção.
+- A equipe pode ajustar a infraestrutura de escala com base em medições, sem tratar hipóteses como garantias.
+
+### Limitações
+
+- A validação pelo nome do banco não substitui isolamento de rede, credenciais e instâncias na implantação.
+- O requisito não define metas quantitativas de escalabilidade; a capacidade precisa ser avaliada em trabalho próprio de desempenho.
+- O Compose local é destinado a desenvolvimento e teste, não constitui configuração de produção.
