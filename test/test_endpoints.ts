@@ -42,6 +42,7 @@ function makeRequest(method: string, path: string, body: any = null, headers: Re
 }
 
 async function runTests() {
+  process.env.NODE_ENV = 'test';
   console.log('--- INICIANDO TESTES AUTOMATIZADOS (SPEC-4.1 / POSTGRESQL + TYPESCRIPT) ---');
   let failures = 0;
 

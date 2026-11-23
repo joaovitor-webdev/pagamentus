@@ -11,6 +11,7 @@ import { StructuralRepository } from '../repositories/structural.repository';
  * - CA-3: Bloqueio de duplicidade via restrição de chave única (UNIQUE).
  */
 async function runTests() {
+  process.env.NODE_ENV = 'test';
   console.log('--- Iniciando Testes de Integridade (SPEC-1.3 / RNF-013) ---\n');
 
   try {
