@@ -78,8 +78,8 @@ Registrar a stack usada pelo projeto, as decisões que orientam sua evolução e
 
 - **PR:** https://github.com/joaovitor-webdev/pagamentus/pull/54
 - **CA-1 a CA-3:** ADR-001, `.env.example` e documentação de execução atualizados.
-- **CA-4 e CA-5:** `npm run build` passou; `tests/databaseEnvironment.test.ts` passou com 8 testes.
-- **Suíte unitária:** 32 suítes e 138 testes passaram, excluindo a integração PostgreSQL que depende de credenciais locais.
+- **CA-4 e CA-5:** `npm run build` passou; `tests/databaseEnvironment.test.ts` passou com 9 testes.
+- **Suíte unitária:** 32 suítes e 139 testes passaram, excluindo a integração PostgreSQL que depende de credenciais locais.
 - **Integração PostgreSQL:** não validada; o serviço local recusou as credenciais fictícias de exemplo. Nenhuma alternativa para `DATABASE_URL` foi usada.
 - **Trello:** status não verificado, pois o cartão exige autenticação/permissão.
 

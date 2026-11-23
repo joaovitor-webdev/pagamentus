@@ -54,7 +54,20 @@ describe('resolveDatabaseEnvironment', () => {
     }).databaseName).toBe('pagamentus_prod');
   });
 
-  it('rejeita a URL de teste em produção', () => {
+  it('exige DATABASE_URL em desenvolvimento e produção', () => {
+    expect(() => resolveDatabaseEnvironment({
+      NODE_ENV: 'development',
+    })).toThrow('DATABASE_URL deve estar configurada');
+    expect(() => resolveDatabaseEnvironment({
+      NODE_ENV: 'production',
+    })).toThrow('DATABASE_URL deve estar configurada');
+  });
+
+  it('rejeita bancos incompatíveis em desenvolvimento e produção', () => {
+    expect(() => resolveDatabaseEnvironment({
+      NODE_ENV: 'development',
+      DATABASE_URL: testUrl,
+    })).toThrow('deve apontar para o banco pagamentus_dev');
     expect(() => resolveDatabaseEnvironment({
       NODE_ENV: 'production',
       DATABASE_URL: testUrl,
