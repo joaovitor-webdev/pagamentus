@@ -1,22 +1,34 @@
-import { Pool, QueryResult, QueryResultRow } from 'pg';
+import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import dotenv from 'dotenv';
+import { resolveDatabaseEnvironment } from '../database/databaseEnvironment';
 
 dotenv.config();
 
-const isTest = process.env.NODE_ENV === 'test';
-const targetDb = isTest ? 'pagamentus_test' : 'pagamentus_prod';
+let poolInstance: Pool | undefined;
 
-// Configura pool suportando tanto URL quanto conexão local por socket /tmp ou TCP
-const poolConfig = process.env.DATABASE_URL
-  ? { connectionString: isTest ? (process.env.DATABASE_URL_TEST || process.env.DATABASE_URL) : process.env.DATABASE_URL }
-  : {
-      host: process.env.PGHOST || '/tmp',
-      port: parseInt(process.env.PGPORT || '5432', 10),
-      database: targetDb,
-      user: process.env.PGUSER || 'doug12',
-    };
+function getPool(): Pool {
+  if (!poolInstance) {
+    poolInstance = new Pool({
+      connectionString: resolveDatabaseEnvironment().connectionString,
+    });
+  }
+  return poolInstance;
+}
 
-export const pool = new Pool(poolConfig);
+export const pool = {
+  query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+    return getPool().query<T>(text, params);
+  },
+  connect(): Promise<PoolClient> {
+    return getPool().connect();
+  },
+  async end(): Promise<void> {
+    if (poolInstance) {
+      await poolInstance.end();
+      poolInstance = undefined;
+    }
+  },
+};
 
 export async function query<T extends QueryResultRow = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
   return pool.query<T>(text, params);

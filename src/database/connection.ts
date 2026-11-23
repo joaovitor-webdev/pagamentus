@@ -1,5 +1,6 @@
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 import * as dotenv from 'dotenv';
+import { resolveDatabaseEnvironment } from './databaseEnvironment';
 
 // Carrega as variáveis de ambiente
 dotenv.config();
@@ -26,13 +27,8 @@ export class DatabaseConnection {
    */
   public static getPool(): Pool {
     if (!this.pool) {
-      const connectionString = process.env.DATABASE_URL;
-      if (!connectionString) {
-        throw new Error('DATABASE_URL não configurada nas variáveis de ambiente.');
-      }
-
       this.pool = new Pool({
-        connectionString,
+        connectionString: resolveDatabaseEnvironment().connectionString,
       });
     }
 
