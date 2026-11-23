@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 1 – Plataforma | @joaovitor-webdev | A definir | https://trello.com/c/LuEhsgst | Fazendo |
+| 1 – Plataforma | @joaovitor-webdev | A definir | https://trello.com/c/LuEhsgst | Revisando |
 
 ## 1. Contexto e objetivo
 
@@ -54,13 +54,13 @@ Registrar a stack usada pelo projeto, as decisões que orientam sua evolução e
 
 ## 7. Tarefas de implementação
 
-- [ ] Atualizar o ADR-001 com a stack efetiva, decisões e limites conhecidos.
-- [ ] Implementar a validação compartilhada das conexões PostgreSQL.
-- [ ] Aplicar a validação às duas implementações de pool.
-- [ ] Ajustar a inicialização local dos bancos de desenvolvimento, teste e produção simulada.
-- [ ] Atualizar `.env.example` e as instruções de execução.
-- [ ] Testar os caminhos válidos e inválidos de configuração.
-- [ ] Registrar evidências por critério e abrir PR para revisão.
+- [x] Atualizar o ADR-001 com a stack efetiva, decisões e limites conhecidos.
+- [x] Implementar a validação compartilhada das conexões PostgreSQL.
+- [x] Aplicar a validação às duas implementações de pool.
+- [x] Ajustar a inicialização local dos bancos de desenvolvimento, teste e produção simulada.
+- [x] Atualizar `.env.example` e as instruções de execução.
+- [x] Testar os caminhos válidos e inválidos de configuração.
+- [x] Registrar evidências por critério e abrir PR para revisão.
 
 ## 8. Dependências
 
@@ -76,8 +76,13 @@ Registrar a stack usada pelo projeto, as decisões que orientam sua evolução e
 
 ## 10. Evidências
 
-A preencher após implementação e validação.
+- **PR:** https://github.com/joaovitor-webdev/pagamentus/pull/54
+- **CA-1 a CA-3:** ADR-001, `.env.example` e documentação de execução atualizados.
+- **CA-4 e CA-5:** `npm run build` passou; `tests/databaseEnvironment.test.ts` passou com 8 testes.
+- **Suíte unitária:** 32 suítes e 138 testes passaram, excluindo a integração PostgreSQL que depende de credenciais locais.
+- **Integração PostgreSQL:** não validada; o serviço local recusou as credenciais fictícias de exemplo. Nenhuma alternativa para `DATABASE_URL` foi usada.
+- **Trello:** status não verificado, pois o cartão exige autenticação/permissão.
 
 ## 11. Histórico de revisão
 
-Nenhuma revisão registrada para esta reimplementação.
+Reimplementação pronta para revisão independente no PR #54.
