@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Banco de Dados PostgreSQL (Multi-inquilino / Ambientes separados)
+  # Bancos locais separados por ambiente lógico
   postgres:
     image: postgres:16-alpine
     container_name: pagamentus_postgres
@@ -9,14 +9,14 @@ services:
     environment:
       POSTGRES_USER: usuario_fake
       POSTGRES_PASSWORD: senha_fake
-      POSTGRES_DB: pagamentus_prod
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U usuario_fake -d pagamentus_prod"]
+      test: ["CMD-SHELL", "pg_isready -U usuario_fake -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
