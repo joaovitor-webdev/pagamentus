@@ -81,7 +81,7 @@ Registrar a stack usada pelo projeto, as decisões que orientam sua evolução e
 - **CA-4 e CA-5:** `npm run build` passou; `tests/databaseEnvironment.test.ts` passou com 9 testes.
 - **Suíte unitária:** 32 suítes e 139 testes passaram, excluindo a integração PostgreSQL que depende de credenciais locais.
 - **Integração PostgreSQL:** não validada; o serviço local recusou as credenciais fictícias de exemplo. Nenhuma alternativa para `DATABASE_URL` foi usada.
-- **Trello:** status não verificado, pois o cartão exige autenticação/permissão.
+- **Trello:** cartão movido para `Revisando`; comentário com PR e evidências publicado.
 
 ## 11. Histórico de revisão
 
