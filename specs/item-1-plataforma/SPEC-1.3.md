@@ -56,7 +56,7 @@ Atender ao RNF-013 no esquema relacional inicial e no mecanismo de transações,
 5. Execute `npx jest --runInBand tests/databaseConnection.test.ts` para validar os comandos de commit e rollback do helper.
 
 ## 10. Evidências (preencher ao concluir)
-- PR: a preencher após abertura.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/55
 - CA-1: `npm run test:integrity` passou; foram identificadas 6 tabelas com PK, 5 FKs, 5 constraints UNIQUE e 29 campos NOT NULL. A inserção com FK inválida foi rejeitada (código PostgreSQL 23503).
 - CA-2: `npm run test:integrity` passou após uma inserção válida e uma exceção simulada na etapa seguinte; a consulta confirmou que o registro não permaneceu no banco.
 - CA-3: `npm run test:integrity` passou; a duplicidade foi rejeitada (código PostgreSQL 23505), sem alterar o registro original.
