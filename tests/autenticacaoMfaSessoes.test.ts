@@ -124,6 +124,10 @@ describe('SPEC-1.4: Autenticação, senhas e MFA (RF-075, RNF-003)', () => {
    * antes de conceder acesso à sessão ativa.
    */
   describe('CA-2: MFA obrigatório para perfis privilegiados', () => {
+    it('gera códigos TOTP compatíveis com o vetor de referência RFC 6238', () => {
+      expect(authService.gerarCodigoMfa('12345678901234567890', 59000)).toBe('287082');
+    });
+
     it('deve exigir MFA para usuário com perfil privilegiado e bloquear acesso antes da verificação', async () => {
       const segredoMfaFicticio = 'segredo_mfa_ficticio_teste_123';
       await authService.cadastrarUsuario({
@@ -180,6 +184,9 @@ describe('SPEC-1.4: Autenticação, senhas e MFA (RF-075, RNF-003)', () => {
 
       expect(meAposMfa.status).toBe(200);
       expect(meAposMfa.body.dados.usuario.email).toBe('admin@exemplo.ficticio.local');
+      expect(meAposMfa.body.dados.usuario.mfaSegredo).toBeUndefined();
+      expect(meAposMfa.body.dados.usuario.senhaHash).toBeUndefined();
+      expect(meAposMfa.body.dados.sessao.token).toBeUndefined();
     });
   });
 
@@ -267,6 +274,45 @@ describe('SPEC-1.4: Autenticação, senhas e MFA (RF-075, RNF-003)', () => {
       expect(meAposLogout.status).toBe(401);
       expect(meAposLogout.body.erro).toMatch(/inativa ou encerrada/i);
     });
+
+    it('lista sessões sem expor tokens e permite encerrar todas as sessões próprias', async () => {
+      await authService.cadastrarUsuario({
+        organizacaoId: organizacaoFicticiaId,
+        perfilId: perfilComumId,
+        nome: 'Usuario Multiplas Sessoes',
+        email: 'multiplas-sessoes@exemplo.ficticio.local',
+        senha: 'SenhaSessoes@2026',
+      });
+
+      const loginInicial = await request(app).post('/api/auth/login').send({
+        email: 'multiplas-sessoes@exemplo.ficticio.local',
+        senha: 'SenhaSessoes@2026',
+      });
+      const loginAdicional = await request(app).post('/api/auth/login').send({
+        email: 'multiplas-sessoes@exemplo.ficticio.local',
+        senha: 'SenhaSessoes@2026',
+      });
+      const tokenInicial = loginInicial.body.dados.token;
+
+      const listagem = await request(app)
+        .get('/api/auth/sessoes')
+        .set('Authorization', `Bearer ${tokenInicial}`);
+      expect(listagem.status).toBe(200);
+      expect(listagem.body.dados).toHaveLength(2);
+      expect(listagem.body.dados[0].token).toBeUndefined();
+
+      const encerramento = await request(app)
+        .delete('/api/auth/sessoes')
+        .set('Authorization', `Bearer ${tokenInicial}`);
+      expect(encerramento.status).toBe(200);
+      expect(encerramento.body.dados).toHaveLength(2);
+      expect(encerramento.body.dados.every((sessao: { ativa: boolean }) => !sessao.ativa)).toBe(true);
+
+      const requisicaoEncerrada = await request(app)
+        .get('/api/auth/me')
+        .set('Authorization', `Bearer ${loginAdicional.body.dados.token}`);
+      expect(requisicaoEncerrada.status).toBe(401);
+    });
   });
 
   /**
@@ -304,6 +350,11 @@ describe('SPEC-1.4: Autenticação, senhas e MFA (RF-075, RNF-003)', () => {
       expect(criarPerfilNegado.status).toBe(403);
       expect(criarPerfilNegado.body.erro).toMatch(/Acesso negado/);
 
+      const listarUsuariosNegado = await request(app)
+        .get('/api/admin/usuarios')
+        .set('Authorization', `Bearer ${tokenOperador}`);
+      expect(listarUsuariosNegado.status).toBe(403);
+
       // 2. Cria e autentica Administrador (perfil privilegiado com MFA)
       const segredoAdmin = 'segredo_admin_master_999';
       await authService.cadastrarUsuario({
@@ -337,6 +388,42 @@ describe('SPEC-1.4: Autenticação, senhas e MFA (RF-075, RNF-003)', () => {
         });
       expect(criarPerfilPermitido.status).toBe(201);
       expect(criarPerfilPermitido.body.dados.nome).toBe('Contador Senior');
+
+      const usuariosAdmin = await request(app)
+        .get('/api/admin/usuarios')
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(usuariosAdmin.status).toBe(200);
+      expect(usuariosAdmin.body.dados[0].senhaHash).toBeUndefined();
+      expect(usuariosAdmin.body.dados[0].mfaSegredo).toBeUndefined();
+
+      const perfisAdmin = await request(app)
+        .get('/api/admin/perfis')
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(perfisAdmin.status).toBe(200);
+
+      const permissoesAdmin = await request(app)
+        .get('/api/admin/permissoes')
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(permissoesAdmin.status).toBe(200);
+
+      const criarPermissao = await request(app)
+        .post('/api/admin/permissoes')
+        .set('Authorization', `Bearer ${tokenAdmin}`)
+        .send({ chave: 'relatorios:consultar', descricao: 'Consulta relatórios' });
+      expect(criarPermissao.status).toBe(201);
+
+      const atribuirPermissao = await request(app)
+        .put(`/api/admin/perfis/${perfilComumId}/permissoes`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
+        .send({ permissoes: ['relatorios:consultar'] });
+      expect(atribuirPermissao.status).toBe(200);
+      expect(atribuirPermissao.body.dados.permissoes).toEqual(['relatorios:consultar']);
+
+      const sessoesOperador = await request(app)
+        .get(`/api/auth/sessoes?usuarioId=${loginOperador.body.dados.usuarioId}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(sessoesOperador.status).toBe(200);
+      expect(sessoesOperador.body.dados[0].token).toBeUndefined();
 
       // Administrador encerra remotamente a sessão ativa do Operador -> sucesso (200)
       const encerrarSessaoOperador = await request(app)
