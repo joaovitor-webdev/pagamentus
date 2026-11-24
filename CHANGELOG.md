@@ -7,7 +7,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - SPEC-1.1: Estrutura base de documentação, modelos de especificação e regras de proteção da branch main.
 - [SPEC-1.2] Arquitetura, stack e ambientes (PR #54, João Vitor): registra a stack adotada e valida a seleção dos bancos por ambiente.
 - [SPEC-1.3] Modelo de dados e integridade (PR #55, João Vitor): reimplementação SDD com validação das constraints do esquema inicial, rejeição de duplicidade e rollback transacional.
-- [SPEC-1.4] Autenticação, senhas e MFA (PR #14, João Vitor): Política de senhas fortes, MFA para perfis privilegiados, bloqueio de tentativas e encerramento de sessões (RF-075, RNF-003).
+- [SPEC-1.4] Autenticação, senhas e MFA (PR #56, João Vitor): TOTP temporal, administração protegida de contas/perfis/permissões, revogação de sessões e respostas sem credenciais ou tokens sensíveis (RF-075, RNF-003).
 - [SPEC-1.5] Perfis, permissões e isolamento entre clientes (PR #15, João Vitor): Segregação entre clientes com autorização expressa, menor privilégio, criptografia de dados sensíveis e TLS (RB-008, RNF-001).
 - [SPEC-1.6] Cadastro de pessoas e empresas (PR #17, João Vitor): Cadastro de PF/PJ com validação de CPF/CNPJ, inscrições, contatos, endereços, responsáveis e dados fiscais com vigência (RF-001, RF-002).
 - [SPEC-1.7] Estabelecimentos, filiais, sócios e responsáveis (PR #18, João Vitor): Múltiplos estabelecimentos, filiais, sócios e responsáveis técnicos vinculados à mesma organização (RF-005).

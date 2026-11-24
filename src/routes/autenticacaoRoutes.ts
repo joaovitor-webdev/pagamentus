@@ -15,6 +15,8 @@ export function criarAutenticacaoRouter(controller: AutenticacaoController): Rou
   router.get('/auth/me', controller.middlewareSessaoAtiva, controller.obterSessaoAtual);
   router.put('/auth/senha', controller.middlewareSessaoAtiva, controller.alterarSenha);
   router.post('/auth/logout', controller.middlewareSessaoAtiva, controller.logout);
+  router.get('/auth/sessoes', controller.middlewareSessaoAtiva, controller.listarSessoes);
+  router.delete('/auth/sessoes', controller.middlewareSessaoAtiva, controller.encerrarTodasSessoes);
   router.delete(
     '/auth/sessoes/:sessaoId',
     controller.middlewareSessaoAtiva,
@@ -27,12 +29,20 @@ export function criarAutenticacaoRouter(controller: AutenticacaoController): Rou
     controller.middlewareSessaoAtiva,
     controller.cadastrarUsuario
   );
+  router.get('/admin/usuarios', controller.middlewareSessaoAtiva, controller.listarUsuarios);
   router.post('/admin/perfis', controller.middlewareSessaoAtiva, controller.criarPerfil);
+  router.get('/admin/perfis', controller.middlewareSessaoAtiva, controller.listarPerfis);
+  router.put(
+    '/admin/perfis/:perfilId/permissoes',
+    controller.middlewareSessaoAtiva,
+    controller.substituirPermissoesDoPerfil
+  );
   router.post(
     '/admin/permissoes',
     controller.middlewareSessaoAtiva,
     controller.criarPermissao
   );
+  router.get('/admin/permissoes', controller.middlewareSessaoAtiva, controller.listarPermissoes);
 
   return router;
 }
