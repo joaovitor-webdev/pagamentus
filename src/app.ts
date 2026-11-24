@@ -137,6 +137,9 @@ import { criarGuiaDemonstrativoFiscalRouter } from './routes/guiaDemonstrativoFi
 import { DivergenciaFiscalContabilService } from './services/DivergenciaFiscalContabilService';
 import { DivergenciaFiscalContabilController } from './controllers/DivergenciaFiscalContabilController';
 import { criarDivergenciaFiscalContabilRouter } from './routes/divergenciaFiscalContabilRoutes';
+import { SimulacaoCenarioTributarioService } from './services/SimulacaoCenarioTributarioService';
+import { SimulacaoCenarioTributarioController } from './controllers/SimulacaoCenarioTributarioController';
+import { criarSimulacaoCenarioTributarioRouter } from './routes/simulacaoCenarioTributarioRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -203,6 +206,7 @@ export function criarApp(): {
   retencaoCreditoParcelamentoService: RetencaoCreditoParcelamentoService;
   guiaDemonstrativoFiscalService: GuiaDemonstrativoFiscalService;
   divergenciaFiscalContabilService: DivergenciaFiscalContabilService;
+  simulacaoCenarioTributarioService: SimulacaoCenarioTributarioService;
 } {
   const app = express();
 
@@ -463,6 +467,12 @@ export function criarApp(): {
   const divergenciaFiscalContabilController =
     new DivergenciaFiscalContabilController(divergenciaFiscalContabilService);
 
+  // 33. Módulo Simulação de Cenários Tributários (SPEC-3.11)
+  const simulacaoCenarioTributarioService =
+    new SimulacaoCenarioTributarioService();
+  const simulacaoCenarioTributarioController =
+    new SimulacaoCenarioTributarioController(simulacaoCenarioTributarioService);
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -518,6 +528,10 @@ export function criarApp(): {
   app.use(
     '/api',
     criarDivergenciaFiscalContabilRouter(divergenciaFiscalContabilController)
+  );
+  app.use(
+    '/api',
+    criarSimulacaoCenarioTributarioRouter(simulacaoCenarioTributarioController)
   );
 
   return {
@@ -582,6 +596,7 @@ export function criarApp(): {
     retencaoCreditoParcelamentoService,
     guiaDemonstrativoFiscalService,
     divergenciaFiscalContabilService,
+    simulacaoCenarioTributarioService,
   };
 }
 
