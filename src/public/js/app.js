@@ -6,7 +6,7 @@
 // Estado global da aplicação
 const state = {
   activeTab: 'dashboard',
-  currentRole: localStorage.getItem('user_role') || 'consulta_assistente',
+  currentRole: localStorage.getItem('user_role') || 'rh_admin',
   currentClientId: Number(localStorage.getItem('client_id') || 1),
   currentCompetencia: '2026-11',
   employees: [],
