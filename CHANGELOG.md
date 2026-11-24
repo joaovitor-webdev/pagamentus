@@ -39,6 +39,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-3.8] Retenções, créditos e parcelamentos (PR #44, Matheus Sousa): Controle de tributos retidos e sofridos, créditos tributários, compensações com controle de saldo, parcelamentos e vencimentos (RF-022).
 - [SPEC-3.9] Guias e demonstrativos (PR #45, Matheus Barbosa)
 - [SPEC-3.10] Divergências fiscais e contábeis (PR #57, Matheus Barbosa): Conferência e alertas de divergências entre documentos fiscais, apuração tributária e contabilidade com histórico por empresa (RF-024).
+- [SPEC-3.11] Simulação de cenários (PR #A definir, Matheus Barbosa): Simulação comparativa de cenários tributários apresentando premissas, limitações, memória de cálculo e cenário mais econômico (RF-028).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
