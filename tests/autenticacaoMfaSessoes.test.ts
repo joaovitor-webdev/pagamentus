@@ -425,6 +425,34 @@ describe('SPEC-1.4: Autenticação, senhas e MFA (RF-075, RNF-003)', () => {
       expect(sessoesOperador.status).toBe(200);
       expect(sessoesOperador.body.dados[0].token).toBeUndefined();
 
+      await authService.cadastrarUsuario({
+        organizacaoId: 'outra-organizacao-ficticia',
+        perfilId: perfilComumId,
+        nome: 'Operador de Outra Organizacao',
+        email: 'operador.outra-organizacao@exemplo.ficticio.local',
+        senha: 'Operador@2026',
+      });
+      const loginOutraOrganizacao = await request(app).post('/api/auth/login').send({
+        email: 'operador.outra-organizacao@exemplo.ficticio.local',
+        senha: 'Operador@2026',
+      });
+
+      const sessoesOutraOrganizacao = await request(app)
+        .get(`/api/auth/sessoes?usuarioId=${loginOutraOrganizacao.body.dados.usuarioId}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(sessoesOutraOrganizacao.status).toBe(403);
+
+      const encerrarTodasOutraOrganizacao = await request(app)
+        .delete('/api/auth/sessoes')
+        .set('Authorization', `Bearer ${tokenAdmin}`)
+        .send({ usuarioId: loginOutraOrganizacao.body.dados.usuarioId });
+      expect(encerrarTodasOutraOrganizacao.status).toBe(403);
+
+      const encerrarSessaoOutraOrganizacao = await request(app)
+        .delete(`/api/auth/sessoes/${loginOutraOrganizacao.body.dados.sessaoId}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`);
+      expect(encerrarSessaoOutraOrganizacao.status).toBe(403);
+
       // Administrador encerra remotamente a sessão ativa do Operador -> sucesso (200)
       const encerrarSessaoOperador = await request(app)
         .delete(`/api/auth/sessoes/${sessaoOperadorId}`)

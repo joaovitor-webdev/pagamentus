@@ -69,8 +69,8 @@ Atender ao RF-075 e ao RNF-003 com autenticação por senha, MFA para perfis pri
 7. Repita consultas/alterações administrativas com e sem as permissões correspondentes (CA-5).
 
 ## 10. Evidências (preencher ao concluir)
-- PR: a preencher após abertura.
-- CA-1 a CA-5: `npx jest --runInBand tests/autenticacaoMfaSessoes.test.ts` passou com 9 testes; cobre recusa de senha fraca, vetor TOTP RFC 6238, bloqueio, encerramento/revogação e autorização administrativa.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/56.
+- CA-1 a CA-5: `npx jest --runInBand tests/autenticacaoMfaSessoes.test.ts` passou com 7 testes; cobre recusa de senha fraca, vetor TOTP RFC 6238, bloqueio, encerramento/revogação, autorização administrativa e isolamento entre organizações.
 - `npm run build`: passou.
 - `npm test`: 33 de 37 suítes e 143 de 157 testes passaram. As 4 suítes de integração restantes requerem `DATABASE_URL_TEST`, ausente neste ambiente.
 

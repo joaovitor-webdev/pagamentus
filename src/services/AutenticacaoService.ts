@@ -583,6 +583,7 @@ export class AutenticacaoService {
   ): Promise<SessaoUsuario[]> {
     if (usuarioAlvoId !== solicitanteUsuarioId) {
       await this.exigirPermissao(solicitanteUsuarioId, 'sessoes:administrar');
+      await this.exigirMesmaOrganizacao(usuarioAlvoId, solicitanteUsuarioId);
     }
 
     const sessoes = await this.repo.listarSessoesPorUsuario(usuarioAlvoId);
@@ -595,6 +596,7 @@ export class AutenticacaoService {
   ): Promise<SessaoUsuario[]> {
     if (usuarioAlvoId !== solicitanteUsuarioId) {
       await this.exigirPermissao(solicitanteUsuarioId, 'sessoes:administrar');
+      await this.exigirMesmaOrganizacao(usuarioAlvoId, solicitanteUsuarioId);
     }
 
     const sessoes = await this.repo.listarSessoesPorUsuario(usuarioAlvoId);
@@ -608,6 +610,25 @@ export class AutenticacaoService {
     );
 
     return encerradas;
+  }
+
+  private async exigirMesmaOrganizacao(
+    usuarioAlvoId: string,
+    solicitanteUsuarioId: string
+  ): Promise<void> {
+    const [usuarioAlvo, solicitante] = await Promise.all([
+      this.repo.buscarUsuarioPorId(usuarioAlvoId),
+      this.repo.buscarUsuarioPorId(solicitanteUsuarioId),
+    ]);
+
+    if (
+      !usuarioAlvo ||
+      !solicitante ||
+      !solicitante.ativo ||
+      usuarioAlvo.organizacaoId !== solicitante.organizacaoId
+    ) {
+      throw new Error('Acesso negado: usuário alvo fora da organização.');
+    }
   }
 
   /**
@@ -631,6 +652,7 @@ export class AutenticacaoService {
     // Se o solicitante não for o dono da sessão, exige permissão administrativa (CA-5)
     if (sessao.usuarioId !== solicitanteUsuarioId) {
       await this.exigirPermissao(solicitanteUsuarioId, 'sessoes:administrar');
+      await this.exigirMesmaOrganizacao(sessao.usuarioId, solicitanteUsuarioId);
     }
 
     sessao.ativa = false;
