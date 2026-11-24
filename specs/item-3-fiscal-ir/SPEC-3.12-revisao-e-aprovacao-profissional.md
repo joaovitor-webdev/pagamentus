@@ -64,6 +64,7 @@ Esta especificação define o **fluxo de conferência, revisão e aprovação pr
 - Modelos, serviço, controller e rotas em `src/models/RevisaoAprovacaoFiscalModel.ts`, `src/services/RevisaoAprovacaoFiscalService.ts`, `src/controllers/RevisaoAprovacaoFiscalController.ts` e `src/routes/revisaoAprovacaoFiscalRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/revisaoAprovacaoProfissional.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/59
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
