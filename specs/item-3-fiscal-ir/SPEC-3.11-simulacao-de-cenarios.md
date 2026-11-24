@@ -58,6 +58,7 @@ Esta especificação define o **módulo de simulação comparativa de cenários 
 - Modelos, serviço, controller e rotas em `src/models/SimulacaoCenarioTributarioModel.ts`, `src/services/SimulacaoCenarioTributarioService.ts`, `src/controllers/SimulacaoCenarioTributarioController.ts` e `src/routes/simulacaoCenarioTributarioRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/simulacaoCenariosTributarios.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/58
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
