@@ -140,6 +140,9 @@ import { criarDivergenciaFiscalContabilRouter } from './routes/divergenciaFiscal
 import { SimulacaoCenarioTributarioService } from './services/SimulacaoCenarioTributarioService';
 import { SimulacaoCenarioTributarioController } from './controllers/SimulacaoCenarioTributarioController';
 import { criarSimulacaoCenarioTributarioRouter } from './routes/simulacaoCenarioTributarioRoutes';
+import { RevisaoAprovacaoFiscalService } from './services/RevisaoAprovacaoFiscalService';
+import { RevisaoAprovacaoFiscalController } from './controllers/RevisaoAprovacaoFiscalController';
+import { criarRevisaoAprovacaoFiscalRouter } from './routes/revisaoAprovacaoFiscalRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -207,6 +210,7 @@ export function criarApp(): {
   guiaDemonstrativoFiscalService: GuiaDemonstrativoFiscalService;
   divergenciaFiscalContabilService: DivergenciaFiscalContabilService;
   simulacaoCenarioTributarioService: SimulacaoCenarioTributarioService;
+  revisaoAprovacaoFiscalService: RevisaoAprovacaoFiscalService;
 } {
   const app = express();
 
@@ -473,6 +477,12 @@ export function criarApp(): {
   const simulacaoCenarioTributarioController =
     new SimulacaoCenarioTributarioController(simulacaoCenarioTributarioService);
 
+  // 34. Módulo Revisão e Aprovação Profissional (SPEC-3.12)
+  const revisaoAprovacaoFiscalService = new RevisaoAprovacaoFiscalService();
+  const revisaoAprovacaoFiscalController = new RevisaoAprovacaoFiscalController(
+    revisaoAprovacaoFiscalService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -532,6 +542,10 @@ export function criarApp(): {
   app.use(
     '/api',
     criarSimulacaoCenarioTributarioRouter(simulacaoCenarioTributarioController)
+  );
+  app.use(
+    '/api',
+    criarRevisaoAprovacaoFiscalRouter(revisaoAprovacaoFiscalController)
   );
 
   return {
@@ -597,6 +611,7 @@ export function criarApp(): {
     guiaDemonstrativoFiscalService,
     divergenciaFiscalContabilService,
     simulacaoCenarioTributarioService,
+    revisaoAprovacaoFiscalService,
   };
 }
 
