@@ -95,10 +95,35 @@ export class AutenticacaoService {
   /**
    * Gera o código MFA de 6 dígitos esperado para um segredo MFA
    */
-  public gerarCodigoMfa(mfaSegredo: string): string {
-    const hmac = crypto.createHmac('sha256', mfaSegredo).update('mfa-totp-window').digest('hex');
-    const valorNumerico = parseInt(hmac.substring(0, 8), 16) % 1000000;
-    return valorNumerico.toString().padStart(6, '0');
+  public gerarCodigoMfa(mfaSegredo: string, instanteMs: number = Date.now()): string {
+    const contador = BigInt(Math.floor(instanteMs / 30000));
+    const mensagem = Buffer.alloc(8);
+    mensagem.writeBigUInt64BE(contador);
+
+    const digest = crypto.createHmac('sha1', mfaSegredo).update(mensagem).digest();
+    const deslocamento = digest[digest.length - 1] & 0x0f;
+    const valor =
+      (digest.readUInt32BE(deslocamento) & 0x7fffffff) % 1000000;
+
+    return valor.toString().padStart(6, '0');
+  }
+
+  private validarCodigoMfa(mfaSegredo: string, codigoMfa: string, instanteMs: number): boolean {
+    const codigoInformado = codigoMfa.trim();
+    if (!/^\d{6}$/.test(codigoInformado)) {
+      return false;
+    }
+
+    for (const deslocamento of [-30000, 0, 30000]) {
+      const codigoEsperado = this.gerarCodigoMfa(mfaSegredo, instanteMs + deslocamento);
+      const informado = Buffer.from(codigoInformado);
+      const esperado = Buffer.from(codigoEsperado);
+      if (crypto.timingSafeEqual(informado, esperado)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   // ============================================================================
@@ -190,12 +215,19 @@ export class AutenticacaoService {
       throw new Error(`O perfil '${nomeNormalizado}' já está cadastrado.`);
     }
 
+    const permissoes = dados.permissoes ? [...new Set(dados.permissoes)] : [];
+    for (const chavePermissao of permissoes) {
+      if (!(await this.repo.buscarPermissaoPorChave(chavePermissao))) {
+        throw new Error(`A permissão '${chavePermissao}' não existe.`);
+      }
+    }
+
     const novoPerfil: PerfilAcesso = {
       id: dados.id || crypto.randomUUID(),
       nome: nomeNormalizado,
       descricao: dados.descricao || '',
       privilegiado: Boolean(dados.privilegiado),
-      permissoes: dados.permissoes ? [...dados.permissoes] : [],
+      permissoes,
       criadoEm: new Date(),
     };
 
@@ -226,6 +258,52 @@ export class AutenticacaoService {
     return this.repo.salvarPerfil(perfil);
   }
 
+  public async substituirPermissoesDoPerfil(
+    perfilId: string,
+    chavesPermissao: string[],
+    solicitanteUsuarioId: string
+  ): Promise<PerfilAcesso> {
+    await this.exigirPermissao(solicitanteUsuarioId, 'perfis:administrar');
+
+    const perfil = await this.repo.buscarPerfilPorId(perfilId);
+    if (!perfil) {
+      throw new Error('Perfil não encontrado.');
+    }
+
+    const permissoes = [...new Set(chavesPermissao)];
+    for (const chavePermissao of permissoes) {
+      if (!(await this.repo.buscarPermissaoPorChave(chavePermissao))) {
+        throw new Error(`A permissão '${chavePermissao}' não existe.`);
+      }
+    }
+
+    perfil.permissoes = permissoes;
+    return this.repo.salvarPerfil(perfil);
+  }
+
+  public async listarPerfis(solicitanteUsuarioId: string): Promise<PerfilAcesso[]> {
+    await this.exigirPermissao(solicitanteUsuarioId, 'perfis:administrar');
+    return this.repo.listarPerfis();
+  }
+
+  public async listarPermissoes(solicitanteUsuarioId: string): Promise<PermissaoAcesso[]> {
+    await this.exigirPermissao(solicitanteUsuarioId, 'perfis:administrar');
+    return this.repo.listarPermissoes();
+  }
+
+  public async listarUsuariosDaOrganizacao(
+    solicitanteUsuarioId: string
+  ): Promise<UsuarioSistema[]> {
+    await this.exigirPermissao(solicitanteUsuarioId, 'usuarios:administrar');
+
+    const solicitante = await this.repo.buscarUsuarioPorId(solicitanteUsuarioId);
+    if (!solicitante || !solicitante.ativo) {
+      throw new Error('Usuário solicitante inválido.');
+    }
+
+    return this.repo.listarUsuariosPorOrganizacao(solicitante.organizacaoId);
+  }
+
   // ============================================================================
   // Administração de Usuários e Alteração de Senha (CA-1 e CA-5)
   // ============================================================================
@@ -245,7 +323,7 @@ export class AutenticacaoService {
       mfaSegredo?: string;
     },
     solicitanteUsuarioId?: string
-  ): Promise<Omit<UsuarioSistema, 'senhaHash'> & { mfaSegredoGerado?: string }> {
+  ): Promise<Omit<UsuarioSistema, 'senhaHash' | 'mfaSegredo'> & { mfaSegredoGerado?: string }> {
     if (solicitanteUsuarioId) {
       await this.exigirPermissao(solicitanteUsuarioId, 'usuarios:administrar');
     }
@@ -271,9 +349,10 @@ export class AutenticacaoService {
 
     // Perfis privilegiados possuem MFA habilitado obrigatoriamente (CA-2)
     const exigirMfa = perfil.privilegiado || Boolean(dados.mfaHabilitado);
-    const mfaSegredo = exigirMfa
-      ? dados.mfaSegredo || crypto.randomBytes(16).toString('hex')
+    const segredoMfaGerado = exigirMfa && !dados.mfaSegredo
+      ? crypto.randomBytes(20).toString('hex')
       : null;
+    const mfaSegredo = exigirMfa ? dados.mfaSegredo || segredoMfaGerado : null;
 
     const novoUsuario: UsuarioSistema = {
       id: dados.id || crypto.randomUUID(),
@@ -291,10 +370,10 @@ export class AutenticacaoService {
     };
 
     const salvo = await this.repo.salvarUsuario(novoUsuario);
-    const { senhaHash: _, ...usuarioSemHash } = salvo;
+    const { senhaHash: _, mfaSegredo: __, ...usuarioSemDadosSensíveis } = salvo;
     return {
-      ...usuarioSemHash,
-      ...(mfaSegredo ? { mfaSegredoGerado: mfaSegredo } : {}),
+      ...usuarioSemDadosSensíveis,
+      ...(segredoMfaGerado ? { mfaSegredoGerado: segredoMfaGerado } : {}),
     };
   }
 
@@ -433,8 +512,7 @@ export class AutenticacaoService {
       throw new Error('Configuração de MFA ausente para este usuário.');
     }
 
-    const codigoEsperado = this.gerarCodigoMfa(usuario.mfaSegredo);
-    if (!codigoMfa || codigoMfa.trim() !== codigoEsperado) {
+    if (!sessao.requerMfa || !this.validarCodigoMfa(usuario.mfaSegredo, codigoMfa || '', agora.getTime())) {
       usuario.tentativasFalhas += 1;
       if (usuario.tentativasFalhas >= this.maxTentativasLogin) {
         usuario.bloqueadoAte = new Date(agora.getTime() + this.tempoBloqueioMs);
@@ -477,12 +555,6 @@ export class AutenticacaoService {
     }
 
     // Impede que perfis privilegiados acessem recursos antes de concluir o MFA (CA-2)
-    if (sessao.requerMfa && !sessao.mfaVerificado) {
-      throw new Error(
-        'Autenticação multifator (MFA) pendente. Conclua a verificação MFA para acessar.'
-      );
-    }
-
     const usuario = await this.repo.buscarUsuarioPorId(sessao.usuarioId);
     if (!usuario || !usuario.ativo) {
       throw new Error('Usuário inativo ou inexistente.');
@@ -491,6 +563,12 @@ export class AutenticacaoService {
     const perfil = await this.repo.buscarPerfilPorId(usuario.perfilId);
     if (!perfil) {
       throw new Error('Perfil de usuário não encontrado.');
+    }
+
+    if ((sessao.requerMfa || perfil.privilegiado) && !sessao.mfaVerificado) {
+      throw new Error(
+        'Autenticação multifator (MFA) pendente. Conclua a verificação MFA para acessar.'
+      );
     }
 
     return { sessao, usuario, perfil };
@@ -509,6 +587,27 @@ export class AutenticacaoService {
 
     const sessoes = await this.repo.listarSessoesPorUsuario(usuarioAlvoId);
     return sessoes.filter((s) => s.ativa);
+  }
+
+  public async encerrarSessoesDoUsuario(
+    usuarioAlvoId: string,
+    solicitanteUsuarioId: string
+  ): Promise<SessaoUsuario[]> {
+    if (usuarioAlvoId !== solicitanteUsuarioId) {
+      await this.exigirPermissao(solicitanteUsuarioId, 'sessoes:administrar');
+    }
+
+    const sessoes = await this.repo.listarSessoesPorUsuario(usuarioAlvoId);
+    const ativas = sessoes.filter((sessao) => sessao.ativa);
+    const encerradas = await Promise.all(
+      ativas.map((sessao) => {
+        sessao.ativa = false;
+        sessao.encerradoEm = new Date();
+        return this.repo.salvarSessao(sessao);
+      }),
+    );
+
+    return encerradas;
   }
 
   /**

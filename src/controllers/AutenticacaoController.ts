@@ -1,5 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import { AutenticacaoService } from '../services/AutenticacaoService';
+import { SessaoUsuario, UsuarioSistema } from '../models/AutenticacaoModel';
+
+function usuarioSemDadosSensíveis(usuario: UsuarioSistema) {
+  const { senhaHash: _senhaHash, mfaSegredo: _mfaSegredo, ...dados } = usuario;
+  return dados;
+}
+
+function sessaoSemToken(sessao: SessaoUsuario) {
+  const { token: _token, ...dados } = sessao;
+  return dados;
+}
 
 /**
  * Extensão da requisição Express para armazenar dados da sessão autenticada
@@ -140,7 +151,7 @@ export class AutenticacaoController {
 
       res.status(200).json({
         sucesso: true,
-        dados: sessao,
+        dados: sessaoSemToken(sessao),
       });
     } catch (erro: any) {
       const bloqueado = erro.message?.toLowerCase().includes('bloquead');
@@ -158,13 +169,12 @@ export class AutenticacaoController {
     try {
       const token = req.tokenSessao!;
       const { sessao, usuario, perfil } = await this.authService.validarSessaoAtiva(token);
-      const { senhaHash: _, ...usuarioSemHash } = usuario;
 
       res.status(200).json({
         sucesso: true,
         dados: {
-          sessao,
-          usuario: usuarioSemHash,
+          sessao: sessaoSemToken(sessao),
+          usuario: usuarioSemDadosSensíveis(usuario),
           perfil,
         },
       });
@@ -188,7 +198,7 @@ export class AutenticacaoController {
 
       res.status(200).json({
         sucesso: true,
-        dados: sessaoEncerrada,
+        dados: sessaoSemToken(sessaoEncerrada),
       });
     } catch (erro: any) {
       res.status(400).json({
@@ -213,7 +223,7 @@ export class AutenticacaoController {
 
       res.status(200).json({
         sucesso: true,
-        dados: sessaoEncerrada,
+        dados: sessaoSemToken(sessaoEncerrada),
       });
     } catch (erro: any) {
       const status = erro.message?.includes('Acesso negado') ? 403 : 400;
@@ -270,6 +280,101 @@ export class AutenticacaoController {
         sucesso: false,
         erro: erro.message,
       });
+    }
+  };
+
+  public listarUsuarios = async (req: RequisicaoAutenticada, res: Response): Promise<void> => {
+    try {
+      const usuarios = await this.authService.listarUsuariosDaOrganizacao(
+        req.usuarioAutenticadoId!,
+      );
+      res.status(200).json({
+        sucesso: true,
+        dados: usuarios.map(usuarioSemDadosSensíveis),
+      });
+    } catch (erro: any) {
+      const status = erro.message?.includes('Acesso negado') ? 403 : 400;
+      res.status(status).json({ sucesso: false, erro: erro.message });
+    }
+  };
+
+  public listarPerfis = async (req: RequisicaoAutenticada, res: Response): Promise<void> => {
+    try {
+      const perfis = await this.authService.listarPerfis(req.usuarioAutenticadoId!);
+      res.status(200).json({ sucesso: true, dados: perfis });
+    } catch (erro: any) {
+      const status = erro.message?.includes('Acesso negado') ? 403 : 400;
+      res.status(status).json({ sucesso: false, erro: erro.message });
+    }
+  };
+
+  public listarPermissoes = async (req: RequisicaoAutenticada, res: Response): Promise<void> => {
+    try {
+      const permissoes = await this.authService.listarPermissoes(req.usuarioAutenticadoId!);
+      res.status(200).json({ sucesso: true, dados: permissoes });
+    } catch (erro: any) {
+      const status = erro.message?.includes('Acesso negado') ? 403 : 400;
+      res.status(status).json({ sucesso: false, erro: erro.message });
+    }
+  };
+
+  public substituirPermissoesDoPerfil = async (
+    req: RequisicaoAutenticada,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const permissoes = await this.authService.substituirPermissoesDoPerfil(
+        String(req.params.perfilId),
+        req.body.permissoes,
+        req.usuarioAutenticadoId!,
+      );
+      res.status(200).json({ sucesso: true, dados: permissoes });
+    } catch (erro: any) {
+      const status = erro.message?.includes('Acesso negado') ? 403 : 400;
+      res.status(status).json({ sucesso: false, erro: erro.message });
+    }
+  };
+
+  public listarSessoes = async (req: RequisicaoAutenticada, res: Response): Promise<void> => {
+    try {
+      const usuarioAlvoId =
+        typeof req.query.usuarioId === 'string'
+          ? req.query.usuarioId
+          : req.usuarioAutenticadoId!;
+      const sessoes = await this.authService.listarSessoesAtivas(
+        usuarioAlvoId,
+        req.usuarioAutenticadoId!,
+      );
+      res.status(200).json({
+        sucesso: true,
+        dados: sessoes.map(sessaoSemToken),
+      });
+    } catch (erro: any) {
+      const status = erro.message?.includes('Acesso negado') ? 403 : 400;
+      res.status(status).json({ sucesso: false, erro: erro.message });
+    }
+  };
+
+  public encerrarTodasSessoes = async (
+    req: RequisicaoAutenticada,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const usuarioAlvoId =
+        typeof req.body.usuarioId === 'string'
+          ? req.body.usuarioId
+          : req.usuarioAutenticadoId!;
+      const sessoes = await this.authService.encerrarSessoesDoUsuario(
+        usuarioAlvoId,
+        req.usuarioAutenticadoId!,
+      );
+      res.status(200).json({
+        sucesso: true,
+        dados: sessoes.map(sessaoSemToken),
+      });
+    } catch (erro: any) {
+      const status = erro.message?.includes('Acesso negado') ? 403 : 400;
+      res.status(status).json({ sucesso: false, erro: erro.message });
     }
   };
 }
