@@ -134,6 +134,9 @@ import { criarRetencaoCreditoParcelamentoRouter } from './routes/retencaoCredito
 import { GuiaDemonstrativoFiscalService } from './services/GuiaDemonstrativoFiscalService';
 import { GuiaDemonstrativoFiscalController } from './controllers/GuiaDemonstrativoFiscalController';
 import { criarGuiaDemonstrativoFiscalRouter } from './routes/guiaDemonstrativoFiscalRoutes';
+import { DivergenciaFiscalContabilService } from './services/DivergenciaFiscalContabilService';
+import { DivergenciaFiscalContabilController } from './controllers/DivergenciaFiscalContabilController';
+import { criarDivergenciaFiscalContabilRouter } from './routes/divergenciaFiscalContabilRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -199,6 +202,7 @@ export function criarApp(): {
   retencaoCreditoParcelamentoRepo: InMemoryRetencaoCreditoParcelamentoRepository;
   retencaoCreditoParcelamentoService: RetencaoCreditoParcelamentoService;
   guiaDemonstrativoFiscalService: GuiaDemonstrativoFiscalService;
+  divergenciaFiscalContabilService: DivergenciaFiscalContabilService;
 } {
   const app = express();
 
@@ -453,6 +457,12 @@ export function criarApp(): {
   const guiaDemonstrativoFiscalController =
     new GuiaDemonstrativoFiscalController(guiaDemonstrativoFiscalService);
 
+  // 32. Módulo Divergências Fiscais e Contábeis (SPEC-3.10)
+  const divergenciaFiscalContabilService =
+    new DivergenciaFiscalContabilService();
+  const divergenciaFiscalContabilController =
+    new DivergenciaFiscalContabilController(divergenciaFiscalContabilService);
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -504,6 +514,10 @@ export function criarApp(): {
   app.use(
     '/api',
     criarGuiaDemonstrativoFiscalRouter(guiaDemonstrativoFiscalController)
+  );
+  app.use(
+    '/api',
+    criarDivergenciaFiscalContabilRouter(divergenciaFiscalContabilController)
   );
 
   return {
@@ -567,6 +581,7 @@ export function criarApp(): {
     retencaoCreditoParcelamentoRepo,
     retencaoCreditoParcelamentoService,
     guiaDemonstrativoFiscalService,
+    divergenciaFiscalContabilService,
   };
 }
 
