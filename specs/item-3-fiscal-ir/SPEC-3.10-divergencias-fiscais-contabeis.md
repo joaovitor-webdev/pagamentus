@@ -63,6 +63,7 @@ Esta especificação define o **mecanismo de conferência e alerta de divergênc
 - Modelos, serviço, controller e rotas em `src/models/DivergenciaFiscalContabilModel.ts`, `src/services/DivergenciaFiscalContabilService.ts`, `src/controllers/DivergenciaFiscalContabilController.ts` e `src/routes/divergenciaFiscalContabilRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/divergenciasFiscaisContabeis.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/57
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
