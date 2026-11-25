@@ -58,6 +58,7 @@ Esta especificação define o **registro e consolidação de bens e direitos (im
 - Modelos, serviço, controller e rotas em `src/models/PatrimonioIrModel.ts`, `src/services/PatrimonioIrService.ts`, `src/controllers/PatrimonioIrController.ts` e `src/routes/patrimonioIrRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/bensDireitosDividasIr.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/62
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
