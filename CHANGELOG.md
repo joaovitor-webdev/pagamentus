@@ -54,6 +54,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-4.7] Tarefas e painel de obrigações (PR #70, Douglas Augusto): Gestão de tarefas de obrigações com responsável, prazo, prioridade, checklist, anexos e painel consolidado por status incluindo atrasadas (RF-062, RF-065).
 - [SPEC-4.8] Alertas de vencimento e atraso (PR #71, Douglas Augusto): Geração e registro de entrega de alertas de vencimento próximo e atraso por canais configurados com aviso auxiliar RB-009 (RF-063, RB-009).
 - [SPEC-4.9] Portal do cliente (PR #72, Douglas Augusto): Envio e consulta de documentos pelo cliente e abertura/acompanhamento de solicitações de atendimento isoladas por cliente (RF-066).
+- [SPEC-4.10] Organização, checklist e correções (PR #A definir, Douglas Augusto): Organização documental por cliente, exercício, competência, tipo e processo com busca/filtros, checklist, comentários, pedidos de correção e confirmação de recebimento (RF-067, RF-068).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
