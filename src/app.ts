@@ -173,6 +173,9 @@ import { criarIrpjCsllBaseAjustesRouter } from './routes/irpjCsllBaseAjustesRout
 import { IrpjObrigacoesDigitaisService } from './services/IrpjObrigacoesDigitaisService';
 import { IrpjObrigacoesDigitaisController } from './controllers/IrpjObrigacoesDigitaisController';
 import { criarIrpjObrigacoesDigitaisRouter } from './routes/irpjObrigacoesDigitaisRoutes';
+import { TarefaObrigacaoService } from './services/TarefaObrigacaoService';
+import { TarefaObrigacaoController } from './controllers/TarefaObrigacaoController';
+import { criarTarefaObrigacaoRouter } from './routes/tarefaObrigacaoRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -251,6 +254,7 @@ export function criarApp(): {
   documentoDeclaracaoIrService: DocumentoDeclaracaoIrService;
   irpjCsllBaseAjustesService: IrpjCsllBaseAjustesService;
   irpjObrigacoesDigitaisService: IrpjObrigacoesDigitaisService;
+  tarefaObrigacaoService: TarefaObrigacaoService;
 } {
   const app = express();
 
@@ -583,6 +587,12 @@ export function criarApp(): {
     irpjObrigacoesDigitaisService
   );
 
+  // 45. Módulo Tarefas e Painel de Obrigações (SPEC-4.7)
+  const tarefaObrigacaoService = new TarefaObrigacaoService();
+  const tarefaObrigacaoController = new TarefaObrigacaoController(
+    tarefaObrigacaoService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -672,6 +682,7 @@ export function criarApp(): {
     '/api',
     criarIrpjObrigacoesDigitaisRouter(irpjObrigacoesDigitaisController)
   );
+  app.use('/api', criarTarefaObrigacaoRouter(tarefaObrigacaoController));
 
   return {
     app,
@@ -747,6 +758,7 @@ export function criarApp(): {
     documentoDeclaracaoIrService,
     irpjCsllBaseAjustesService,
     irpjObrigacoesDigitaisService,
+    tarefaObrigacaoService,
   };
 }
 
