@@ -19,6 +19,7 @@ interface ObrigacaoRow {
   id: string;
   empresa_id: string;
   competencia?: string | null;
+  competencia_referencia?: string | null;
   tipo?: 'ENTREGA' | 'PAGAMENTO';
   titulo: string;
   vencimento: string;
@@ -178,6 +179,7 @@ export function ModuloObrigacoes({
                 <TableHead>Obrigação</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Vencimento</TableHead>
+                <TableHead>Competência</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
                 <TableHead>Responsável</TableHead>
                 <TableHead>Status</TableHead>
@@ -192,7 +194,14 @@ export function ModuloObrigacoes({
                     <TableCell className="font-medium">{o.titulo}</TableCell>
                     <TableCell><Badge variant="outline">{o.tipo || 'ENTREGA'}</Badge></TableCell>
                     <TableCell>{o.vencimento.slice(0, 10).split('-').reverse().join('/')}</TableCell>
-                    <TableCell className="text-right">{o.valor_guia != null ? Number(o.valor_guia).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}</TableCell>
+                    <TableCell>{o.competencia_referencia ? o.competencia_referencia.split('-').reverse().join('/') : '—'}</TableCell>
+                    <TableCell className="text-right">
+                      {o.valor_guia != null
+                        ? Number(o.valor_guia).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                        : ['DARF INSS (DCTFWeb)', 'DARF IRRF (Salários)', 'FGTS Digital'].includes(o.titulo)
+                          ? <span className="text-xs text-amber-700">Aguardando fechamento da folha</span>
+                          : '—'}
+                    </TableCell>
                     <TableCell>{o.responsavel_nome || 'Equipe Fiscal'}</TableCell>
                     <TableCell><Badge variant="outline" className={st.className}>{st.label}</Badge></TableCell>
                     <TableCell className="text-right">
