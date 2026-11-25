@@ -100,10 +100,17 @@ export function ModuloContabil({
       }
     }
 
+    const [anoStr, mesStr] = competencia.split('-');
+    const ultimoDia = new Date(Number(anoStr), Number(mesStr), 0).getDate();
+    const inicioMes = `${competencia}-01`;
+    const fimMes = `${competencia}-${String(ultimoDia).padStart(2, '0')}`;
+
     const { data: lancs } = await supabase
       .from('lancamentos_contabeis')
       .select('id, data_lancamento, historico, conta_debito_id, conta_credito_id, valor, origem, estornado')
       .eq('empresa_id', empresaId)
+      .gte('data_lancamento', inicioMes)
+      .lte('data_lancamento', fimMes)
       .order('data_lancamento', { ascending: false });
 
     if (lancs) setLancamentos(lancs as LancamentoRow[]);
