@@ -61,6 +61,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-5.12] Homologação, treinamento e implantação (PR #77, Pablo Eduardo): Guia de homologação, treinamento e implantação com cláusula obrigatória RB-010 e teste automatizado de prontidão (RB-010).
 - [SPEC-5.2] Painéis de indicadores — implementação (PR #78, Pablo Eduardo): API consolidada de indicadores (tarefas, faturamento, inadimplência, obrigações, fechamentos e produtividade) com filtro por período, estado vazio e controle de permissão (RF-072).
 - [SPEC-5.3] Relatórios em PDF, XLSX e CSV — implementação (PR #79, Pablo Eduardo): Exportação estruturada de relatórios em PDF, XLSX e CSV com controle de permissão por perfil (RF-071).
+- [SPEC-5.4] Exportação controlada e saída de dados — implementação (PR #A definir, Pablo Eduardo): Exportação em formatos abertos (JSON/CSV) com controle de permissão e trilha de auditoria com hash SHA-256 (RF-073, RNF-015).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
