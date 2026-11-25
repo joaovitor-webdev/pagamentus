@@ -188,6 +188,9 @@ import { criarOrganizacaoDocumentoRouter } from './routes/organizacaoDocumentoRo
 import { AcessoRetencaoConsentimentoService } from './services/AcessoRetencaoConsentimentoService';
 import { AcessoRetencaoConsentimentoController } from './controllers/AcessoRetencaoConsentimentoController';
 import { criarAcessoRetencaoConsentimentoRouter } from './routes/acessoRetencaoConsentimentoRoutes';
+import { PainelIndicadoresService } from './services/PainelIndicadoresService';
+import { PainelIndicadoresController } from './controllers/PainelIndicadoresController';
+import { criarPainelIndicadoresRouter } from './routes/painelIndicadoresRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -271,6 +274,7 @@ export function criarApp(): {
   portalClienteService: PortalClienteService;
   organizacaoDocumentoService: OrganizacaoDocumentoService;
   acessoRetencaoConsentimentoService: AcessoRetencaoConsentimentoService;
+  painelIndicadoresService: PainelIndicadoresService;
 } {
   const app = express();
 
@@ -635,6 +639,12 @@ export function criarApp(): {
       acessoRetencaoConsentimentoService
     );
 
+  // 50. Módulo Painéis de Indicadores (SPEC-5.2)
+  const painelIndicadoresService = new PainelIndicadoresService();
+  const painelIndicadoresController = new PainelIndicadoresController(
+    painelIndicadoresService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -737,6 +747,7 @@ export function criarApp(): {
       acessoRetencaoConsentimentoController
     )
   );
+  app.use('/api', criarPainelIndicadoresRouter(painelIndicadoresController));
 
   return {
     app,
@@ -817,6 +828,7 @@ export function criarApp(): {
     portalClienteService,
     organizacaoDocumentoService,
     acessoRetencaoConsentimentoService,
+    painelIndicadoresService,
   };
 }
 
