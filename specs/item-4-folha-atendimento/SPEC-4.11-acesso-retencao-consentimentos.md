@@ -60,6 +60,7 @@ Esta especificação define o **controle de acesso, download, compartilhamento, 
 - Modelos, serviço, controller e rotas em `src/models/AcessoRetencaoConsentimentoModel.ts`, `src/services/AcessoRetencaoConsentimentoService.ts`, `src/controllers/AcessoRetencaoConsentimentoController.ts` e `src/routes/acessoRetencaoConsentimentoRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/acessoRetencaoConsentimentos.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/74
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
