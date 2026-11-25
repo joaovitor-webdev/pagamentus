@@ -176,6 +176,9 @@ import { criarIrpjObrigacoesDigitaisRouter } from './routes/irpjObrigacoesDigita
 import { TarefaObrigacaoService } from './services/TarefaObrigacaoService';
 import { TarefaObrigacaoController } from './controllers/TarefaObrigacaoController';
 import { criarTarefaObrigacaoRouter } from './routes/tarefaObrigacaoRoutes';
+import { AlertaVencimentoService } from './services/AlertaVencimentoService';
+import { AlertaVencimentoController } from './controllers/AlertaVencimentoController';
+import { criarAlertaVencimentoRouter } from './routes/alertaVencimentoRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -255,6 +258,7 @@ export function criarApp(): {
   irpjCsllBaseAjustesService: IrpjCsllBaseAjustesService;
   irpjObrigacoesDigitaisService: IrpjObrigacoesDigitaisService;
   tarefaObrigacaoService: TarefaObrigacaoService;
+  alertaVencimentoService: AlertaVencimentoService;
 } {
   const app = express();
 
@@ -593,6 +597,12 @@ export function criarApp(): {
     tarefaObrigacaoService
   );
 
+  // 46. Módulo Alertas de Vencimento e Atraso (SPEC-4.8)
+  const alertaVencimentoService = new AlertaVencimentoService();
+  const alertaVencimentoController = new AlertaVencimentoController(
+    alertaVencimentoService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -683,6 +693,7 @@ export function criarApp(): {
     criarIrpjObrigacoesDigitaisRouter(irpjObrigacoesDigitaisController)
   );
   app.use('/api', criarTarefaObrigacaoRouter(tarefaObrigacaoController));
+  app.use('/api', criarAlertaVencimentoRouter(alertaVencimentoController));
 
   return {
     app,
@@ -759,6 +770,7 @@ export function criarApp(): {
     irpjCsllBaseAjustesService,
     irpjObrigacoesDigitaisService,
     tarefaObrigacaoService,
+    alertaVencimentoService,
   };
 }
 
