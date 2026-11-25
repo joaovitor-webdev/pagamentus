@@ -209,6 +209,9 @@ import { criarImportacaoExportacaoValidadaRouter } from './routes/importacaoExpo
 import { ObservabilidadeMonitoramentoService } from './services/ObservabilidadeMonitoramentoService';
 import { ObservabilidadeMonitoramentoController } from './controllers/ObservabilidadeMonitoramentoController';
 import { criarObservabilidadeMonitoramentoRouter } from './routes/observabilidadeMonitoramentoRoutes';
+import { DesempenhoCargaService } from './services/DesempenhoCargaService';
+import { DesempenhoCargaController } from './controllers/DesempenhoCargaController';
+import { criarDesempenhoCargaRouter } from './routes/desempenhoCargaRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -299,6 +302,7 @@ export function criarApp(): {
   apiDocumentadaService: ApiDocumentadaService;
   importacaoExportacaoValidadaService: ImportacaoExportacaoValidadaService;
   observabilidadeMonitoramentoService: ObservabilidadeMonitoramentoService;
+  desempenhoCargaService: DesempenhoCargaService;
 } {
   const app = express();
 
@@ -709,6 +713,12 @@ export function criarApp(): {
       observabilidadeMonitoramentoService
     );
 
+  // 57. Módulo Desempenho e Carga (SPEC-5.9)
+  const desempenhoCargaService = new DesempenhoCargaService();
+  const desempenhoCargaController = new DesempenhoCargaController(
+    desempenhoCargaService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -834,6 +844,7 @@ export function criarApp(): {
       observabilidadeMonitoramentoController
     )
   );
+  app.use('/api', criarDesempenhoCargaRouter(desempenhoCargaController));
 
   return {
     app,
@@ -921,6 +932,7 @@ export function criarApp(): {
     apiDocumentadaService,
     importacaoExportacaoValidadaService,
     observabilidadeMonitoramentoService,
+    desempenhoCargaService,
   };
 }
 
