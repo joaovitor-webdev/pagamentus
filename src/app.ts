@@ -167,6 +167,9 @@ import { criarPendenciaStatusIrRouter } from './routes/pendenciaStatusIrRoutes';
 import { DocumentoDeclaracaoIrService } from './services/DocumentoDeclaracaoIrService';
 import { DocumentoDeclaracaoIrController } from './controllers/DocumentoDeclaracaoIrController';
 import { criarDocumentoDeclaracaoIrRouter } from './routes/documentoDeclaracaoIrRoutes';
+import { IrpjCsllBaseAjustesService } from './services/IrpjCsllBaseAjustesService';
+import { IrpjCsllBaseAjustesController } from './controllers/IrpjCsllBaseAjustesController';
+import { criarIrpjCsllBaseAjustesRouter } from './routes/irpjCsllBaseAjustesRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -243,6 +246,7 @@ export function criarApp(): {
   comparacaoTributacaoIrService: ComparacaoTributacaoIrService;
   pendenciaStatusIrService: PendenciaStatusIrService;
   documentoDeclaracaoIrService: DocumentoDeclaracaoIrService;
+  irpjCsllBaseAjustesService: IrpjCsllBaseAjustesService;
 } {
   const app = express();
 
@@ -563,6 +567,12 @@ export function criarApp(): {
     documentoDeclaracaoIrService
   );
 
+  // 43. Módulo IRPJ/CSLL: Base e Ajustes (SPEC-3.21)
+  const irpjCsllBaseAjustesService = new IrpjCsllBaseAjustesService();
+  const irpjCsllBaseAjustesController = new IrpjCsllBaseAjustesController(
+    irpjCsllBaseAjustesService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -647,6 +657,7 @@ export function criarApp(): {
     '/api',
     criarDocumentoDeclaracaoIrRouter(documentoDeclaracaoIrController)
   );
+  app.use('/api', criarIrpjCsllBaseAjustesRouter(irpjCsllBaseAjustesController));
 
   return {
     app,
@@ -720,6 +731,7 @@ export function criarApp(): {
     comparacaoTributacaoIrService,
     pendenciaStatusIrService,
     documentoDeclaracaoIrService,
+    irpjCsllBaseAjustesService,
   };
 }
 
