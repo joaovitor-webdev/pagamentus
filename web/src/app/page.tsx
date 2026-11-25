@@ -5,6 +5,7 @@ import { consultarHealthcheck, HealthResponse } from '@/lib/api';
 import { ModuloContabil } from '@/components/ModuloContabil';
 import { ModuloFolha } from '@/components/ModuloFolha';
 import { ModuloFiscalIR } from '@/components/ModuloFiscalIR';
+import { ModuloObrigacoes } from '@/components/ModuloObrigacoes';
 import { ModuloAuditoria } from '@/components/ModuloAuditoria';
 import { ModuloCadastros } from '@/components/ModuloCadastros';
 import { ModuloFinanceiro } from '@/components/ModuloFinanceiro';
@@ -397,48 +398,7 @@ export default function HomePage() {
           {moduloAtivo === 'cadastros' && <ModuloCadastros />}
 
           {moduloAtivo === 'obrigacoes' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Painel de Obrigações Acessórias</CardTitle>
-                <CardDescription>
-                  Acompanhamento de entregas por empresa e competência. Alertas são auxiliares.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Obrigação</TableHead>
-                      <TableHead>Empresa</TableHead>
-                      <TableHead>Vencimento</TableHead>
-                      <TableHead>Responsável</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {obrigacoes.map((ob) => (
-                      <TableRow key={ob.id} className="hover:bg-slate-50/80 transition-colors">
-                        <TableCell className="font-medium">{ob.titulo}</TableCell>
-                        <TableCell>{ob.competencia}</TableCell>
-                        <TableCell>{ob.vencimento}</TableCell>
-                        <TableCell>—</TableCell>
-                        <TableCell>
-                          {ob.status === 'ENTREGUE' ? (
-                            <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> Entregue
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
-                              <AlertTriangle className="w-3 h-3 mr-1" /> {ob.status}
-                            </Badge>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+            <ModuloObrigacoes empresaId={empresaSelecionada.id} competencia={competencia} />
           )}
 
           {moduloAtivo === 'parametros' && <ModuloParametros perfilAtivo={perfilAtivo} />}
