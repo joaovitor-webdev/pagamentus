@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -12,44 +12,60 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ShieldCheck } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
-const LOGS_AUDITORIA = [
-  {
-    id: '1',
-    dataHora: '25/11/2026 01:40:12',
-    usuario: 'Carlos Eduardo (Contador)',
-    modulo: 'CONTABIL',
-    acao: 'LANCAMENTO_CRIADO',
-    detalhes: 'Partida dobrada registrada (Competência 11/2026)',
-  },
-  {
-    id: '2',
-    dataHora: '25/11/2026 01:42:05',
-    usuario: 'Mariana Silva (RH/DP)',
-    modulo: 'FOLHA_RH',
-    acao: 'CONSULTA_SALARIAL',
-    detalhes: 'Acesso autorizado aos dados da folha 11/2026',
-  },
-  {
-    id: '3',
-    dataHora: '25/11/2026 01:45:30',
-    usuario: 'Sistema (Observabilidade)',
-    modulo: 'SEGURANCA',
-    acao: 'MASCARAMENTO_LGPD',
-    detalhes: 'Dados sensíveis protegidos contra exposição em logs (RNF-014)',
-  },
-];
+interface LogAuditoriaRow {
+  id: string;
+  data_hora: string;
+  usuario_id: string | null;
+  modulo: string;
+  acao: string;
+  entidade: string;
+  depois: { justificativa?: string } | null;
+}
+
+const ACOES_TRADUZIDAS: Record<string, string> = {
+  REABRIR_COMPETENCIA: 'Reabertura de competência',
+  CONFERENCIA_CONTADOR: 'Conferência de parâmetros',
+  INSERT: 'Inclusão',
+  UPDATE: 'Alteração',
+  DELETE: 'Exclusão',
+};
 
 export function ModuloAuditoria() {
+  const [logs, setLogs] = useState<LogAuditoriaRow[]>([]);
+  const [usuariosMap, setUsuariosMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const supabase = createClient();
+    Promise.all([
+      supabase
+        .from('auditoria')
+        .select('id, data_hora, usuario_id, modulo, acao, entidade, depois')
+        .order('data_hora', { ascending: false })
+        .limit(25),
+      supabase.from('usuarios_perfis').select('usuario_id, nome'),
+    ]).then(([audRes, perfRes]) => {
+      if (audRes.data) setLogs(audRes.data as LogAuditoriaRow[]);
+      if (perfRes.data) {
+        const map: Record<string, string> = {};
+        for (const p of perfRes.data) {
+          map[p.usuario_id] = p.nome;
+        }
+        setUsuariosMap(map);
+      }
+    });
+  }, []);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-blue-600" />
-          Trilha de Auditoria &amp; LGPD (RNF-002 / RNF-004 / RNF-014)
+          Trilha de Auditoria &amp; LGPD
         </CardTitle>
         <CardDescription>
-          Registro imutável de ações relevantes com usuário, horário, módulo e resultado, sem exposição de segredos.
+          Registros imutáveis gravados automaticamente no PostgreSQL.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -60,21 +76,43 @@ export function ModuloAuditoria() {
               <TableHead>Usuário</TableHead>
               <TableHead>Módulo</TableHead>
               <TableHead>Ação</TableHead>
-              <TableHead>Detalhes</TableHead>
+              <TableHead>Justificativa / Entidade</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {LOGS_AUDITORIA.map((log) => (
-              <TableRow key={log.id}>
-                <TableCell className="text-xs font-mono">{log.dataHora}</TableCell>
-                <TableCell className="font-medium">{log.usuario}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary">{log.modulo}</Badge>
+            {logs.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-sm text-slate-500">
+                  Nenhum registro de auditoria visível para este perfil.
                 </TableCell>
-                <TableCell className="text-xs font-mono">{log.acao}</TableCell>
-                <TableCell className="text-xs text-slate-600">{log.detalhes}</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              logs.map((log) => (
+                <TableRow key={log.id}>
+                  <TableCell className="text-xs font-mono">
+                    {new Date(log.data_hora).toLocaleString('pt-BR')}
+                  </TableCell>
+                  <TableCell className="text-xs font-medium">
+                    {(log.usuario_id && usuariosMap[log.usuario_id]) || 'Sistema'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{log.modulo}</Badge>
+                  </TableCell>
+                  <TableCell className="text-xs">
+                    {ACOES_TRADUZIDAS[log.acao] || log.acao}
+                  </TableCell>
+                  <TableCell className="text-xs text-slate-600">
+                    {log.depois?.justificativa ? (
+                      <span className="font-medium text-amber-800">
+                        {log.depois.justificativa}
+                      </span>
+                    ) : (
+                      log.entidade
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </CardContent>

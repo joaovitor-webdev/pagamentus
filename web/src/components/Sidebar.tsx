@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { podeAcessarModulo, PapelUsuario } from '@/lib/permissoes';
 
 export type ModuloId =
   | 'dashboard'
@@ -26,6 +27,7 @@ export type ModuloId =
   | 'folha'
   | 'fiscal'
   | 'obrigacoes'
+  | 'parametros'
   | 'auditoria';
 
 interface SidebarProps {
@@ -36,6 +38,7 @@ interface SidebarProps {
   mobileAberto: boolean;
   onFecharMobile: () => void;
   usuarioNome: string;
+  usuarioPapel: string;
   onLogout: () => void;
 }
 
@@ -52,6 +55,7 @@ const ITENS_MENU: Array<{
   { id: 'fiscal', label: 'Fiscal & Imposto de Renda', grupo: 'Tributário', icon: Receipt },
   { id: 'obrigacoes', label: 'Obrigações & Prazos', grupo: 'Tributário', icon: CalendarClock },
   { id: 'cadastros', label: 'Cadastros & Documentos', grupo: 'Gestão', icon: Building2 },
+  { id: 'parametros', label: 'Parâmetros Legais', grupo: 'Governança', icon: FileSpreadsheet },
   { id: 'auditoria', label: 'Relatórios & Auditoria', grupo: 'Governança', icon: ShieldCheck },
 ];
 
@@ -63,6 +67,7 @@ export function Sidebar({
   mobileAberto,
   onFecharMobile,
   usuarioNome,
+  usuarioPapel,
   onLogout,
 }: SidebarProps) {
   return (
@@ -117,9 +122,11 @@ export function Sidebar({
           </button>
         </div>
 
-        {/* Navegação */}
+        {/* Navegação filtrada pelo papel real do usuário */}
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-          {ITENS_MENU.map((item) => {
+          {ITENS_MENU.filter((item) =>
+            podeAcessarModulo((usuarioPapel as PapelUsuario) || 'CLIENTE', item.id as never)
+          ).map((item) => {
             const Icon = item.icon;
             const ativo = moduloAtivo === item.id;
             return (
@@ -164,7 +171,7 @@ export function Sidebar({
             {!recolhido && (
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-slate-800 truncate">{usuarioNome}</p>
-                <p className="text-[11px] text-slate-400 truncate">Sessão Ativa</p>
+                <p className="text-[11px] text-blue-600 font-medium truncate">{usuarioPapel}</p>
               </div>
             )}
             <button
