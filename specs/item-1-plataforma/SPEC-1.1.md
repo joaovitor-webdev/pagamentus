@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 1 – Plataforma | @joaovitor-webdev | A definir | A definir | Fazendo |
+| 1 – Plataforma | @joaovitor-webdev | A definir | A definir | Revisando |
 
 ## 1. Contexto e objetivo
 Estabelecer a base estrutural, o versionamento e os padrões de documentação e contribuição do repositório do projeto, garantindo conformidade com a metodologia Spec-Driven Development (SDD) e assegurando a integridade e governança da branch `main`.
@@ -45,7 +45,7 @@ Estabelecer a base estrutural, o versionamento e os padrões de documentação e
 - [x] Criar a especificação SPEC-1.1 preenchida em `specs/item-1-plataforma/SPEC-1.1.md`
 - [x] Configurar regras de proteção da branch `main` no repositório GitHub
 - [x] Atualizar `CHANGELOG.md` na seção `[Não lançado]`
-- [ ] Abrir Pull Request com o template padrão para validação do 4º período
+- [x] Abrir Pull Request com o template padrão para validação do 4º período
 
 ## 8. Dependências
 Nenhuma (spec fundacional).
@@ -61,6 +61,7 @@ Nenhuma (spec fundacional).
    - Confirmar se `allow_force_pushes` e `allow_deletions` estão como `false`.
 
 ## 10. Evidências (preencher ao concluir)
+- **PR:** https://github.com/joaovitor-webdev/pagamentus/pull/1 (mergeado; sem aprovação registrada na consulta ao GitHub).
 - **CA-1 (Estrutura e documentação):** Arquivos `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md` presentes na raiz e estrutura `specs/` com modelo oficial preservada.
 - **CA-2 e CA-3 (Proteção da main e exigência de revisão):**
   - Configuração ativa no GitHub (`GET /repos/joaovitor-webdev/pagamentus/branches/main/protection`):

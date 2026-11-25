@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/CuSU54R9 | Revisando |
+| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/CuSU54R9 | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define o **motor de cálculo tributário parametrizado e a geração de memória de cálculo detalhada e reproduzível** para tributos federais, estaduais e municipais, considerando regime, atividade, município/UF, período e tipo de operação (com regras parametrizadas de demonstração, sem caráter de tabela oficial).

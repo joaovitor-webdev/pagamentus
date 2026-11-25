@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @joaovitor-webdev | A definir | https://trello.com/c/fVr1VbaO | Revisando |
+| 2 – Contabilidade | @joaovitor-webdev | @joaovitor-webdev | https://trello.com/c/fVr1VbaO | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define a geração dos relatórios contábeis básicos — **Balancete de Verificação**, **Livro Razão**, **Livro Diário** e **livro/relatório auxiliar** — a partir dos lançamentos contábeis e do plano de contas da empresa. O objetivo é permitir a conferência dos saldos e da movimentação contábil de forma consistente com os lançamentos registrados no sistema.

@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @joaovitor-webdev | A definir | https://trello.com/c/SZg1MXdD | Revisando |
+| 2 – Contabilidade | @joaovitor-webdev | @joaovitor-webdev | https://trello.com/c/SZg1MXdD | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação complementa a `SPEC-2.7` e define a geração das demonstrações contábeis de síntese — **Balanço Patrimonial**, **DRE (Demonstração do Resultado do Exercício)**, **DFC (Demonstração dos Fluxos de Caixa)** quando aplicável e **DMPL/DLPA (Demonstração das Mutações do Patrimônio Líquido / Lucros ou Prejuízos Acumulados)** quando aplicável — a partir dos mesmos lançamentos contábeis e plano de contas da empresa, garantindo totais conferidos e consistentes entre si.

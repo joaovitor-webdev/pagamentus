@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 3A – Fiscal e tributos | Matheus Barbosa | A definir | A definir | Fazendo |
+| 3A – Fiscal e tributos | Matheus Barbosa | A definir | https://trello.com/c/n4uF6CZw | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define a preparação de guias e demonstrativos fiscais para conferência, deixando explícito quando uma guia ainda não foi transmitida. A geração para conferência não deve ser interpretada como transmissão automática quando não houver integração homologada.

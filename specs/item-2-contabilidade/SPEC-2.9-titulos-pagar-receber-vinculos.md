@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @joaovitor-webdev | A definir | https://trello.com/c/TeTxvWKP | Revisando |
+| 2 – Contabilidade | @joaovitor-webdev | @joaovitor-webdev | https://trello.com/c/TeTxvWKP | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define o cadastro de **títulos a pagar e a receber** com suas **parcelas, vencimentos, fornecedores/clientes, condições de pagamento e categorias**, bem como o registro de **anexos e vínculos** entre cada título, documento fiscal, lançamento contábil e comprovante. O objetivo é garantir rastreabilidade entre o contas a pagar/receber e os registros fiscais e contábeis da empresa.

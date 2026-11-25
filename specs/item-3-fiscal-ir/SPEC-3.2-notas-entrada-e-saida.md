@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/bPvrb2Ge | Revisando |
+| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/bPvrb2Ge | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define o **registro e controle de notas fiscais de entrada, saída e serviços**, contemplando **retenções, cancelamentos, devoluções e ajustes aplicáveis** vinculados à empresa, para manter o registro fiscal organizado e rastreável.

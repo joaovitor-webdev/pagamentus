@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/NLkJOXmL | Revisando |
+| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/NLkJOXmL | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define a **parametrização de regimes tributários e o controle de histórico de opção com vigência temporal** por empresa, contemplando Simples Nacional, Lucro Presumido, Lucro Real e outros enquadramentos aplicáveis, bem como anexos/faixas, atividades, segregação de receitas e parâmetros associados.

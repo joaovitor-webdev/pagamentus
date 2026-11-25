@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @joaovitor-webdev | A definir | https://trello.com/c/LbBBaKsb | Revisando |
+| 2 – Contabilidade | @joaovitor-webdev | @joaovitor-webdev | https://trello.com/c/LbBBaKsb | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação complementa a `SPEC-2.9` e define o controle de **pagamentos, recebimentos, baixas totais ou parciais, juros, multas, descontos, estornos e inadimplência** sobre as parcelas dos títulos a pagar e a receber da empresa. O objetivo é manter atualizado o saldo em aberto de cada parcela, o histórico de baixas/estornos e a identificação de parcelas em atraso.
