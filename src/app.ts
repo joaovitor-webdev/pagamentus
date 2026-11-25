@@ -197,6 +197,9 @@ import { criarRelatorioExportacaoRouter } from './routes/relatorioExportacaoRout
 import { ExportacaoControladaService } from './services/ExportacaoControladaService';
 import { ExportacaoControladaController } from './controllers/ExportacaoControladaController';
 import { criarExportacaoControladaRouter } from './routes/exportacaoControladaRoutes';
+import { RelatorioAuditoriaService } from './services/RelatorioAuditoriaService';
+import { RelatorioAuditoriaController } from './controllers/RelatorioAuditoriaController';
+import { criarRelatorioAuditoriaRouter } from './routes/relatorioAuditoriaRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -283,6 +286,7 @@ export function criarApp(): {
   painelIndicadoresService: PainelIndicadoresService;
   relatorioExportacaoService: RelatorioExportacaoService;
   exportacaoControladaService: ExportacaoControladaService;
+  relatorioAuditoriaService: RelatorioAuditoriaService;
 } {
   const app = express();
 
@@ -665,6 +669,12 @@ export function criarApp(): {
     exportacaoControladaService
   );
 
+  // 53. Módulo Relatórios de Auditoria (SPEC-5.5)
+  const relatorioAuditoriaService = new RelatorioAuditoriaService();
+  const relatorioAuditoriaController = new RelatorioAuditoriaController(
+    relatorioAuditoriaService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -776,6 +786,7 @@ export function criarApp(): {
     '/api',
     criarExportacaoControladaRouter(exportacaoControladaController)
   );
+  app.use('/api', criarRelatorioAuditoriaRouter(relatorioAuditoriaController));
 
   return {
     app,
@@ -859,6 +870,7 @@ export function criarApp(): {
     painelIndicadoresService,
     relatorioExportacaoService,
     exportacaoControladaService,
+    relatorioAuditoriaService,
   };
 }
 
