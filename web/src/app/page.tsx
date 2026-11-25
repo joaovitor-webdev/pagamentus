@@ -6,23 +6,24 @@ import { ModuloContabil } from '@/components/ModuloContabil';
 import { ModuloFolha } from '@/components/ModuloFolha';
 import { ModuloFiscalIR } from '@/components/ModuloFiscalIR';
 import { ModuloAuditoria } from '@/components/ModuloAuditoria';
+import { ModuloCadastros } from '@/components/ModuloCadastros';
+import { ModuloFinanceiro } from '@/components/ModuloFinanceiro';
+import { Sidebar, ModuloId } from '@/components/Sidebar';
 import { TelaLogin } from '@/components/TelaLogin';
 import {
   Building2,
   Calculator,
   FileText,
   Users,
-  ShieldCheck,
   CalendarClock,
   CheckCircle2,
   AlertTriangle,
   ArrowUpRight,
   Database,
+  Menu,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -89,6 +90,9 @@ export default function HomePage() {
     nome: string;
     perfil: string;
   } | null>(null);
+  const [moduloAtivo, setModuloAtivo] = useState<ModuloId>('dashboard');
+  const [sidebarRecolhida, setSidebarRecolhida] = useState(false);
+  const [mobileMenuAberto, setMobileMenuAberto] = useState(false);
   const [competencia, setCompetencia] = useState('2026-11');
   const [empresaSelecionada, setEmpresaSelecionada] = useState(EMPRESAS_FICTICIAS[0]);
   const [perfilAtivo, setPerfilAtivo] = useState('ADMINISTRADOR');
@@ -112,25 +116,34 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header Principal */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <div className="min-h-screen flex bg-slate-50">
+      <Sidebar
+        moduloAtivo={moduloAtivo}
+        onSelectModulo={setModuloAtivo}
+        recolhido={sidebarRecolhida}
+        onToggleRecolher={() => setSidebarRecolhida(!sidebarRecolhida)}
+        mobileAberto={mobileMenuAberto}
+        onFecharMobile={() => setMobileMenuAberto(false)}
+        usuarioNome={usuarioLogado.nome}
+        onLogout={() => setUsuarioLogado(null)}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header Contextual */}
+        <header className="bg-white/90 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-30 h-16 px-4 sm:px-6 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 text-white font-bold flex items-center justify-center shadow-sm">
-              PG
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-bold text-slate-900 text-base sm:text-lg leading-none">
-                  Pagamentus
-                </h1>
-                <Badge variant="secondary" className="text-xs">
-                  Next.js + Supabase
-                </Badge>
-              </div>
-              <p className="text-xs text-slate-500 hidden sm:block">
-                Sistema Integrado de Contabilidade, Fiscal e Imposto de Renda
+            <button
+              type="button"
+              onClick={() => setMobileMenuAberto(true)}
+              aria-label="Abrir menu"
+              className="lg:hidden p-2 rounded-md text-slate-600 hover:bg-slate-100"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="hidden sm:block">
+              <p className="text-xs text-slate-400">Empresa ativa</p>
+              <p className="text-sm font-semibold text-slate-800 truncate max-w-[240px]">
+                {empresaSelecionada.nome}
               </p>
             </div>
           </div>
@@ -140,7 +153,7 @@ export default function HomePage() {
               aria-label="Competência"
               value={competencia}
               onChange={(e) => setCompetencia(e.target.value)}
-              className="text-xs sm:text-sm border border-slate-300 rounded-md px-2 py-1.5 bg-blue-50 font-semibold text-blue-800"
+              className="text-xs sm:text-sm border border-blue-200 rounded-md px-2.5 py-1.5 bg-blue-50 font-semibold text-blue-800 transition-colors hover:bg-blue-100/70"
             >
               <option value="2026-11">Comp: 2026-11</option>
               <option value="2026-10">Comp: 2026-10</option>
@@ -154,7 +167,7 @@ export default function HomePage() {
                 const found = EMPRESAS_FICTICIAS.find((emp) => emp.id === e.target.value);
                 if (found) setEmpresaSelecionada(found);
               }}
-              className="text-xs sm:text-sm border border-slate-300 rounded-md px-2.5 py-1.5 bg-white text-slate-800"
+              className="text-xs sm:text-sm border border-slate-300 rounded-md px-2.5 py-1.5 bg-white text-slate-800 max-w-[170px] sm:max-w-none"
             >
               {EMPRESAS_FICTICIAS.map((emp) => (
                 <option key={emp.id} value={emp.id}>
@@ -167,7 +180,7 @@ export default function HomePage() {
               aria-label="Perfil RBAC"
               value={perfilAtivo}
               onChange={(e) => setPerfilAtivo(e.target.value)}
-              className="text-xs sm:text-sm border border-slate-300 rounded-md px-2.5 py-1.5 bg-slate-50 font-medium text-slate-700"
+              className="hidden md:block text-xs sm:text-sm border border-slate-300 rounded-md px-2.5 py-1.5 bg-slate-50 font-medium text-slate-700"
             >
               <option value="ADMINISTRADOR">Administrador</option>
               <option value="CONTADOR">Contador Responsável</option>
@@ -176,113 +189,132 @@ export default function HomePage() {
               <option value="CLIENTE_IR">Cliente Contribuinte IR</option>
             </select>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Conteúdo Principal */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner de Contexto da Empresa */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <div className="flex items-center gap-3">
-            <Building2 className="w-8 h-8 text-blue-600 shrink-0" />
-            <div>
-              <h2 className="font-semibold text-slate-900">{empresaSelecionada.nome}</h2>
-              <p className="text-xs text-slate-500">
-                Documento: {empresaSelecionada.cnpj} · Regime: {empresaSelecionada.regime} · UF:{' '}
-                {empresaSelecionada.uf}
-              </p>
+        {/* Área de Conteúdo */}
+        <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-6 transition-all duration-200">
+          {moduloAtivo === 'dashboard' && (
+            <div className="space-y-6">
+              {/* Banner de Contexto */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <Building2 className="w-8 h-8 text-blue-600 shrink-0" />
+                  <div>
+                    <h2 className="font-semibold text-slate-900">{empresaSelecionada.nome}</h2>
+                    <p className="text-xs text-slate-500">
+                      Documento: {empresaSelecionada.cnpj} · Regime: {empresaSelecionada.regime} · UF:{' '}
+                      {empresaSelecionada.uf}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    className={
+                      health?.status === 'UP'
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border-amber-200'
+                    }
+                  >
+                    <Database className="w-3 h-3 mr-1" />
+                    {health?.status === 'UP'
+                      ? `API Online (v${health.versao})`
+                      : 'Dados Fictícios Prontos'}
+                  </Badge>
+                  <a
+                    href="/api/docs"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center rounded-md text-xs font-medium border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-100 text-slate-800 transition-colors"
+                  >
+                    API Docs <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Cards Clicáveis (Atalhos para os Módulos) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card
+                  onClick={() => setModuloAtivo('folha')}
+                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
+                >
+                  <CardHeader className="pb-2">
+                    <CardDescription className="flex items-center justify-between">
+                      <span>Folha &amp; RH (RF-051/056)</span>
+                      <Users className="w-4 h-4 text-emerald-600" />
+                    </CardDescription>
+                    <CardTitle className="text-2xl">2 Empregados</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500">Clique para calcular e fechar a folha</p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  onClick={() => setModuloAtivo('contabil')}
+                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
+                >
+                  <CardHeader className="pb-2">
+                    <CardDescription className="flex items-center justify-between">
+                      <span>Contabilidade (RF-006/008)</span>
+                      <Calculator className="w-4 h-4 text-blue-600" />
+                    </CardDescription>
+                    <CardTitle className="text-2xl">100% Balanceado</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500">Partidas dobradas (RB-001)</p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  onClick={() => setModuloAtivo('fiscal')}
+                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
+                >
+                  <CardHeader className="pb-2">
+                    <CardDescription className="flex items-center justify-between">
+                      <span>Fiscal &amp; IR (RF-016/045)</span>
+                      <FileText className="w-4 h-4 text-indigo-600" />
+                    </CardDescription>
+                    <CardTitle className="text-2xl">2 Apurações</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500">Aguardando conferência (RB-003)</p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  onClick={() => setModuloAtivo('obrigacoes')}
+                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
+                >
+                  <CardHeader className="pb-2">
+                    <CardDescription className="flex items-center justify-between">
+                      <span>Obrigações (RF-061/065)</span>
+                      <CalendarClock className="w-4 h-4 text-amber-600" />
+                    </CardDescription>
+                    <CardTitle className="text-2xl">2 Pendentes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500">Alertas auxiliares ativos (RB-009)</p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge
-              className={
-                health?.status === 'UP'
-                  ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-emerald-200'
-                  : 'bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200'
-              }
-            >
-              <Database className="w-3 h-3 mr-1" />
-              {health?.status === 'UP'
-                ? `API Online (v${health.versao})`
-                : 'Dados Fictícios Prontos'}
-            </Badge>
-            <a
-              href="/api/docs"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-md text-xs font-medium border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-100 text-slate-800 transition-colors"
-            >
-              API Docs <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
-            </a>
-          </div>
-        </div>
+          )}
 
-        {/* Cards de Resumo */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center justify-between">
-                <span>Contabilidade (RF-006/008)</span>
-                <Calculator className="w-4 h-4 text-blue-600" />
-              </CardDescription>
-              <CardTitle className="text-2xl">100% Balanceado</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-slate-500">Competência 11/2026 aberta (RB-001)</p>
-            </CardContent>
-          </Card>
+          {moduloAtivo === 'folha' && (
+            <ModuloFolha perfilAtivo={perfilAtivo} competencia={competencia} />
+          )}
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center justify-between">
-                <span>Fiscal &amp; IR (RF-016/045)</span>
-                <FileText className="w-4 h-4 text-indigo-600" />
-              </CardDescription>
-              <CardTitle className="text-2xl">2 Apurações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-slate-500">Aguardando conferência profissional (RB-003)</p>
-            </CardContent>
-          </Card>
+          {moduloAtivo === 'contabil' && (
+            <ModuloContabil empresaNome={empresaSelecionada.nome} />
+          )}
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center justify-between">
-                <span>Folha &amp; RH (RF-051/056)</span>
-                <Users className="w-4 h-4 text-emerald-600" />
-              </CardDescription>
-              <CardTitle className="text-2xl">2 Empregados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-slate-500">Mascaramento LGPD ativo por perfil</p>
-            </CardContent>
-          </Card>
+          {moduloAtivo === 'financeiro' && <ModuloFinanceiro />}
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center justify-between">
-                <span>Obrigações (RF-061/065)</span>
-                <CalendarClock className="w-4 h-4 text-amber-600" />
-              </CardDescription>
-              <CardTitle className="text-2xl">2 Pendentes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-slate-500">Alertas auxiliares ativos (RB-009)</p>
-            </CardContent>
-          </Card>
-        </div>
+          {moduloAtivo === 'fiscal' && <ModuloFiscalIR perfilAtivo={perfilAtivo} />}
 
-        {/* Navegação por Módulos do Escopo */}
-        <Tabs defaultValue="obrigacoes" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
-            <TabsTrigger value="obrigacoes">Obrigações &amp; Prazos</TabsTrigger>
-            <TabsTrigger value="contabil">Contábil</TabsTrigger>
-            <TabsTrigger value="fiscal">Fiscal &amp; IR</TabsTrigger>
-            <TabsTrigger value="folha">Folha &amp; RH</TabsTrigger>
-            <TabsTrigger value="auditoria">Auditoria &amp; LGPD</TabsTrigger>
-          </TabsList>
+          {moduloAtivo === 'cadastros' && <ModuloCadastros />}
 
-          <TabsContent value="obrigacoes" className="mt-4">
+          {moduloAtivo === 'obrigacoes' && (
             <Card>
               <CardHeader>
                 <CardTitle>Painel de Obrigações Acessórias (RF-065)</CardTitle>
@@ -303,7 +335,7 @@ export default function HomePage() {
                   </TableHeader>
                   <TableBody>
                     {OBRIGACOES_INICIAIS.map((ob) => (
-                      <TableRow key={ob.id}>
+                      <TableRow key={ob.id} className="hover:bg-slate-50/80 transition-colors">
                         <TableCell className="font-medium">{ob.titulo}</TableCell>
                         <TableCell>{ob.empresa}</TableCell>
                         <TableCell>{ob.vencimento}</TableCell>
@@ -325,25 +357,11 @@ export default function HomePage() {
                 </Table>
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="contabil" className="mt-4">
-            <ModuloContabil empresaNome={empresaSelecionada.nome} />
-          </TabsContent>
-
-          <TabsContent value="fiscal" className="mt-4">
-            <ModuloFiscalIR perfilAtivo={perfilAtivo} />
-          </TabsContent>
-
-          <TabsContent value="folha" className="mt-4">
-            <ModuloFolha perfilAtivo={perfilAtivo} competencia={competencia} />
-          </TabsContent>
-
-          <TabsContent value="auditoria" className="mt-4">
-            <ModuloAuditoria />
-          </TabsContent>
-        </Tabs>
-      </main>
+          {moduloAtivo === 'auditoria' && <ModuloAuditoria />}
+        </main>
+      </div>
     </div>
   );
 }
