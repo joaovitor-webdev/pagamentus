@@ -847,18 +847,6 @@ export function criarApp(): {
   );
   app.use('/api', criarDesempenhoCargaRouter(desempenhoCargaController));
 
-  // Servir arquivos estáticos do frontend
-  const publicDir = path.join(process.cwd(), 'public');
-  app.use(express.static(publicDir));
-
-  // Fallback SPA para a interface web
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) {
-      return next();
-    }
-    res.sendFile(path.join(publicDir, 'index.html'));
-  });
-
   return {
     app,
     planoContasRepo,
