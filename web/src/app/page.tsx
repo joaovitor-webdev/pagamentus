@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { consultarHealthcheck, HealthResponse } from '@/lib/api';
 import { ModuloContabil } from '@/components/ModuloContabil';
 import { ModuloFolha } from '@/components/ModuloFolha';
+import { ModuloFiscalIR } from '@/components/ModuloFiscalIR';
+import { ModuloAuditoria } from '@/components/ModuloAuditoria';
 import {
   Building2,
   Calculator,
@@ -301,17 +303,7 @@ export default function HomePage() {
           </TabsContent>
 
           <TabsContent value="fiscal" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Módulo Fiscal, Regimes &amp; Imposto de Renda (Item 3)</CardTitle>
-                <CardDescription>
-                  Notas fiscais, apuração de Simples Nacional / Lucro Presumido / Real, IRPF e IRPJ/CSLL.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-slate-600">
-                Cálculos reproduzíveis com memória detalhada e aprovação obrigatória (RB-003, RB-004).
-              </CardContent>
-            </Card>
+            <ModuloFiscalIR perfilAtivo={perfilAtivo} />
           </TabsContent>
 
           <TabsContent value="folha" className="mt-4">
@@ -319,20 +311,7 @@ export default function HomePage() {
           </TabsContent>
 
           <TabsContent value="auditoria" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-blue-600" />
-                  Segurança, Auditoria e LGPD (Item 1 &amp; Item 5)
-                </CardTitle>
-                <CardDescription>
-                  Trilha de auditoria imutável (RNF-004), isolamento entre clientes (RB-008) e observabilidade.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-slate-600">
-                Todas as operações críticas registram usuário, data, objeto e justificativa.
-              </CardContent>
-            </Card>
+            <ModuloAuditoria />
           </TabsContent>
         </Tabs>
       </main>
