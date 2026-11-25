@@ -61,6 +61,7 @@ Esta especificação define o **acompanhamento de status da declaração de IRPF
 - Modelos, serviço, controller e rotas em `src/models/PendenciaStatusIrModel.ts`, `src/services/PendenciaStatusIrService.ts`, `src/controllers/PendenciaStatusIrController.ts` e `src/routes/pendenciaStatusIrRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/pendenciasStatusIr.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/66
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
