@@ -164,6 +164,9 @@ import { criarComparacaoTributacaoIrRouter } from './routes/comparacaoTributacao
 import { PendenciaStatusIrService } from './services/PendenciaStatusIrService';
 import { PendenciaStatusIrController } from './controllers/PendenciaStatusIrController';
 import { criarPendenciaStatusIrRouter } from './routes/pendenciaStatusIrRoutes';
+import { DocumentoDeclaracaoIrService } from './services/DocumentoDeclaracaoIrService';
+import { DocumentoDeclaracaoIrController } from './controllers/DocumentoDeclaracaoIrController';
+import { criarDocumentoDeclaracaoIrRouter } from './routes/documentoDeclaracaoIrRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -239,6 +242,7 @@ export function criarApp(): {
   consistenciaIrService: ConsistenciaIrService;
   comparacaoTributacaoIrService: ComparacaoTributacaoIrService;
   pendenciaStatusIrService: PendenciaStatusIrService;
+  documentoDeclaracaoIrService: DocumentoDeclaracaoIrService;
 } {
   const app = express();
 
@@ -553,6 +557,12 @@ export function criarApp(): {
     pendenciaStatusIrService
   );
 
+  // 42. Módulo Declaração, Recibo e Comprovantes IRPF (SPEC-3.20)
+  const documentoDeclaracaoIrService = new DocumentoDeclaracaoIrService();
+  const documentoDeclaracaoIrController = new DocumentoDeclaracaoIrController(
+    documentoDeclaracaoIrService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -633,6 +643,10 @@ export function criarApp(): {
     criarComparacaoTributacaoIrRouter(comparacaoTributacaoIrController)
   );
   app.use('/api', criarPendenciaStatusIrRouter(pendenciaStatusIrController));
+  app.use(
+    '/api',
+    criarDocumentoDeclaracaoIrRouter(documentoDeclaracaoIrController)
+  );
 
   return {
     app,
@@ -705,6 +719,7 @@ export function criarApp(): {
     consistenciaIrService,
     comparacaoTributacaoIrService,
     pendenciaStatusIrService,
+    documentoDeclaracaoIrService,
   };
 }
 
