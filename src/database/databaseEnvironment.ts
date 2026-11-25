@@ -59,9 +59,16 @@ export function resolveDatabaseEnvironment(
   const parsedUrl = parseDatabaseUrl(connectionString, variableName);
   const databaseName = getDatabaseName(parsedUrl, variableName);
   const expectedDatabase = expectedDatabaseByEnvironment[environment];
-  if (databaseName !== expectedDatabase) {
+
+  // Em produção com provedores gerenciados (ex: Supabase, Neon), o banco padrão costuma ser 'postgres'.
+  // Permitimos 'postgres' em produção ou o esperado 'pagamentus_prod'.
+  const ehBancoValido =
+    databaseName === expectedDatabase ||
+    (environment === 'production' && (databaseName === 'postgres' || databaseName === 'pagamentus_prod'));
+
+  if (!ehBancoValido) {
     throw new Error(
-      `${variableName} deve apontar para o banco ${expectedDatabase} em NODE_ENV=${environment}.`,
+      `${variableName} deve apontar para o banco ${expectedDatabase}${environment === 'production' ? ' ou postgres' : ''} em NODE_ENV=${environment}.`,
     );
   }
 
