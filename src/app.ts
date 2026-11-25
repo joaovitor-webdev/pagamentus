@@ -152,6 +152,9 @@ import { criarRendimentoDeducaoIrRouter } from './routes/rendimentoDeducaoIrRout
 import { PatrimonioIrService } from './services/PatrimonioIrService';
 import { PatrimonioIrController } from './controllers/PatrimonioIrController';
 import { criarPatrimonioIrRouter } from './routes/patrimonioIrRoutes';
+import { InformeOrigemIrService } from './services/InformeOrigemIrService';
+import { InformeOrigemIrController } from './controllers/InformeOrigemIrController';
+import { criarInformeOrigemIrRouter } from './routes/informeOrigemIrRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -223,6 +226,7 @@ export function criarApp(): {
   fichaContribuinteIrService: FichaContribuinteIrService;
   rendimentoDeducaoIrService: RendimentoDeducaoIrService;
   patrimonioIrService: PatrimonioIrService;
+  informeOrigemIrService: InformeOrigemIrService;
 } {
   const app = express();
 
@@ -513,6 +517,12 @@ export function criarApp(): {
     patrimonioIrService
   );
 
+  // 38. Módulo Importação de Informes e Origem dos Dados IRPF (SPEC-3.16)
+  const informeOrigemIrService = new InformeOrigemIrService();
+  const informeOrigemIrController = new InformeOrigemIrController(
+    informeOrigemIrService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -586,6 +596,7 @@ export function criarApp(): {
     criarRendimentoDeducaoIrRouter(rendimentoDeducaoIrController)
   );
   app.use('/api', criarPatrimonioIrRouter(patrimonioIrController));
+  app.use('/api', criarInformeOrigemIrRouter(informeOrigemIrController));
 
   return {
     app,
@@ -654,6 +665,7 @@ export function criarApp(): {
     fichaContribuinteIrService,
     rendimentoDeducaoIrService,
     patrimonioIrService,
+    informeOrigemIrService,
   };
 }
 
