@@ -161,6 +161,9 @@ import { criarConsistenciaIrRouter } from './routes/consistenciaIrRoutes';
 import { ComparacaoTributacaoIrService } from './services/ComparacaoTributacaoIrService';
 import { ComparacaoTributacaoIrController } from './controllers/ComparacaoTributacaoIrController';
 import { criarComparacaoTributacaoIrRouter } from './routes/comparacaoTributacaoIrRoutes';
+import { PendenciaStatusIrService } from './services/PendenciaStatusIrService';
+import { PendenciaStatusIrController } from './controllers/PendenciaStatusIrController';
+import { criarPendenciaStatusIrRouter } from './routes/pendenciaStatusIrRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -235,6 +238,7 @@ export function criarApp(): {
   informeOrigemIrService: InformeOrigemIrService;
   consistenciaIrService: ConsistenciaIrService;
   comparacaoTributacaoIrService: ComparacaoTributacaoIrService;
+  pendenciaStatusIrService: PendenciaStatusIrService;
 } {
   const app = express();
 
@@ -543,6 +547,12 @@ export function criarApp(): {
     comparacaoTributacaoIrService
   );
 
+  // 41. Módulo Pendências e Status IRPF (SPEC-3.19)
+  const pendenciaStatusIrService = new PendenciaStatusIrService();
+  const pendenciaStatusIrController = new PendenciaStatusIrController(
+    pendenciaStatusIrService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -622,6 +632,7 @@ export function criarApp(): {
     '/api',
     criarComparacaoTributacaoIrRouter(comparacaoTributacaoIrController)
   );
+  app.use('/api', criarPendenciaStatusIrRouter(pendenciaStatusIrController));
 
   return {
     app,
@@ -693,6 +704,7 @@ export function criarApp(): {
     informeOrigemIrService,
     consistenciaIrService,
     comparacaoTributacaoIrService,
+    pendenciaStatusIrService,
   };
 }
 
