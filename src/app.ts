@@ -146,6 +146,9 @@ import { criarRevisaoAprovacaoFiscalRouter } from './routes/revisaoAprovacaoFisc
 import { FichaContribuinteIrService } from './services/FichaContribuinteIrService';
 import { FichaContribuinteIrController } from './controllers/FichaContribuinteIrController';
 import { criarFichaContribuinteIrRouter } from './routes/fichaContribuinteIrRoutes';
+import { RendimentoDeducaoIrService } from './services/RendimentoDeducaoIrService';
+import { RendimentoDeducaoIrController } from './controllers/RendimentoDeducaoIrController';
+import { criarRendimentoDeducaoIrRouter } from './routes/rendimentoDeducaoIrRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -215,6 +218,7 @@ export function criarApp(): {
   simulacaoCenarioTributarioService: SimulacaoCenarioTributarioService;
   revisaoAprovacaoFiscalService: RevisaoAprovacaoFiscalService;
   fichaContribuinteIrService: FichaContribuinteIrService;
+  rendimentoDeducaoIrService: RendimentoDeducaoIrService;
 } {
   const app = express();
 
@@ -493,6 +497,12 @@ export function criarApp(): {
     fichaContribuinteIrService
   );
 
+  // 36. Módulo Rendimentos e Deduções IRPF (SPEC-3.14)
+  const rendimentoDeducaoIrService = new RendimentoDeducaoIrService();
+  const rendimentoDeducaoIrController = new RendimentoDeducaoIrController(
+    rendimentoDeducaoIrService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -561,6 +571,10 @@ export function criarApp(): {
     '/api',
     criarFichaContribuinteIrRouter(fichaContribuinteIrController)
   );
+  app.use(
+    '/api',
+    criarRendimentoDeducaoIrRouter(rendimentoDeducaoIrController)
+  );
 
   return {
     app,
@@ -627,6 +641,7 @@ export function criarApp(): {
     simulacaoCenarioTributarioService,
     revisaoAprovacaoFiscalService,
     fichaContribuinteIrService,
+    rendimentoDeducaoIrService,
   };
 }
 
