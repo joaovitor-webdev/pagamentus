@@ -49,6 +49,7 @@ Esta especificação define a **suíte de testes funcionais e de controle de per
 ## 10. Evidências (preencher ao concluir)
 - Suíte `tests/spec510-funcionaisPermissao.test.ts` executada com `npx jest tests/spec510-funcionaisPermissao.test.ts` (1 suíte, 3 testes aprovados: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/75
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
