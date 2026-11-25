@@ -57,6 +57,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-4.10] Organização, checklist e correções (PR #73, Douglas Augusto): Organização documental por cliente, exercício, competência, tipo e processo com busca/filtros, checklist, comentários, pedidos de correção e confirmação de recebimento (RF-067, RF-068).
 - [SPEC-4.11] Acesso, retenção e consentimentos (PR #74, Douglas Augusto): Controle de políticas de acesso, download, compartilhamento, retenção/descarte e registro de consentimentos, autorizações e procurações (RF-069, RF-070).
 - [SPEC-5.10] Testes funcionais e de permissão (PR #75, Pablo Eduardo): Suíte automatizada de testes funcionais ponta a ponta, validação de bloqueios por perfil (HTTP 403) e isolamento entre clientes.
+- [SPEC-5.11] Testes de integração e recuperação (PR #76, Pablo Eduardo): Suíte automatizada de testes de integração entre módulos de IRPF, obrigações/alertas e validação de continuidade/recuperação operacional.
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
