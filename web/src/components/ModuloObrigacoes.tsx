@@ -19,6 +19,7 @@ interface ObrigacaoRow {
   id: string;
   empresa_id: string;
   competencia?: string | null;
+  tipo?: 'ENTREGA' | 'PAGAMENTO';
   titulo: string;
   vencimento: string;
   status: 'PENDENTE' | 'EM_PREPARACAO' | 'ENTREGUE';
@@ -175,7 +176,9 @@ export function ModuloObrigacoes({
             <TableHeader>
               <TableRow>
                 <TableHead>Obrigação</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Vencimento</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
                 <TableHead>Responsável</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ação</TableHead>
@@ -187,7 +190,9 @@ export function ModuloObrigacoes({
                 return (
                   <TableRow key={o.id}>
                     <TableCell className="font-medium">{o.titulo}</TableCell>
+                    <TableCell><Badge variant="outline">{o.tipo || 'ENTREGA'}</Badge></TableCell>
                     <TableCell>{o.vencimento.slice(0, 10).split('-').reverse().join('/')}</TableCell>
+                    <TableCell className="text-right">{o.valor_guia != null ? Number(o.valor_guia).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}</TableCell>
                     <TableCell>{o.responsavel_nome || 'Equipe Fiscal'}</TableCell>
                     <TableCell><Badge variant="outline" className={st.className}>{st.label}</Badge></TableCell>
                     <TableCell className="text-right">
