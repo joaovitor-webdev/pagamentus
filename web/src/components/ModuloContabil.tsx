@@ -573,12 +573,27 @@ export function ModuloContabil({
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 {(() => {
-                  const rec = balancete.filter((b) => b.grupo === 'RECEITA').reduce((a, b) => a + (b.creditos - b.debitos), 0);
+                  const recBruta = balancete
+                    .filter((b) => b.grupo === 'RECEITA' && b.codigo.startsWith('3.1.'))
+                    .reduce((a, b) => a + (b.creditos - b.debitos), 0);
+                  const deducoesLista = balancete.filter(
+                    (b) => b.grupo === 'RECEITA' && b.codigo.startsWith('3.2.') && b.debitos - b.creditos !== 0
+                  );
+                  const deducoes = deducoesLista.reduce((a, b) => a + (b.debitos - b.creditos), 0);
+                  const recLiquida = recBruta - deducoes;
                   const desp = balancete.filter((b) => b.grupo === 'DESPESA').reduce((a, b) => a + (b.debitos - b.creditos), 0);
-                  const res = rec - desp;
+                  const res = recLiquida - desp;
                   return (
                     <>
-                      <div className="flex justify-between"><span>(+) Receitas</span><strong>{rec.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></div>
+                      <div className="flex justify-between"><span>(+) Receita Bruta</span><strong>{recBruta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></div>
+                      <div className="flex justify-between text-amber-700"><span>(–) Deduções da Receita</span><strong>{deducoes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></div>
+                      {deducoesLista.map((d) => (
+                        <div key={d.codigo} className="flex justify-between text-xs text-slate-600 pl-4">
+                          <span>{d.codigo} {d.nome}</span>
+                          <span>{(d.debitos - d.creditos).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between border-t pt-1 font-semibold"><span>(=) Receita Líquida</span><span>{recLiquida.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
                       <div className="flex justify-between text-red-700"><span>(–) Despesas</span><strong>{desp.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></div>
                       <div className="flex justify-between border-t pt-2 font-bold text-emerald-700"><span>(=) Resultado do Período</span><span>{res.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
                     </>
