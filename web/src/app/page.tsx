@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { consultarHealthcheck, HealthResponse } from '@/lib/api';
+import { ModuloContabil } from '@/components/ModuloContabil';
+import { ModuloFolha } from '@/components/ModuloFolha';
 import {
   Building2,
   Calculator,
@@ -295,17 +297,7 @@ export default function HomePage() {
           </TabsContent>
 
           <TabsContent value="contabil" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Módulo Contábil &amp; Financeiro (Item 2)</CardTitle>
-                <CardDescription>
-                  Plano de contas, lançamentos com partidas dobradas (RB-001), balancete, DRE e conciliação bancária.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-slate-600">
-                Conectado ao backend Express (`/api/plano-contas`, `/api/lancamentos`, `/api/periodos-contabeis`).
-              </CardContent>
-            </Card>
+            <ModuloContabil empresaNome={empresaSelecionada.nome} />
           </TabsContent>
 
           <TabsContent value="fiscal" className="mt-4">
@@ -323,17 +315,7 @@ export default function HomePage() {
           </TabsContent>
 
           <TabsContent value="folha" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Módulo Folha de Pagamento &amp; Atendimento (Item 4)</CardTitle>
-                <CardDescription>
-                  Cadastro de empregados, cálculo de folha, férias, 13º salário, eSocial e portal do cliente.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm text-slate-600">
-                Controle de acesso RBAC com mascaramento de dados salariais para perfis não autorizados (RF-056).
-              </CardContent>
-            </Card>
+            <ModuloFolha perfilAtivo={perfilAtivo} />
           </TabsContent>
 
           <TabsContent value="auditoria" className="mt-4">
