@@ -21,9 +21,12 @@ export interface ParamPresumido {
   aliquota_iss_padrao: number;
   cbs_teste_2026: number;
   ibs_teste_2026: number;
+  limite_receita_anual_lc224?: number;
+  acrescimo_presuncao_lc224?: number;
 }
 
 export interface FaixaIRPFAnual {
+  ano_calendario?: number;
   faixa: number;
   base_min: number;
   base_max: number | null;
@@ -34,6 +37,11 @@ export interface FaixaIRPFAnual {
   limite_previdencia_pct: number;
   desconto_simplificado_pct: number;
   limite_desconto_simplificado_anual: number;
+  reducao_limite_isencao?: number | null;
+  reducao_limite_faixa?: number | null;
+  reducao_maxima?: number | null;
+  reducao_constante?: number | null;
+  reducao_fator?: number | null;
 }
 
 function round2(d: Decimal): number {
@@ -93,6 +101,7 @@ export function calcularLucroPresumido(input: {
   receitaMensal: number;
   receitaTrimestral: number;
   params: ParamPresumido;
+  aplicarLc224?: boolean;
 }) {
   const recMes = new Decimal(input.receitaMensal || 0);
   const recTrim = new Decimal(input.receitaTrimestral || 0);
@@ -104,18 +113,28 @@ export function calcularLucroPresumido(input: {
   const cbsInformativo = round2(recMes.mul(p.cbs_teste_2026));
   const ibsInformativo = round2(recMes.mul(p.ibs_teste_2026));
 
-  const baseIrpj = recTrim.mul(p.presuncao_irpj);
+  const limiteTrimLc224 = new Decimal(p.limite_receita_anual_lc224 ?? 5000000).div(4);
+  const acrescimo = new Decimal(p.acrescimo_presuncao_lc224 ?? 0.1);
+  const parcelaNormal = input.aplicarLc224 ? Decimal.min(recTrim, limiteTrimLc224) : recTrim;
+  const parcelaExcedente = input.aplicarLc224 ? Decimal.max(0, recTrim.minus(limiteTrimLc224)) : new Decimal(0);
+
+  const presIrpjExcedente = new Decimal(p.presuncao_irpj).mul(new Decimal(1).plus(acrescimo));
+  const presCsllExcedente = new Decimal(p.presuncao_csll).mul(new Decimal(1).plus(acrescimo));
+
+  const baseIrpj = parcelaNormal.mul(p.presuncao_irpj).plus(parcelaExcedente.mul(presIrpjExcedente));
   const irpjBasico = baseIrpj.mul(p.aliquota_irpj);
   const excedente = Decimal.max(0, baseIrpj.minus(p.limite_adicional_trimestral));
   const irpjAdicional = excedente.mul(p.adicional_irpj);
   const irpjTotal = round2(irpjBasico.plus(irpjAdicional));
 
-  const baseCsll = recTrim.mul(p.presuncao_csll);
+  const baseCsll = parcelaNormal.mul(p.presuncao_csll).plus(parcelaExcedente.mul(presCsllExcedente));
   const csll = round2(baseCsll.mul(p.aliquota_csll));
 
   return {
     mensal: { iss, pis, cofins, cbsInformativo, ibsInformativo },
     trimestral: {
+      parcelaNormal: round2(parcelaNormal),
+      parcelaExcedente: round2(parcelaExcedente),
       baseIrpj: round2(baseIrpj),
       irpjBasico: round2(irpjBasico),
       irpjAdicional: round2(irpjAdicional),
@@ -136,6 +155,20 @@ function calcularImpostoTabelaAnual(baseCalculo: Decimal, tabela: FaixaIRPFAnual
   if (!faixa) return 0;
   const imposto = Decimal.max(0, baseCalculo.mul(faixa.aliquota).minus(faixa.parcela_deduzir));
   return round2(imposto);
+}
+
+function calcularReducaoLei15270(rend: Decimal, impostoAntes: number, ref: FaixaIRPFAnual): number {
+  if (!ref.reducao_limite_isencao || !ref.reducao_limite_faixa) return 0;
+  if (rend.lte(ref.reducao_limite_isencao)) {
+    return Math.min(impostoAntes, ref.reducao_maxima ?? impostoAntes);
+  }
+  if (rend.lte(ref.reducao_limite_faixa)) {
+    const red = new Decimal(ref.reducao_constante ?? 0).minus(
+      new Decimal(ref.reducao_fator ?? 0).mul(rend)
+    );
+    return round2(Decimal.max(0, Decimal.min(new Decimal(impostoAntes), red)));
+  }
+  return 0;
 }
 
 export function calcularComparadorIRPF(input: {
@@ -165,7 +198,9 @@ export function calcularComparadorIRPF(input: {
 
   const totalDeducoesLegais = inss.plus(dep).plus(saude).plus(educacaoDedutivel).plus(prevDedutivel).plus(livroCaixa);
   const baseCompleta = Decimal.max(0, rend.minus(totalDeducoesLegais));
-  const impostoCompleto = calcularImpostoTabelaAnual(baseCompleta, input.tabelaAnual);
+  const impostoCompletoAntes = calcularImpostoTabelaAnual(baseCompleta, input.tabelaAnual);
+  const reducaoCompleta = calcularReducaoLei15270(rend, impostoCompletoAntes, ref);
+  const impostoCompleto = round2(Decimal.max(0, new Decimal(impostoCompletoAntes).minus(reducaoCompleta)));
   const saldoCompleto = round2(new Decimal(impostoCompleto).minus(irRetido));
 
   const descontoSimplificado = Decimal.min(
@@ -173,7 +208,9 @@ export function calcularComparadorIRPF(input: {
     new Decimal(ref.limite_desconto_simplificado_anual)
   );
   const baseSimplificada = Decimal.max(0, rend.minus(descontoSimplificado));
-  const impostoSimplificado = calcularImpostoTabelaAnual(baseSimplificada, input.tabelaAnual);
+  const impostoSimplificadoAntes = calcularImpostoTabelaAnual(baseSimplificada, input.tabelaAnual);
+  const reducaoSimplificada = calcularReducaoLei15270(rend, impostoSimplificadoAntes, ref);
+  const impostoSimplificado = round2(Decimal.max(0, new Decimal(impostoSimplificadoAntes).minus(reducaoSimplificada)));
   const saldoSimplificado = round2(new Decimal(impostoSimplificado).minus(irRetido));
 
   const maisVantajoso = impostoSimplificado <= impostoCompleto ? 'SIMPLIFICADO' : 'COMPLETO';
@@ -182,12 +219,16 @@ export function calcularComparadorIRPF(input: {
     completo: {
       deducoes: round2(totalDeducoesLegais),
       baseCalculo: round2(baseCompleta),
+      impostoAntesReducao: impostoCompletoAntes,
+      reducaoLei15270: reducaoCompleta,
       impostoDevido: impostoCompleto,
       saldoPagarRestituir: saldoCompleto,
     },
     simplificado: {
       desconto: round2(descontoSimplificado),
       baseCalculo: round2(baseSimplificada),
+      impostoAntesReducao: impostoSimplificadoAntes,
+      reducaoLei15270: reducaoSimplificada,
       impostoDevido: impostoSimplificado,
       saldoPagarRestituir: saldoSimplificado,
     },

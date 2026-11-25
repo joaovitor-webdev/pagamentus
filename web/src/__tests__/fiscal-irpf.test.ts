@@ -9,8 +9,10 @@ import {
 } from '../lib/fiscal/motor';
 
 const FAIXAS_SIMPLES: FaixaSimples[] = [
+  { anexo: 'II', faixa: 1, rbt12_min: 0, rbt12_max: 180000, aliquota_nominal: 0.045, parcela_deduzir: 0 },
   { anexo: 'III', faixa: 1, rbt12_min: 0, rbt12_max: 180000, aliquota_nominal: 0.06, parcela_deduzir: 0 },
   { anexo: 'III', faixa: 2, rbt12_min: 180000.01, rbt12_max: 360000, aliquota_nominal: 0.112, parcela_deduzir: 9360 },
+  { anexo: 'IV', faixa: 1, rbt12_min: 0, rbt12_max: 180000, aliquota_nominal: 0.045, parcela_deduzir: 0 },
   { anexo: 'V', faixa: 1, rbt12_min: 0, rbt12_max: 180000, aliquota_nominal: 0.155, parcela_deduzir: 0 },
   { anexo: 'V', faixa: 2, rbt12_min: 180000.01, rbt12_max: 360000, aliquota_nominal: 0.18, parcela_deduzir: 4500 },
 ];
@@ -29,8 +31,17 @@ const PARAMS_PRESUMIDO: ParamPresumido = {
   ibs_teste_2026: 0.001,
 };
 
+const TABELA_IRPF_2025: FaixaIRPFAnual[] = [
+  { ano_calendario: 2025, faixa: 1, base_min: 0, base_max: 27110.4, aliquota: 0, parcela_deduzir: 0, deducao_dependente_anual: 2275.08, limite_educacao_anual: 3561.5, limite_previdencia_pct: 0.12, desconto_simplificado_pct: 0.2, limite_desconto_simplificado_anual: 16754.34 },
+  { ano_calendario: 2025, faixa: 2, base_min: 27110.41, base_max: 33919.8, aliquota: 0.075, parcela_deduzir: 2033.28, deducao_dependente_anual: 2275.08, limite_educacao_anual: 3561.5, limite_previdencia_pct: 0.12, desconto_simplificado_pct: 0.2, limite_desconto_simplificado_anual: 16754.34 },
+  { ano_calendario: 2025, faixa: 3, base_min: 33919.81, base_max: 45012.6, aliquota: 0.15, parcela_deduzir: 4577.27, deducao_dependente_anual: 2275.08, limite_educacao_anual: 3561.5, limite_previdencia_pct: 0.12, desconto_simplificado_pct: 0.2, limite_desconto_simplificado_anual: 16754.34 },
+  { ano_calendario: 2025, faixa: 4, base_min: 45012.61, base_max: 55976.16, aliquota: 0.225, parcela_deduzir: 7953.21, deducao_dependente_anual: 2275.08, limite_educacao_anual: 3561.5, limite_previdencia_pct: 0.12, desconto_simplificado_pct: 0.2, limite_desconto_simplificado_anual: 16754.34 },
+  { ano_calendario: 2025, faixa: 5, base_min: 55976.17, base_max: null, aliquota: 0.275, parcela_deduzir: 10752.02, deducao_dependente_anual: 2275.08, limite_educacao_anual: 3561.5, limite_previdencia_pct: 0.12, desconto_simplificado_pct: 0.2, limite_desconto_simplificado_anual: 16754.34 },
+];
+
 const TABELA_IRPF_2026: FaixaIRPFAnual[] = [
   {
+    ano_calendario: 2026,
     faixa: 1,
     base_min: 0,
     base_max: 29145.6,
@@ -41,6 +52,11 @@ const TABELA_IRPF_2026: FaixaIRPFAnual[] = [
     limite_previdencia_pct: 0.12,
     desconto_simplificado_pct: 0.2,
     limite_desconto_simplificado_anual: 17640,
+    reducao_limite_isencao: 60000,
+    reducao_limite_faixa: 88200,
+    reducao_maxima: 2694.15,
+    reducao_constante: 8429.73,
+    reducao_fator: 0.095575,
   },
   {
     faixa: 2,
@@ -181,5 +197,100 @@ describe('Motor Fiscal e IRPF 2026', () => {
       tabelaAnual: TABELA_IRPF_2026,
     });
     expect(vantCompleto.maisVantajoso).toBe('COMPLETO');
+  });
+
+  it('(f) LC 224/2025: serviços 1.500.000 sem acréscimo vs 2.000.000 com acréscimo só sobre excedente de 1.250.000', () => {
+    const semAcrescimo = calcularLucroPresumido({
+      receitaMensal: 500000,
+      receitaTrimestral: 1500000,
+      params: PARAMS_PRESUMIDO,
+      aplicarLc224: false,
+    });
+    expect(semAcrescimo.trimestral.baseIrpj).toBe(480000);
+
+    const comAcrescimo = calcularLucroPresumido({
+      receitaMensal: 666666.67,
+      receitaTrimestral: 2000000,
+      params: PARAMS_PRESUMIDO,
+      aplicarLc224: true,
+    });
+    expect(comAcrescimo.trimestral.parcelaNormal).toBe(1250000);
+    expect(comAcrescimo.trimestral.parcelaExcedente).toBe(750000);
+    // 1.250.000 * 32% + 750.000 * 35,2% = 400.000 + 264.000 = 664.000
+    expect(comAcrescimo.trimestral.baseIrpj).toBe(664000);
+  });
+
+  it('(g) Simples Nacional Anexos II e IV', () => {
+    const anexoII = calcularSimplesNacional({
+      rbt12: 180000,
+      receitaMes: 10000,
+      faixas: FAIXAS_SIMPLES,
+      anexoPadrao: 'II',
+    });
+    expect(anexoII.das).toBe(450);
+
+    const anexoIV = calcularSimplesNacional({
+      rbt12: 180000,
+      receitaMes: 10000,
+      faixas: FAIXAS_SIMPLES,
+      anexoPadrao: 'IV',
+    });
+    expect(anexoIV.das).toBe(450);
+  });
+
+  it('(h) IRPF 2026 (55k zero, 70k redução parcial, 100k sem redução) e 2025 (55k sem redução)', () => {
+    const r2026_55k = calcularComparadorIRPF({
+      rendimentosTributaveis: 55000,
+      inss: 0,
+      dependentes: 0,
+      saude: 0,
+      educacao: 0,
+      previdenciaPrivada: 0,
+      livroCaixa: 0,
+      irRetido: 0,
+      tabelaAnual: TABELA_IRPF_2026,
+    });
+    expect(r2026_55k.simplificado.impostoDevido).toBe(0);
+
+    const r2026_70k = calcularComparadorIRPF({
+      rendimentosTributaveis: 70000,
+      inss: 0,
+      dependentes: 0,
+      saude: 0,
+      educacao: 0,
+      previdenciaPrivada: 0,
+      livroCaixa: 0,
+      irRetido: 0,
+      tabelaAnual: TABELA_IRPF_2026,
+    });
+    expect(r2026_70k.simplificado.reducaoLei15270).toBeGreaterThan(0);
+    expect(r2026_70k.simplificado.impostoDevido).toBeLessThan(r2026_70k.simplificado.impostoAntesReducao);
+
+    const r2026_100k = calcularComparadorIRPF({
+      rendimentosTributaveis: 100000,
+      inss: 0,
+      dependentes: 0,
+      saude: 0,
+      educacao: 0,
+      previdenciaPrivada: 0,
+      livroCaixa: 0,
+      irRetido: 0,
+      tabelaAnual: TABELA_IRPF_2026,
+    });
+    expect(r2026_100k.simplificado.reducaoLei15270).toBe(0);
+
+    const r2025_55k = calcularComparadorIRPF({
+      rendimentosTributaveis: 55000,
+      inss: 0,
+      dependentes: 0,
+      saude: 0,
+      educacao: 0,
+      previdenciaPrivada: 0,
+      livroCaixa: 0,
+      irRetido: 0,
+      tabelaAnual: TABELA_IRPF_2025,
+    });
+    expect(r2025_55k.simplificado.reducaoLei15270).toBe(0);
+    expect(r2025_55k.simplificado.impostoDevido).toBeGreaterThan(0);
   });
 });

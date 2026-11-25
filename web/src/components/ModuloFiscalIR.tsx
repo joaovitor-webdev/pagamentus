@@ -51,6 +51,7 @@ export function ModuloFiscalIR({
   const [sucesso, setSucesso] = useState<string | null>(null);
 
   // Formulário IRPF
+  const [anoCalendario, setAnoCalendario] = useState<2025 | 2026>(2026);
   const [rendimentos, setRendimentos] = useState('80000');
   const [inss, setInss] = useState('5000');
   const [dependentes, setDependentes] = useState('0');
@@ -126,8 +127,12 @@ export function ModuloFiscalIR({
     URL.revokeObjectURL(url);
   };
 
+  const tabelaAnoSelecionado = tabelaIrpf.filter(
+    (f) => (f.ano_calendario ?? 2026) === anoCalendario
+  );
+
   const resultadoIrpf =
-    tabelaIrpf.length > 0
+    tabelaAnoSelecionado.length > 0
       ? calcularComparadorIRPF({
           rendimentosTributaveis: Number(rendimentos) || 0,
           inss: Number(inss) || 0,
@@ -137,7 +142,7 @@ export function ModuloFiscalIR({
           previdenciaPrivada: Number(previdencia) || 0,
           livroCaixa: Number(livroCaixa) || 0,
           irRetido: Number(irRetido) || 0,
-          tabelaAnual: tabelaIrpf,
+          tabelaAnual: tabelaAnoSelecionado,
         })
       : null;
 
@@ -190,7 +195,11 @@ export function ModuloFiscalIR({
         )}
 
         {aba === 'apuracoes' && (
-          <Table>
+          <>
+            <div className="p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-xs">
+              <strong>CBS (0,9%) / IBS (0,1%) — Ano-Teste 2026:</strong> Valores meramente informativos (não somados ao total de tributos e não aplicáveis ao Simples Nacional). Recolhimento dispensado em 2026 se cumpridas as obrigações acessórias (LC 214/2025, art. 348).
+            </div>
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Tributo</TableHead>
@@ -244,11 +253,23 @@ export function ModuloFiscalIR({
               )}
             </TableBody>
           </Table>
+          </>
         )}
 
         {aba === 'irpf' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-xs font-medium block mb-1">Ano-calendário / Exercício</label>
+                <select
+                  className="w-full border rounded h-9 px-3 text-sm"
+                  value={anoCalendario}
+                  onChange={(e) => setAnoCalendario(Number(e.target.value) as 2025 | 2026)}
+                >
+                  <option value={2026}>Ano-calendário 2026 (Exercício 2027 — c/ redução Lei 15.270)</option>
+                  <option value={2025}>Ano-calendário 2025 (Exercício 2026 — s/ redução)</option>
+                </select>
+              </div>
               <div>
                 <label className="text-xs font-medium block mb-1">Rendimentos Tributáveis (R$)</label>
                 <input className="w-full border rounded h-9 px-3 text-sm" type="number" value={rendimentos} onChange={(e) => setRendimentos(e.target.value)} />
