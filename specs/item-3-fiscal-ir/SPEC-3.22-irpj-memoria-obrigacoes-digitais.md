@@ -58,6 +58,7 @@ Esta especificação define a **memória de apuração de IRPJ/CSLL conciliada c
 - Modelos, serviço, controller e rotas em `src/models/IrpjObrigacoesDigitaisModel.ts`, `src/services/IrpjObrigacoesDigitaisService.ts`, `src/controllers/IrpjObrigacoesDigitaisController.ts` e `src/routes/irpjObrigacoesDigitaisRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/irpjMemoriaObrigacoesDigitais.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/69
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
