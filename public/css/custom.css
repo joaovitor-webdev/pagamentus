@@ -1,0 +1,42 @@
+/* Estilos customizados e regras de impressão para Holerite (RF-055) */
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-holerite, #printable-holerite * {
+    visibility: visible;
+  }
+  #printable-holerite {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Transições suaves */
+.tab-content {
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
