@@ -67,6 +67,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-5.7] Importação e exportação validadas — implementação (PR #83, Pablo Eduardo): Validação estrutural de arquivos, detecção e prevenção de duplicidades, pré-visualização, relatório de processamento e preservação de arquivos originais com hash SHA-256 (RF-078, RB-006).
 - [SPEC-5.8] Observabilidade e monitoramento — implementação (PR #84, Pablo Eduardo): Endpoint de healthcheck público, métricas operacionais com SLA de 99,5%, emissão de alertas e traces de erros com sanitização de dados sensíveis (RNF-014, RNF-005).
 - [SPEC-5.9] Desempenho e carga — implementação (PR #85, Pablo Eduardo): Avaliação de SLA de resposta para 95% das telas comuns em até 3 segundos e feedback de progresso para cálculos e relatórios demorados (RNF-006).
+- [Deploy] Preparação para Vercel e Supabase PostgreSQL (PR #87, João Vitor): Configuração de serverless entrypoint (api/index.ts), vercel.json, compatibilidade de banco de dados e guia de implantação.
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
