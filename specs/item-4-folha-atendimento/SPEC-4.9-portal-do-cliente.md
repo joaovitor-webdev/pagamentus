@@ -59,6 +59,7 @@ Esta especificação define a **interface de API do Portal do Cliente** permitin
 - Modelos, serviço, controller e rotas em `src/models/PortalClienteModel.ts`, `src/services/PortalClienteService.ts`, `src/controllers/PortalClienteController.ts` e `src/routes/portalClienteRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/portalCliente.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/72
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
