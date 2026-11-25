@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { consultarHealthcheck, HealthResponse } from '@/lib/api';
 import {
   Building2,
   Calculator,
@@ -80,6 +81,13 @@ const OBRIGACOES_INICIAIS = [
 export default function HomePage() {
   const [empresaSelecionada, setEmpresaSelecionada] = useState(EMPRESAS_FICTICIAS[0]);
   const [perfilAtivo, setPerfilAtivo] = useState('ADMINISTRADOR');
+  const [health, setHealth] = useState<HealthResponse | null>(null);
+
+  useEffect(() => {
+    consultarHealthcheck().then((data) => {
+      if (data) setHealth(data);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -153,9 +161,17 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-emerald-200">
+            <Badge
+              className={
+                health?.status === 'UP'
+                  ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-emerald-200'
+                  : 'bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200'
+              }
+            >
               <Database className="w-3 h-3 mr-1" />
-              Dados Fictícios Prontos
+              {health?.status === 'UP'
+                ? `API Online (v${health.versao})`
+                : 'Dados Fictícios Prontos'}
             </Badge>
             <a
               href="/api/docs"
