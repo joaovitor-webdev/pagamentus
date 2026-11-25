@@ -49,6 +49,7 @@ Esta especificação define o **roteiro de homologação, treinamento operaciona
 - Guia criado em `docs/implantacao-homologacao-treinamento.md`.
 - Suíte `tests/spec512-homologacaoImplantacao.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/77
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
