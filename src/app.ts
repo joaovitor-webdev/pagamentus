@@ -158,6 +158,9 @@ import { criarInformeOrigemIrRouter } from './routes/informeOrigemIrRoutes';
 import { ConsistenciaIrService } from './services/ConsistenciaIrService';
 import { ConsistenciaIrController } from './controllers/ConsistenciaIrController';
 import { criarConsistenciaIrRouter } from './routes/consistenciaIrRoutes';
+import { ComparacaoTributacaoIrService } from './services/ComparacaoTributacaoIrService';
+import { ComparacaoTributacaoIrController } from './controllers/ComparacaoTributacaoIrController';
+import { criarComparacaoTributacaoIrRouter } from './routes/comparacaoTributacaoIrRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -231,6 +234,7 @@ export function criarApp(): {
   patrimonioIrService: PatrimonioIrService;
   informeOrigemIrService: InformeOrigemIrService;
   consistenciaIrService: ConsistenciaIrService;
+  comparacaoTributacaoIrService: ComparacaoTributacaoIrService;
 } {
   const app = express();
 
@@ -533,6 +537,12 @@ export function criarApp(): {
     consistenciaIrService
   );
 
+  // 40. Módulo Comparação de Opções de Tributação IRPF (SPEC-3.18)
+  const comparacaoTributacaoIrService = new ComparacaoTributacaoIrService();
+  const comparacaoTributacaoIrController = new ComparacaoTributacaoIrController(
+    comparacaoTributacaoIrService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -608,6 +618,10 @@ export function criarApp(): {
   app.use('/api', criarPatrimonioIrRouter(patrimonioIrController));
   app.use('/api', criarInformeOrigemIrRouter(informeOrigemIrController));
   app.use('/api', criarConsistenciaIrRouter(consistenciaIrController));
+  app.use(
+    '/api',
+    criarComparacaoTributacaoIrRouter(comparacaoTributacaoIrController)
+  );
 
   return {
     app,
@@ -678,6 +692,7 @@ export function criarApp(): {
     patrimonioIrService,
     informeOrigemIrService,
     consistenciaIrService,
+    comparacaoTributacaoIrService,
   };
 }
 
