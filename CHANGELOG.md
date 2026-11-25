@@ -49,6 +49,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-3.18] Comparação de opções de tributação (PR #65, José Erivan): Comparador entre tributação Completa e Simplificada IRPF com teto parametrizado, estimativas e premissas (RF-037).
 - [SPEC-3.19] Pendências e status (PR #66, José Erivan): Acompanhamento de status da declaração IRPF, documentos faltantes, pendências, alertas e resumo para revisão do contribuinte (RF-038, RF-040).
 - [SPEC-3.20] Declaração, recibo e comprovantes (PR #67, José Erivan): Armazenamento com hash SHA-256 e controle de acesso restrito para declaração, recibo, cópia transmitida e comprovantes do cliente (RF-039).
+- [SPEC-3.21] IRPJ/CSLL: base e ajustes (PR #A definir, José Erivan): Apuração da base de cálculo de IRPJ/CSLL com controle de adições, exclusões e compensação de prejuízos fiscais (RF-042, RF-043).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
