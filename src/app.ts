@@ -143,6 +143,9 @@ import { criarSimulacaoCenarioTributarioRouter } from './routes/simulacaoCenario
 import { RevisaoAprovacaoFiscalService } from './services/RevisaoAprovacaoFiscalService';
 import { RevisaoAprovacaoFiscalController } from './controllers/RevisaoAprovacaoFiscalController';
 import { criarRevisaoAprovacaoFiscalRouter } from './routes/revisaoAprovacaoFiscalRoutes';
+import { FichaContribuinteIrService } from './services/FichaContribuinteIrService';
+import { FichaContribuinteIrController } from './controllers/FichaContribuinteIrController';
+import { criarFichaContribuinteIrRouter } from './routes/fichaContribuinteIrRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -211,6 +214,7 @@ export function criarApp(): {
   divergenciaFiscalContabilService: DivergenciaFiscalContabilService;
   simulacaoCenarioTributarioService: SimulacaoCenarioTributarioService;
   revisaoAprovacaoFiscalService: RevisaoAprovacaoFiscalService;
+  fichaContribuinteIrService: FichaContribuinteIrService;
 } {
   const app = express();
 
@@ -483,6 +487,12 @@ export function criarApp(): {
     revisaoAprovacaoFiscalService
   );
 
+  // 35. Módulo Ficha do Contribuinte e Dependentes (SPEC-3.13)
+  const fichaContribuinteIrService = new FichaContribuinteIrService();
+  const fichaContribuinteIrController = new FichaContribuinteIrController(
+    fichaContribuinteIrService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -546,6 +556,10 @@ export function criarApp(): {
   app.use(
     '/api',
     criarRevisaoAprovacaoFiscalRouter(revisaoAprovacaoFiscalController)
+  );
+  app.use(
+    '/api',
+    criarFichaContribuinteIrRouter(fichaContribuinteIrController)
   );
 
   return {
@@ -612,6 +626,7 @@ export function criarApp(): {
     divergenciaFiscalContabilService,
     simulacaoCenarioTributarioService,
     revisaoAprovacaoFiscalService,
+    fichaContribuinteIrService,
   };
 }
 
