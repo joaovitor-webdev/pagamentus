@@ -179,6 +179,9 @@ import { criarTarefaObrigacaoRouter } from './routes/tarefaObrigacaoRoutes';
 import { AlertaVencimentoService } from './services/AlertaVencimentoService';
 import { AlertaVencimentoController } from './controllers/AlertaVencimentoController';
 import { criarAlertaVencimentoRouter } from './routes/alertaVencimentoRoutes';
+import { PortalClienteService } from './services/PortalClienteService';
+import { PortalClienteController } from './controllers/PortalClienteController';
+import { criarPortalClienteRouter } from './routes/portalClienteRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -259,6 +262,7 @@ export function criarApp(): {
   irpjObrigacoesDigitaisService: IrpjObrigacoesDigitaisService;
   tarefaObrigacaoService: TarefaObrigacaoService;
   alertaVencimentoService: AlertaVencimentoService;
+  portalClienteService: PortalClienteService;
 } {
   const app = express();
 
@@ -603,6 +607,12 @@ export function criarApp(): {
     alertaVencimentoService
   );
 
+  // 47. Módulo Portal do Cliente (SPEC-4.9)
+  const portalClienteService = new PortalClienteService();
+  const portalClienteController = new PortalClienteController(
+    portalClienteService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -694,6 +704,7 @@ export function criarApp(): {
   );
   app.use('/api', criarTarefaObrigacaoRouter(tarefaObrigacaoController));
   app.use('/api', criarAlertaVencimentoRouter(alertaVencimentoController));
+  app.use('/api', criarPortalClienteRouter(portalClienteController));
 
   return {
     app,
@@ -771,6 +782,7 @@ export function criarApp(): {
     irpjObrigacoesDigitaisService,
     tarefaObrigacaoService,
     alertaVencimentoService,
+    portalClienteService,
   };
 }
 
