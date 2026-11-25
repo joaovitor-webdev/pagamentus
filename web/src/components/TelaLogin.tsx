@@ -84,7 +84,6 @@ export function TelaLogin({ onLoginSuccess }: TelaLoginProps) {
 
   const preencherDemo = () => {
     setEmail('admin@pagamentus.test');
-    setSenha('Pagamentus@2026');
     setErro(null);
   };
 
@@ -121,7 +120,7 @@ export function TelaLogin({ onLoginSuccess }: TelaLoginProps) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@pagamentus.test"
+                  placeholder="seu@email.com"
                   className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

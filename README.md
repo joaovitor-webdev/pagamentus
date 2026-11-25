@@ -140,11 +140,11 @@ A aplicação de demonstração iniciará na porta `3000` (`http://localhost:300
 
 | Papel RBAC | E-mail | Senha (Dev) |
 |---|---|---|
-| `ADMIN` | `admin@pagamentus.test` | `Pagamentus@2026` |
-| `CONTADOR` | `contador@pagamentus.test` | `Pagamentus@2026` |
-| `RH_DP` | `rh@pagamentus.test` | `Pagamentus@2026` |
-| `FINANCEIRO` | `financeiro@pagamentus.test` | `Pagamentus@2026` |
-| `CLIENTE` | `cliente@pagamentus.test` | `Pagamentus@2026` |
+| `ADMIN` | `admin@pagamentus.test` | *(configurada localmente via `SEED_DEV_PASSWORD` no `.env`)* |
+| `CONTADOR` | `contador@pagamentus.test` | *(configurada localmente via `SEED_DEV_PASSWORD` no `.env`)* |
+| `RH_DP` | `rh@pagamentus.test` | *(configurada localmente via `SEED_DEV_PASSWORD` no `.env`)* |
+| `FINANCEIRO` | `financeiro@pagamentus.test` | *(configurada localmente via `SEED_DEV_PASSWORD` no `.env`)* |
+| `CLIENTE` | `cliente@pagamentus.test` | *(configurada localmente via `SEED_DEV_PASSWORD` no `.env`)* |
 
 ### Segurança no Projeto Remoto (Supabase Cloud)
 - No painel do Supabase (`Authentication > Providers > Email`), desative **Allow new users to sign up** (`OFF`), pois o `supabase/config.toml` vale apenas localmente.
