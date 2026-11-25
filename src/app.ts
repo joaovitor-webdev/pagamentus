@@ -194,6 +194,9 @@ import { criarPainelIndicadoresRouter } from './routes/painelIndicadoresRoutes';
 import { RelatorioExportacaoService } from './services/RelatorioExportacaoService';
 import { RelatorioExportacaoController } from './controllers/RelatorioExportacaoController';
 import { criarRelatorioExportacaoRouter } from './routes/relatorioExportacaoRoutes';
+import { ExportacaoControladaService } from './services/ExportacaoControladaService';
+import { ExportacaoControladaController } from './controllers/ExportacaoControladaController';
+import { criarExportacaoControladaRouter } from './routes/exportacaoControladaRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -279,6 +282,7 @@ export function criarApp(): {
   acessoRetencaoConsentimentoService: AcessoRetencaoConsentimentoService;
   painelIndicadoresService: PainelIndicadoresService;
   relatorioExportacaoService: RelatorioExportacaoService;
+  exportacaoControladaService: ExportacaoControladaService;
 } {
   const app = express();
 
@@ -655,6 +659,12 @@ export function criarApp(): {
     relatorioExportacaoService
   );
 
+  // 52. Módulo Exportação Controlada e Saída de Dados (SPEC-5.4)
+  const exportacaoControladaService = new ExportacaoControladaService();
+  const exportacaoControladaController = new ExportacaoControladaController(
+    exportacaoControladaService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -762,6 +772,10 @@ export function criarApp(): {
     '/api',
     criarRelatorioExportacaoRouter(relatorioExportacaoController)
   );
+  app.use(
+    '/api',
+    criarExportacaoControladaRouter(exportacaoControladaController)
+  );
 
   return {
     app,
@@ -844,6 +858,7 @@ export function criarApp(): {
     acessoRetencaoConsentimentoService,
     painelIndicadoresService,
     relatorioExportacaoService,
+    exportacaoControladaService,
   };
 }
 
