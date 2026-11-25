@@ -386,7 +386,13 @@ export default function HomePage() {
 
           {moduloAtivo === 'financeiro' && <ModuloFinanceiro empresaId={empresaSelecionada.id} />}
 
-          {moduloAtivo === 'fiscal' && <ModuloFiscalIR perfilAtivo={perfilAtivo} />}
+          {moduloAtivo === 'fiscal' && (
+            <ModuloFiscalIR
+              perfilAtivo={perfilAtivo}
+              empresaId={empresaSelecionada.id}
+              competencia={competencia}
+            />
+          )}
 
           {moduloAtivo === 'cadastros' && <ModuloCadastros />}
 
