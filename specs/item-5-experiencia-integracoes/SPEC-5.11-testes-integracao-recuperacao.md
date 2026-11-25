@@ -46,6 +46,7 @@ Esta especificação define a **suíte de testes de integração entre módulos 
 ## 10. Evidências (preencher ao concluir)
 - Suíte `tests/spec511-integracaoRecuperacao.test.ts` executada com `npx jest tests/spec511-integracaoRecuperacao.test.ts` (1 suíte, 3 testes aprovados: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/76
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
