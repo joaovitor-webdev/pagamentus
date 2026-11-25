@@ -66,6 +66,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-5.6] API documentada — implementação (PR #82, Pablo Eduardo): Contrato OpenAPI 3.0.3, página HTML de documentação, política de rate limiting (HTTP 429) e logs de acesso sanitizados com controle de permissão (RF-077).
 - [SPEC-5.7] Importação e exportação validadas — implementação (PR #83, Pablo Eduardo): Validação estrutural de arquivos, detecção e prevenção de duplicidades, pré-visualização, relatório de processamento e preservação de arquivos originais com hash SHA-256 (RF-078, RB-006).
 - [SPEC-5.8] Observabilidade e monitoramento — implementação (PR #84, Pablo Eduardo): Endpoint de healthcheck público, métricas operacionais com SLA de 99,5%, emissão de alertas e traces de erros com sanitização de dados sensíveis (RNF-014, RNF-005).
+- [SPEC-5.9] Desempenho e carga — implementação (PR #85, Pablo Eduardo): Avaliação de SLA de resposta para 95% das telas comuns em até 3 segundos e feedback de progresso para cálculos e relatórios demorados (RNF-006).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
