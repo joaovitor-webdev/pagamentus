@@ -206,6 +206,9 @@ import { criarApiDocumentadaRouter } from './routes/apiDocumentadaRoutes';
 import { ImportacaoExportacaoValidadaService } from './services/ImportacaoExportacaoValidadaService';
 import { ImportacaoExportacaoValidadaController } from './controllers/ImportacaoExportacaoValidadaController';
 import { criarImportacaoExportacaoValidadaRouter } from './routes/importacaoExportacaoValidadaRoutes';
+import { ObservabilidadeMonitoramentoService } from './services/ObservabilidadeMonitoramentoService';
+import { ObservabilidadeMonitoramentoController } from './controllers/ObservabilidadeMonitoramentoController';
+import { criarObservabilidadeMonitoramentoRouter } from './routes/observabilidadeMonitoramentoRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -295,6 +298,7 @@ export function criarApp(): {
   relatorioAuditoriaService: RelatorioAuditoriaService;
   apiDocumentadaService: ApiDocumentadaService;
   importacaoExportacaoValidadaService: ImportacaoExportacaoValidadaService;
+  observabilidadeMonitoramentoService: ObservabilidadeMonitoramentoService;
 } {
   const app = express();
 
@@ -697,6 +701,14 @@ export function criarApp(): {
       importacaoExportacaoValidadaService
     );
 
+  // 56. Módulo Observabilidade e Monitoramento (SPEC-5.8)
+  const observabilidadeMonitoramentoService =
+    new ObservabilidadeMonitoramentoService();
+  const observabilidadeMonitoramentoController =
+    new ObservabilidadeMonitoramentoController(
+      observabilidadeMonitoramentoService
+    );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -816,6 +828,12 @@ export function criarApp(): {
       importacaoExportacaoValidadaController
     )
   );
+  app.use(
+    '/api',
+    criarObservabilidadeMonitoramentoRouter(
+      observabilidadeMonitoramentoController
+    )
+  );
 
   return {
     app,
@@ -902,6 +920,7 @@ export function criarApp(): {
     relatorioAuditoriaService,
     apiDocumentadaService,
     importacaoExportacaoValidadaService,
+    observabilidadeMonitoramentoService,
   };
 }
 
