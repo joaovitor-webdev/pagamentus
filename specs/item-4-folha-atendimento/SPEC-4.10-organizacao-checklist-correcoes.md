@@ -63,6 +63,7 @@ Esta especificação define a **organização documental por cliente, exercício
 - Modelos, serviço, controller e rotas em `src/models/OrganizacaoDocumentoModel.ts`, `src/services/OrganizacaoDocumentoService.ts`, `src/controllers/OrganizacaoDocumentoController.ts` e `src/routes/organizacaoDocumentoRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/organizacaoChecklistCorrecoes.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/73
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
