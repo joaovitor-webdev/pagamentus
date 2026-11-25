@@ -1,5 +1,6 @@
 import express, { Express } from 'express';
 import path from 'path';
+import fs from 'fs';
 import { InMemoryPlanoContasRepository } from './repositories/PlanoContasRepository';
 import { PlanoContasService } from './services/PlanoContasService';
 import { PlanoContasController } from './controllers/PlanoContasController';
@@ -846,6 +847,60 @@ export function criarApp(): {
     )
   );
   app.use('/api', criarDesempenhoCargaRouter(desempenhoCargaController));
+
+  // Rota raiz e estáticos resilientes para ambiente Serverless e Vercel
+  const carregarHtmlPrincipal = (): string => {
+    const caminhosPossiveis = [
+      path.join(process.cwd(), 'public', 'index.html'),
+      path.join(process.cwd(), 'src', 'public', 'index.html'),
+      path.join(__dirname, '..', 'public', 'index.html'),
+      path.join(__dirname, 'public', 'index.html'),
+    ];
+    for (const caminho of caminhosPossiveis) {
+      if (fs.existsSync(caminho)) {
+        return fs.readFileSync(caminho, 'utf-8');
+      }
+    }
+    return '<h1>Pagamentus API Online</h1><p>Acesse <a href="/api/health">/api/health</a> ou <a href="/api/docs">/api/docs</a>.</p>';
+  };
+
+  app.get('/', (_req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.status(200).send(carregarHtmlPrincipal());
+  });
+
+  app.get('/index.html', (_req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.status(200).send(carregarHtmlPrincipal());
+  });
+
+  app.get('/css/custom.css', (_req, res) => {
+    const caminhos = [
+      path.join(process.cwd(), 'public', 'css', 'custom.css'),
+      path.join(process.cwd(), 'src', 'public', 'css', 'custom.css'),
+    ];
+    for (const c of caminhos) {
+      if (fs.existsSync(c)) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+        return res.status(200).send(fs.readFileSync(c, 'utf-8'));
+      }
+    }
+    res.status(404).send('');
+  });
+
+  app.get('/js/app.js', (_req, res) => {
+    const caminhos = [
+      path.join(process.cwd(), 'public', 'js', 'app.js'),
+      path.join(process.cwd(), 'src', 'public', 'js', 'app.js'),
+    ];
+    for (const c of caminhos) {
+      if (fs.existsSync(c)) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        return res.status(200).send(fs.readFileSync(c, 'utf-8'));
+      }
+    }
+    res.status(404).send('');
+  });
 
   return {
     app,
