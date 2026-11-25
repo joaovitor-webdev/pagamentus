@@ -865,8 +865,13 @@ export function criarApp(): {
   };
 
   app.get('/', (_req, res) => {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.status(200).send(carregarHtmlPrincipal());
+    try {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.status(200).send(carregarHtmlPrincipal());
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      res.status(200).send(`<!DOCTYPE html><html><body><h1>Pagamentus</h1><p>Sistema online. Erro ao ler index: ${msg}</p><p><a href="/index.html">Acessar /index.html</a></p></body></html>`);
+    }
   });
 
   app.get('/index.html', (_req, res) => {
