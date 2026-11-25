@@ -155,6 +155,9 @@ import { criarPatrimonioIrRouter } from './routes/patrimonioIrRoutes';
 import { InformeOrigemIrService } from './services/InformeOrigemIrService';
 import { InformeOrigemIrController } from './controllers/InformeOrigemIrController';
 import { criarInformeOrigemIrRouter } from './routes/informeOrigemIrRoutes';
+import { ConsistenciaIrService } from './services/ConsistenciaIrService';
+import { ConsistenciaIrController } from './controllers/ConsistenciaIrController';
+import { criarConsistenciaIrRouter } from './routes/consistenciaIrRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -227,6 +230,7 @@ export function criarApp(): {
   rendimentoDeducaoIrService: RendimentoDeducaoIrService;
   patrimonioIrService: PatrimonioIrService;
   informeOrigemIrService: InformeOrigemIrService;
+  consistenciaIrService: ConsistenciaIrService;
 } {
   const app = express();
 
@@ -523,6 +527,12 @@ export function criarApp(): {
     informeOrigemIrService
   );
 
+  // 39. Módulo Consistência e Regras do Exercício IRPF (SPEC-3.17)
+  const consistenciaIrService = new ConsistenciaIrService();
+  const consistenciaIrController = new ConsistenciaIrController(
+    consistenciaIrService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -597,6 +607,7 @@ export function criarApp(): {
   );
   app.use('/api', criarPatrimonioIrRouter(patrimonioIrController));
   app.use('/api', criarInformeOrigemIrRouter(informeOrigemIrController));
+  app.use('/api', criarConsistenciaIrRouter(consistenciaIrController));
 
   return {
     app,
@@ -666,6 +677,7 @@ export function criarApp(): {
     rendimentoDeducaoIrService,
     patrimonioIrService,
     informeOrigemIrService,
+    consistenciaIrService,
   };
 }
 
