@@ -61,6 +61,7 @@ Esta especificação define o **cadastro da ficha do contribuinte pessoa física
 - Modelos, serviço, controller e rotas em `src/models/FichaContribuinteIrModel.ts`, `src/services/FichaContribuinteIrService.ts`, `src/controllers/FichaContribuinteIrController.ts` e `src/routes/fichaContribuinteIrRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/fichaContribuinteDependentes.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/60
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
