@@ -58,6 +58,7 @@ Esta especificação define o **envio e registro de alertas de vencimento próxi
 - Modelos, serviço, controller e rotas em `src/models/AlertaVencimentoModel.ts`, `src/services/AlertaVencimentoService.ts`, `src/controllers/AlertaVencimentoController.ts` e `src/routes/alertaVencimentoRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/alertasVencimentoAtraso.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/71
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
