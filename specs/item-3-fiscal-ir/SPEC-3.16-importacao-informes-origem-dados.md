@@ -61,6 +61,7 @@ Esta especificação define a **importação de informes de rendimentos/document
 - Modelos, serviço, controller e rotas em `src/models/InformeOrigemIrModel.ts`, `src/services/InformeOrigemIrService.ts`, `src/controllers/InformeOrigemIrController.ts` e `src/routes/informeOrigemIrRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/importacaoInformesOrigemIr.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/63
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
