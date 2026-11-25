@@ -191,6 +191,9 @@ import { criarAcessoRetencaoConsentimentoRouter } from './routes/acessoRetencaoC
 import { PainelIndicadoresService } from './services/PainelIndicadoresService';
 import { PainelIndicadoresController } from './controllers/PainelIndicadoresController';
 import { criarPainelIndicadoresRouter } from './routes/painelIndicadoresRoutes';
+import { RelatorioExportacaoService } from './services/RelatorioExportacaoService';
+import { RelatorioExportacaoController } from './controllers/RelatorioExportacaoController';
+import { criarRelatorioExportacaoRouter } from './routes/relatorioExportacaoRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -275,6 +278,7 @@ export function criarApp(): {
   organizacaoDocumentoService: OrganizacaoDocumentoService;
   acessoRetencaoConsentimentoService: AcessoRetencaoConsentimentoService;
   painelIndicadoresService: PainelIndicadoresService;
+  relatorioExportacaoService: RelatorioExportacaoService;
 } {
   const app = express();
 
@@ -645,6 +649,12 @@ export function criarApp(): {
     painelIndicadoresService
   );
 
+  // 51. Módulo Relatórios em PDF, XLSX e CSV (SPEC-5.3)
+  const relatorioExportacaoService = new RelatorioExportacaoService();
+  const relatorioExportacaoController = new RelatorioExportacaoController(
+    relatorioExportacaoService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -748,6 +758,10 @@ export function criarApp(): {
     )
   );
   app.use('/api', criarPainelIndicadoresRouter(painelIndicadoresController));
+  app.use(
+    '/api',
+    criarRelatorioExportacaoRouter(relatorioExportacaoController)
+  );
 
   return {
     app,
@@ -829,6 +843,7 @@ export function criarApp(): {
     organizacaoDocumentoService,
     acessoRetencaoConsentimentoService,
     painelIndicadoresService,
+    relatorioExportacaoService,
   };
 }
 
