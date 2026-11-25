@@ -149,6 +149,9 @@ import { criarFichaContribuinteIrRouter } from './routes/fichaContribuinteIrRout
 import { RendimentoDeducaoIrService } from './services/RendimentoDeducaoIrService';
 import { RendimentoDeducaoIrController } from './controllers/RendimentoDeducaoIrController';
 import { criarRendimentoDeducaoIrRouter } from './routes/rendimentoDeducaoIrRoutes';
+import { PatrimonioIrService } from './services/PatrimonioIrService';
+import { PatrimonioIrController } from './controllers/PatrimonioIrController';
+import { criarPatrimonioIrRouter } from './routes/patrimonioIrRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -219,6 +222,7 @@ export function criarApp(): {
   revisaoAprovacaoFiscalService: RevisaoAprovacaoFiscalService;
   fichaContribuinteIrService: FichaContribuinteIrService;
   rendimentoDeducaoIrService: RendimentoDeducaoIrService;
+  patrimonioIrService: PatrimonioIrService;
 } {
   const app = express();
 
@@ -503,6 +507,12 @@ export function criarApp(): {
     rendimentoDeducaoIrService
   );
 
+  // 37. Módulo Bens, Direitos e Dívidas IRPF (SPEC-3.15)
+  const patrimonioIrService = new PatrimonioIrService();
+  const patrimonioIrController = new PatrimonioIrController(
+    patrimonioIrService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -575,6 +585,7 @@ export function criarApp(): {
     '/api',
     criarRendimentoDeducaoIrRouter(rendimentoDeducaoIrController)
   );
+  app.use('/api', criarPatrimonioIrRouter(patrimonioIrController));
 
   return {
     app,
@@ -642,6 +653,7 @@ export function criarApp(): {
     revisaoAprovacaoFiscalService,
     fichaContribuinteIrService,
     rendimentoDeducaoIrService,
+    patrimonioIrService,
   };
 }
 
