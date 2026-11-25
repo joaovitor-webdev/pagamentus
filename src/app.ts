@@ -170,6 +170,9 @@ import { criarDocumentoDeclaracaoIrRouter } from './routes/documentoDeclaracaoIr
 import { IrpjCsllBaseAjustesService } from './services/IrpjCsllBaseAjustesService';
 import { IrpjCsllBaseAjustesController } from './controllers/IrpjCsllBaseAjustesController';
 import { criarIrpjCsllBaseAjustesRouter } from './routes/irpjCsllBaseAjustesRoutes';
+import { IrpjObrigacoesDigitaisService } from './services/IrpjObrigacoesDigitaisService';
+import { IrpjObrigacoesDigitaisController } from './controllers/IrpjObrigacoesDigitaisController';
+import { criarIrpjObrigacoesDigitaisRouter } from './routes/irpjObrigacoesDigitaisRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -247,6 +250,7 @@ export function criarApp(): {
   pendenciaStatusIrService: PendenciaStatusIrService;
   documentoDeclaracaoIrService: DocumentoDeclaracaoIrService;
   irpjCsllBaseAjustesService: IrpjCsllBaseAjustesService;
+  irpjObrigacoesDigitaisService: IrpjObrigacoesDigitaisService;
 } {
   const app = express();
 
@@ -573,6 +577,12 @@ export function criarApp(): {
     irpjCsllBaseAjustesService
   );
 
+  // 44. Módulo IRPJ: Memória de Apuração e Obrigações Digitais (SPEC-3.22)
+  const irpjObrigacoesDigitaisService = new IrpjObrigacoesDigitaisService();
+  const irpjObrigacoesDigitaisController = new IrpjObrigacoesDigitaisController(
+    irpjObrigacoesDigitaisService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -658,6 +668,10 @@ export function criarApp(): {
     criarDocumentoDeclaracaoIrRouter(documentoDeclaracaoIrController)
   );
   app.use('/api', criarIrpjCsllBaseAjustesRouter(irpjCsllBaseAjustesController));
+  app.use(
+    '/api',
+    criarIrpjObrigacoesDigitaisRouter(irpjObrigacoesDigitaisController)
+  );
 
   return {
     app,
@@ -732,6 +746,7 @@ export function criarApp(): {
     pendenciaStatusIrService,
     documentoDeclaracaoIrService,
     irpjCsllBaseAjustesService,
+    irpjObrigacoesDigitaisService,
   };
 }
 
