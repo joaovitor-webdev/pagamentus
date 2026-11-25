@@ -76,6 +76,7 @@ export default function HomePage() {
   const [contagens, setContagens] = useState({
     empregados: 0,
     lancamentos: 0,
+    lancamentosEstornos: 0,
     apuracoes: 0,
     apuracoesAprovadas: 0,
     impostosMesValor: 0,
@@ -164,7 +165,7 @@ export default function HomePage() {
 
     Promise.all([
       supabase.from('empregados').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaSelecionada.id),
-      supabase.from('lancamentos_contabeis').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaSelecionada.id).eq('estornado', false),
+      supabase.from('lancamentos_contabeis').select('id, origem, estornado').eq('empresa_id', empresaSelecionada.id),
       supabase.from('apuracoes_fiscais').select('valor_apurado, status').eq('empresa_id', empresaSelecionada.id).eq('competencia', competencia),
       supabase
         .from('obrigacoes_acessorias')
@@ -180,10 +181,13 @@ export default function HomePage() {
       const impostosTotal = aps.reduce((acc, a) => acc + Number(a.valor_apurado || 0), 0);
       const aprovadas = aps.filter((a) => a.status === 'APROVADA').length;
       const liqTotal = (folhaRes.data || []).reduce((acc, f) => acc + Number(f.valor_liquido || 0), 0);
+      const lancRows = lancRes.data || [];
+      const estornosCount = lancRows.filter((l) => l.origem === 'ESTORNO').length;
 
       setContagens({
         empregados: empRes.count ?? 0,
-        lancamentos: lancRes.count ?? 0,
+        lancamentos: lancRows.length,
+        lancamentosEstornos: estornosCount,
         apuracoes: aps.length,
         apuracoesAprovadas: aprovadas,
         impostosMesValor: impostosTotal,
@@ -401,7 +405,9 @@ export default function HomePage() {
                       <span>Diário, Balancete &amp; DRE</span>
                       <Calculator className="w-4 h-4 text-blue-600" />
                     </CardDescription>
-                    <CardTitle className="text-2xl">{contagens.lancamentos} Lançamentos</CardTitle>
+                    <CardTitle className="text-xl">
+                      {contagens.lancamentos} lançamentos ({contagens.lancamentosEstornos} estornos)
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-xs text-slate-500">Partidas dobradas · Clique para abrir relatórios contábeis</p>

@@ -55,6 +55,7 @@ export function ModuloObrigacoes({
 }) {
   const [obrigacoes, setObrigacoes] = useState<ObrigacaoRow[]>([]);
   const [visao, setVisao] = useState<'lista' | 'calendario'>('lista');
+  const [modoPeriodo, setModoPeriodo] = useState<'VENCIMENTO' | 'COMPETENCIA_REF'>('VENCIMENTO');
   const [filtroStatus, setFiltroStatus] = useState<string>('TODOS');
   const [filtroResp, setFiltroResp] = useState<string>('');
   const [entregando, setEntregando] = useState<ObrigacaoRow | null>(null);
@@ -114,13 +115,17 @@ export function ModuloObrigacoes({
 
   const filtradas = useMemo(() => {
     return obrigacoes.filter((o) => {
-      if (o.competencia && o.competencia !== competencia) return false;
+      if (modoPeriodo === 'VENCIMENTO') {
+        if (o.vencimento.slice(0, 7) !== competencia) return false;
+      } else {
+        if (o.competencia_referencia !== competencia) return false;
+      }
       const st = getStatusCalculado(o).label;
       if (filtroStatus !== 'TODOS' && st !== filtroStatus) return false;
       if (filtroResp && !(o.responsavel_nome || '').toLowerCase().includes(filtroResp.toLowerCase())) return false;
       return true;
     });
-  }, [obrigacoes, competencia, filtroStatus, filtroResp]);
+  }, [obrigacoes, competencia, modoPeriodo, filtroStatus, filtroResp]);
 
   return (
     <Card>
@@ -157,7 +162,16 @@ export function ModuloObrigacoes({
         {sucesso && <div className="p-3 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">{sucesso}</div>}
 
         <div className="flex items-center gap-3 flex-wrap">
-          <select className="border rounded h-9 px-3 text-sm" value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}>
+          <select
+            aria-label="Modo de período"
+            className="border rounded h-9 px-3 text-sm bg-blue-50 border-blue-200 text-blue-800 font-medium"
+            value={modoPeriodo}
+            onChange={(e) => setModoPeriodo(e.target.value as 'VENCIMENTO' | 'COMPETENCIA_REF')}
+          >
+            <option value="VENCIMENTO">Por Mês de Vencimento ({competencia.split('-').reverse().join('/')})</option>
+            <option value="COMPETENCIA_REF">Por Competência de Referência ({competencia.split('-').reverse().join('/')})</option>
+          </select>
+          <select aria-label="Filtrar status" className="border rounded h-9 px-3 text-sm" value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}>
             <option value="TODOS">Todos os status</option>
             <option value="Pendente">Pendente</option>
             <option value="Em preparação">Em preparação</option>
