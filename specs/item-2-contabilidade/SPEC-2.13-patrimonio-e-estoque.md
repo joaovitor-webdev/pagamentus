@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @joaovitor-webdev | A definir | https://trello.com/c/oK7jfxFh | Revisando |
+| 2 – Contabilidade | @joaovitor-webdev | @joaovitor-webdev | https://trello.com/c/oK7jfxFh | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define o controle de **patrimônio (bens imobilizados/intangíveis/exauríveis)** — incluindo cadastro, cálculo de depreciação/amortização/exaustão, baixas, transferências, reavaliações permitidas e histórico documental — e a **importação de saldos e movimentações de estoque** da empresa.

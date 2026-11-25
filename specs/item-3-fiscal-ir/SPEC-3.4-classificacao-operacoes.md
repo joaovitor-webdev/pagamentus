@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/8ivyVM6H | Revisando |
+| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/8ivyVM6H | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define a **classificação fiscal das operações** por **natureza da operação, CFOP/códigos aplicáveis, NCM e CST/CSOSN**, conforme o tipo de operação e o regime tributário da empresa, utilizando **tabelas fictícias configuráveis** (sem caráter de tabela fiscal oficial).

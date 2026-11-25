@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @italograu17-ai | A definir | https://trello.com/c/uuh6dMbI | Revisando |
+| 2 – Contabilidade | @italograu17-ai | @joaovitor-webdev | https://trello.com/c/uuh6dMbI | Feito |
 
 ## 1. Contexto e objetivo
 Estabelecer o controle de ciclo de vida dos períodos contábeis por empresa (`ABERTO`, `EM_FECHAMENTO` e `ENCERRADO`), bloqueando alterações ou novos lançamentos em períodos encerrados e exigindo permissão especial, justificativa obrigatória e registro na trilha de auditoria para reabertura de um período encerrado.

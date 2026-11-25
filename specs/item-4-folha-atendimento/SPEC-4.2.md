@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 4 – Folha, obrigações e atendimento ao cliente | Douglas | A definir | A definir | Implementado |
+| 4 – Folha, obrigações e atendimento ao cliente | Douglas | @joaovitor-webdev | A definir | Feito |
 
 ## 1. Contexto e objetivo
 
@@ -86,9 +86,10 @@ Suíte automatizada: `npm test`.
 
 ## 10. Evidências
 
+- **PR:** https://github.com/joaovitor-webdev/pagamentus/pull/13 (mergeado e aprovado).
 - Testes de integração PostgreSQL em [spec42-rf053.integration.test.ts](../../tests/spec42-rf053.integration.test.ts): **6/6 aprovados**.
-- Suíte completa: **5/5 suites, 30/30 testes aprovados**.
-- Verificação de tipos com TypeScript: aprovada usando `--module Node16 --moduleResolution Node16`.
+- Suíte completa via `npm test`: **32/32 suítes, 136/136 testes aprovados**.
+- `npm run build`: aprovado.
 
 ## 11. Histórico de revisão
 

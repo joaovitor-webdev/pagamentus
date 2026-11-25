@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @joaovitor-webdev | A definir | https://trello.com/c/CYwJPRPs | Revisando |
+| 2 – Contabilidade | @joaovitor-webdev | @joaovitor-webdev | https://trello.com/c/CYwJPRPs | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define a geração dos relatórios gerenciais financeiros da empresa — **Fluxo de Caixa**, **Posição Financeira**, **Aging de Recebíveis**, **Previsão de Pagamentos** e **Relatório Financeiro por Centro de Custo** — a partir dos títulos a pagar/receber (`SPEC-2.9`), baixas registradas (`SPEC-2.10`) e centros de custo (`SPEC-2.6`). O objetivo é consolidar a visão financeira com totais conferidos.

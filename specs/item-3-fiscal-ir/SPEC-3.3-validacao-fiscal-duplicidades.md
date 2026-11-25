@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/miNCCfqQ | Revisando |
+| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/miNCCfqQ | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define a **validação fiscal de documentos e notas** quanto a campos fiscais, datas, valores, participantes, códigos tributários e **detecção de duplicidades** conforme regras configuradas por empresa, retornando os motivos claros de rejeição.

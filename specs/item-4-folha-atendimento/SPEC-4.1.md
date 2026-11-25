@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 4 – Folha, obrigações e atendimento ao cliente | Douglas | Revisor (4º período) | [Cartão SPEC-4.1](https://trello.com/c/spec-4-1) | Feito |
+| 4 – Folha, obrigações e atendimento ao cliente | Douglas | @joaovitor-webdev | A definir | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define e implementa o núcleo operacional do **Item 4 (Folha de Pagamento, Obrigações e Atendimento ao Cliente)** do Sistema Integrado de Contabilidade, Fiscal e IR.
@@ -87,7 +87,7 @@ O objetivo é fornecer um módulo robusto, autônomo e de alta confiabilidade pa
 - **CA-1 (Cadastro e Contratos - RF-051)**:
   - **Dado** que o usuário está no perfil RH/Admin,
   - **Quando** ele preenche e envia o formulário de cadastro com nome, CPF fictício, cargo, salário base, jornada, data de admissão e dependentes,
-  - **Então** o registro é salvo no SQLite e exibido na listagem com opções para editar, visualizar e inativar.
+  - **Então** o registro é salvo no PostgreSQL e exibido na listagem com opções para editar, visualizar e inativar.
 
 - **CA-2 (Cálculo e Memória da Folha - RF-052)**:
   - **Dado** que há empregados ativos e eventos lançados para uma competência,
@@ -160,7 +160,7 @@ O objetivo é fornecer um módulo robusto, autônomo e de alta confiabilidade pa
 
 ## 7. Tarefas de implementação
 - [x] Configuração da infraestrutura do projeto (`package.json`, `.env`, dependências).
-- [x] Criação do schema do banco SQLite e seeding de 3 colaboradores fictícios (LGPD).
+- [x] Criação do schema PostgreSQL e seeding de colaboradores fictícios (LGPD).
 - [x] Implementação dos serviços de cálculo (folha, férias, 13º, encargos e provisões).
 - [x] Implementação dos serviços de mascaramento (LGPD) e RBAC.
 - [x] Implementação do gerador de arquivos estruturados eSocial (RF-054).
@@ -176,7 +176,7 @@ O objetivo é fornecer um módulo robusto, autônomo e de alta confiabilidade pa
 - [x] Testes automatizados das rotas e validação dos critérios de aceite.
 
 ## 8. Dependências
-- Nenhuma dependência externa bloqueante; utiliza SQLite local embutido e Tailwind CSS via CDN.
+- Banco de dados PostgreSQL acessado pelo driver `pg`; Tailwind CSS via CDN.
 
 ## 9. Como validar
 1. Inicie a aplicação com `npm start` e acerte o endereço `http://localhost:3000`.
@@ -192,9 +192,11 @@ O objetivo é fornecer um módulo robusto, autônomo e de alta confiabilidade pa
 9. Na aba **Exportação eSocial**, gere e baixe o arquivo JSON/TXT estruturado.
 
 ## 10. Evidências (preencher ao concluir)
-- Servidor operando na porta 3000 com saída limpa.
-- Todos os testes de integração e endpoints respondendo com código 200/201 e 403 para acessos não autorizados.
-- Logs de auditoria gravados no banco SQLite `data/payroll.sqlite`.
+- **PR:** https://github.com/joaovitor-webdev/pagamentus/pull/10 (mergeado e aprovado).
+- **Persistência:** `src/db/database.ts` configura o driver PostgreSQL `pg`.
+- Suíte completa: **32 suítes, 136 testes aprovados**.
+- `npm run build`: aprovado.
+- Testes executados com a base PostgreSQL `pagamentus_test`.
 
 ## 11. Histórico de revisão
 - **Revisão Inicial (11/11/2026)**: Especificação criada e aprovada pelo responsável Douglas para atendimento aos requisitos RF-051 a RF-056.

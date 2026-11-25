@@ -196,14 +196,20 @@ São specs pequenas, para o time começar. O 4º período pode repriorizar. O MV
 | **Item 2 – Ítalo** |  |  |  |
 | SPEC-2.1 | Plano de contas | RF-006 | Contas sintéticas e analíticas com código, natureza e hierarquia; só a analítica recebe lançamento |
 | SPEC-2.2 | Lançamento contábil com partidas dobradas | RF-007, RF-008, RB-001 | Lançamento com débito diferente do crédito é rejeitado com mensagem clara |
-| SPEC-2.3 | Contas a pagar e a receber | RF-046, RF-047 | Título com parcelas e vencimento; baixa total e parcial atualiza o saldo |
+| SPEC-2.3 | Recorrentes, rateios, provisões e estornos | RF-009 | Modelo recorrente gera lançamentos; rateios, provisões e estornos mantêm vínculo com o lançamento original |
 | **Item 3 – Matheus** |  |  |  |
-| SPEC-3.1 | Cadastro e validação de documentos fiscais | RF-017, RF-018 | Nota de entrada ou saída é salva; documento duplicado é bloqueado |
-| SPEC-3.2 | Regras tributárias parametrizáveis e versionadas | RF-025, RF-026, RF-080 | Regra com regime, vigência e exercício; a consulta devolve a regra vigente na data |
-| SPEC-3.3 | Memória de cálculo de um tributo de referência | RF-021, RNF-012 | Mostra base, alíquota, dedução e arredondamento; mesmo cenário, mesmo resultado (parâmetros fictícios) |
+| SPEC-3.1 | Importação de documentos fiscais | RF-016 | Preserva o arquivo original e verifica sua integridade por SHA-256 |
+| SPEC-3.2 | Notas de entrada e saída | RF-017 | Registra notas, retenções, cancelamentos, devoluções e ajustes aplicáveis |
+| SPEC-3.3 | Validação fiscal e duplicidades | RF-018 | Valida documentos conforme regras da empresa e rejeita duplicidades com os motivos |
+| SPEC-3.4 | Classificação das operações | RF-019 | Classifica a operação por natureza, CFOP, NCM e CST/CSOSN conforme regime, com tabelas fictícias |
+| SPEC-3.5 | Regras tributárias versionadas | RF-080, RB-004 | Aplica a versão vigente conforme exercício, regime, jurisdição e situação do contribuinte |
+| SPEC-3.6 | Regimes tributários | RF-025, RF-026 | Mantém opções de regime, parâmetros e histórico com vigência temporal |
+| SPEC-3.7 | Cálculo e memória de cálculo | RF-020, RF-021, RF-027, RNF-012 | Calcula tributos aplicáveis e retorna memória detalhada e reproduzível |
+| SPEC-3.8 | Retenções, créditos e parcelamentos | RF-022 | Controla retenções, créditos, compensações, parcelas e vencimentos |
+| SPEC-3.9 | Guias e demonstrativos | RF-023 | Prepara guia para conferência e a identifica como não transmitida |
 | **Item 4 – Douglas** |  |  |  |
-| SPEC-4.1 | Cadastro de empregados e contratos | RF-051, RF-056 | Dados salariais visíveis só para o perfil de RH |
-| SPEC-4.2 | Tarefas e prazos | RF-062, RF-065 | Tarefa com responsável, prazo, prioridade, status e checklist; painel lista por status e destaca atrasadas |
+| SPEC-4.1 | Cadastro de empregados, contratos e folha de pagamento | RF-051 a RF-056 | Cadastro, cálculo, eventos, arquivo de conferência, recibos e controle de acesso conforme critérios da spec |
+| SPEC-4.2 | Eventos variáveis e afastamentos | RF-053 | Registros de eventos, ponto, afastamentos, benefícios e histórico contratual validados e associados ao tenant |
 | SPEC-4.3 | Portal de documentos do cliente | RF-066, RF-067, RF-068 | Cliente envia documento e vê só os próprios; checklist marca como recebido |
 | **Item 5A – Erivan** |  |  |  |
 | SPEC-5.1 | Navegação e layout responsivo | RNF-009 | Menu muda conforme o perfil e as telas funcionam em celular, tablet e computador |
@@ -213,6 +219,30 @@ São specs pequenas, para o time começar. O 4º período pode repriorizar. O MV
 | SPEC-5.4 | Plano de testes e rastreabilidade | RNF-011, RNF-012 | Matriz RF → spec → teste cobrindo as specs do primeiro lote |
 | SPEC-5.5 | Padrão e documentação da API | RF-077 | Contrato (OpenAPI) com autenticação, formato de erro e exemplos; uma rota de teste documentada |
 | SPEC-5.6 | Importação de arquivos com pré-validação | RF-078, RB-006 | Importar CSV mostra resumo de aceitos, rejeitados e duplicados antes de gravar |
+
+### Specs do Item 2 posteriores ao lote inicial
+
+| Spec | Título | Requisitos | Critério de aceite principal |
+| --- | --- | --- | --- |
+| SPEC-2.4 | Importação de lançamentos | RF-010 | Lote é pré-validado, apresenta erros e pode ser desfeito |
+| SPEC-2.5 | Períodos contábeis | RF-012, RB-002 | Período encerrado só é reaberto com permissão, justificativa e auditoria |
+| SPEC-2.6 | Centros de custo e comparativos | RF-014 | Dimensões gerenciais são associadas aos lançamentos e comparadas entre períodos |
+| SPEC-2.7 | Balancete, razão e diário | RF-013 (parte 1) | Relatórios contábeis previstos são gerados para o período |
+| SPEC-2.8 | Balanço, DRE, DFC e DMPL | RF-013 (parte 2) | Demonstrações contábeis previstas são geradas para o período |
+| SPEC-2.9 | Títulos a pagar e a receber e vínculos | RF-046, RF-050 | Títulos, parcelas e vínculos documentais são mantidos |
+| SPEC-2.10 | Baixas, juros e inadimplência | RF-047 | Baixas totais/parciais, encargos e estornos atualizam o saldo |
+| SPEC-2.11 | Conciliação contábil e bancária | RF-011, RF-048 | Extratos e saldos são conciliados com confirmação das correspondências |
+| SPEC-2.12 | Fluxo de caixa e relatórios financeiros | RF-049 | Fluxo e relatórios financeiros são gerados conforme filtros informados |
+| SPEC-2.13 | Patrimônio e estoque | RF-057 a RF-060 | Bens, movimentações e saldos de estoque são controlados conforme a spec |
+
+### Situação dos PRs abertos do Item 4
+
+| Spec | PR | Situação verificada |
+| --- | --- | --- |
+| SPEC-4.3 – Portal de documentos do cliente | [#16](https://github.com/joaovitor-webdev/pagamentus/pull/16) | Título corrigido; branch do fork ainda usa `spec/4.3-calculo-folha` e depende do autor |
+| SPEC-4.4 – Recibos, relatórios e eventos oficiais | [#34](https://github.com/joaovitor-webdev/pagamentus/pull/34) | CA-1 está pendente até definição do leiaute oficial vigente |
+| SPEC-4.5 – Aprovação da folha e dados sensíveis | [#35](https://github.com/joaovitor-webdev/pagamentus/pull/35) | Perfis simulados não autenticam a identidade; não considerar controle de produção |
+| SPEC-4.6 – Calendário e versões de leiautes | [#36](https://github.com/joaovitor-webdev/pagamentus/pull/36) | PR contém somente a especificação; implementação e testes da aplicação não foram executados |
 
 **Ordem e dependências.** As SPEC-1.1 e 1.2 saem primeiro, porque definem o repositório e a stack. Enquanto isso, todos já escrevem as próprias specs (etapas 1 a 3 do ciclo), que não dependem da stack. A implementação começa quando a SPEC-1.2 for aprovada. Os nomes de entidades das specs 2 a 4 devem seguir a SPEC-1.3.
 

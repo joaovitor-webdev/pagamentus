@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/2WE1HxGo | Revisando |
+| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/2WE1HxGo | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define o **controle de tributos retidos e sofridos, créditos tributários, compensações, parcelamentos e vencimentos** por empresa, permitindo acompanhar saldos, utilizações e datas de vencimento das obrigações e parcelamentos.

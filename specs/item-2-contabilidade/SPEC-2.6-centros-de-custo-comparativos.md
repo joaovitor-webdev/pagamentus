@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @italograu17-ai | https://github.com/joaovitor-webdev/pagamentus/pull/26 | https://trello.com/c/GHLUQ6wR | Revisando |
+| 2 – Contabilidade | @italograu17-ai | @joaovitor-webdev | https://trello.com/c/GHLUQ6wR | Feito |
 
 ## 1. Contexto e objetivo
 Permitir o cadastro e a manutenção de dimensões gerenciais por empresa — centros de custo, departamentos, projetos e unidades — bem como sua associação em lançamentos contábeis e a emissão de comparativos financeiros/contábeis entre dois períodos (competências).

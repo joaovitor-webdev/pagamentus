@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/dWBjUREh | Revisando |
+| 3A – Fiscal e tributos | @matheusbdsousa-lgtm | A definir | https://trello.com/c/dWBjUREh | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define a **parametrização e versionamento controlado de regras tributárias** (tabelas, fórmulas e leiautes) por **exercício fiscal, vigência, regime, jurisdição e situação do contribuinte**, garantindo que os cálculos utilizem a versão correta da regra para cada cenário (com dados parametrizados de demonstração, sem caráter de tabela oficial).

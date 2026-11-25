@@ -2,7 +2,7 @@
 
 | Item | Responsável | Revisor (4º período) | Trello | Status |
 |---|---|---|---|---|
-| 2 – Contabilidade | @joaovitor-webdev | A definir | https://trello.com/c/zGPxV9HL | Revisando |
+| 2 – Contabilidade | @joaovitor-webdev | @joaovitor-webdev | https://trello.com/c/zGPxV9HL | Feito |
 
 ## 1. Contexto e objetivo
 Esta especificação define a **importação de extratos bancários com sugestão automática de conciliação e confirmação manual**, além da **conciliação de saldos contábeis** com extratos bancários, contas a pagar/receber, folha e módulos fiscais. O objetivo é permitir que o usuário confira divergências de saldos e valide manualmente os vínculos entre movimentações bancárias e registros do sistema.
