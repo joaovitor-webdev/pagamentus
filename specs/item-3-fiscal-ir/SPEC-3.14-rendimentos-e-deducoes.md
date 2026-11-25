@@ -59,6 +59,7 @@ Esta especificação define o **registro, categorização e consolidação de re
 - Modelos, serviço, controller e rotas em `src/models/RendimentoDeducaoIrModel.ts`, `src/services/RendimentoDeducaoIrService.ts`, `src/controllers/RendimentoDeducaoIrController.ts` e `src/routes/rendimentoDeducaoIrRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/rendimentosDeducoesIr.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/61
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
