@@ -59,7 +59,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-5.10] Testes funcionais e de permissão (PR #75, Pablo Eduardo): Suíte automatizada de testes funcionais ponta a ponta, validação de bloqueios por perfil (HTTP 403) e isolamento entre clientes.
 - [SPEC-5.11] Testes de integração e recuperação (PR #76, Pablo Eduardo): Suíte automatizada de testes de integração entre módulos de IRPF, obrigações/alertas e validação de continuidade/recuperação operacional.
 - [SPEC-5.12] Homologação, treinamento e implantação (PR #77, Pablo Eduardo): Guia de homologação, treinamento e implantação com cláusula obrigatória RB-010 e teste automatizado de prontidão (RB-010).
-- [SPEC-5.2] Painéis de indicadores — implementação (PR #A definir, Pablo Eduardo): API consolidada de indicadores (tarefas, faturamento, inadimplência, obrigações, fechamentos e produtividade) com filtro por período, estado vazio e controle de permissão (RF-072).
+- [SPEC-5.2] Painéis de indicadores — implementação (PR #78, Pablo Eduardo): API consolidada de indicadores (tarefas, faturamento, inadimplência, obrigações, fechamentos e produtividade) com filtro por período, estado vazio e controle de permissão (RF-072).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
