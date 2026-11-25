@@ -44,6 +44,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-3.13] Ficha do contribuinte e dependentes (PR #60, José Erivan): Cadastro da ficha do contribuinte IRPF com dados pessoais, ocupação, endereço, dados bancários, alimentandos, dependentes e bloqueio de duplicidade no exercício (RF-030, RF-034).
 - [SPEC-3.14] Rendimentos e deduções (PR #61, José Erivan): Coleta e consolidação de rendimentos por categoria e pagamentos/despesas dedutíveis na declaração de IRPF (RF-031, RF-033).
 - [SPEC-3.15] Bens, direitos e dívidas (PR #62, José Erivan): Registro e consolidação patrimonial de bens, direitos, dívidas e ônus reais por declaração IRPF (RF-032).
+- [SPEC-3.16] Importação de informes e origem dos dados (PR #A definir, José Erivan): Importação de informes CSV/JSON e digitação assistida com registro de exercício e distinção de origem dos dados (RF-035, RB-005).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
