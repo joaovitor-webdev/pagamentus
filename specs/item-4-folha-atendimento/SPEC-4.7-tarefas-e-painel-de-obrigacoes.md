@@ -61,6 +61,7 @@ Esta especificação define a **gestão de tarefas de obrigações acessórias/o
 - Modelos, serviço, controller e rotas em `src/models/TarefaObrigacaoModel.ts`, `src/services/TarefaObrigacaoService.ts`, `src/controllers/TarefaObrigacaoController.ts` e `src/routes/tarefaObrigacaoRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/tarefasPainelObrigacoes.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/70
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.

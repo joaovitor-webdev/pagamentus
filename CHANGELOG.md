@@ -51,7 +51,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-3.20] Declaração, recibo e comprovantes (PR #67, José Erivan): Armazenamento com hash SHA-256 e controle de acesso restrito para declaração, recibo, cópia transmitida e comprovantes do cliente (RF-039).
 - [SPEC-3.21] IRPJ/CSLL: base e ajustes (PR #68, José Erivan): Apuração da base de cálculo de IRPJ/CSLL com controle de adições, exclusões e compensação de prejuízos fiscais (RF-042, RF-043).
 - [SPEC-3.22] IRPJ: memória de apuração e obrigações digitais (PR #69, José Erivan): Memória de apuração IRPJ/CSLL conciliada com a contabilidade, documentação de suporte e preparação de pacotes para obrigações digitais versionadas (RF-044, RF-045).
-- [SPEC-4.7] Tarefas e painel de obrigações (PR #A definir, Douglas Augusto): Gestão de tarefas de obrigações com responsável, prazo, prioridade, checklist, anexos e painel consolidado por status incluindo atrasadas (RF-062, RF-065).
+- [SPEC-4.7] Tarefas e painel de obrigações (PR #70, Douglas Augusto): Gestão de tarefas de obrigações com responsável, prazo, prioridade, checklist, anexos e painel consolidado por status incluindo atrasadas (RF-062, RF-065).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
