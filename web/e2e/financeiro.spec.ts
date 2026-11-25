@@ -22,9 +22,17 @@ test.describe('Fase 5 - Módulo Financeiro', () => {
     }
 
     await page.getByRole('button', { name: 'Contábil & Diário' }).click();
-    const rowDiario = page.locator('tr', { hasText: /Recebimento título Cliente Alpha Consultoria/i }).first();
+    const rowDiario = page
+      .locator('tr', { hasText: /Recebimento título Cliente Alpha Consultoria/i })
+      .filter({ hasText: 'FINANCEIRO' })
+      .first();
     await expect(rowDiario).toBeVisible({ timeout: 10000 });
     await expect(rowDiario).toContainText('FINANCEIRO');
     await expect(rowDiario).toContainText('12.500,00');
+
+    // Testar filtro por competência: trocar para 2026-12 e verificar 0 lançamentos + título 2026-12
+    await page.getByRole('combobox', { name: 'Competência' }).selectOption('2026-12');
+    await expect(page.getByText('Período Contábil 2026-12')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('tr', { hasText: /Recebimento título Cliente Alpha Consultoria/i })).toHaveCount(0);
   });
 });
