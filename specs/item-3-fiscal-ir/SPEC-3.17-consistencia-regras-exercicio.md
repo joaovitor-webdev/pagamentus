@@ -63,6 +63,7 @@ Esta especificação define o **motor de conferência de consistência da declar
 - Modelos, serviço, controller e rotas em `src/models/ConsistenciaIrModel.ts`, `src/services/ConsistenciaIrService.ts`, `src/controllers/ConsistenciaIrController.ts` e `src/routes/consistenciaIrRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/consistenciaRegrasExercicioIr.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/64
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
