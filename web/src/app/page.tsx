@@ -300,37 +300,53 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Cards Clicáveis (Atalhos para os Módulos) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Cards Clicáveis (Atalhos Acionáveis para os Módulos - Fase 8) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Card
+                  onClick={() => setModuloAtivo('obrigacoes')}
+                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
+                >
+                  <CardHeader className="pb-2">
+                    <CardDescription className="flex items-center justify-between">
+                      <span>Obrigações vencendo (7 dias)</span>
+                      <CalendarClock className="w-4 h-4 text-amber-600" />
+                    </CardDescription>
+                    <CardTitle className="text-2xl">{contagens.obrigacoesPendentes} Pendentes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500">Clique para abrir o calendário fiscal e anexar comprovantes</p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  onClick={() => setModuloAtivo('financeiro')}
+                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
+                >
+                  <CardHeader className="pb-2">
+                    <CardDescription className="flex items-center justify-between">
+                      <span>Contas vencidas &amp; da semana</span>
+                      <AlertTriangle className="w-4 h-4 text-rose-600" />
+                    </CardDescription>
+                    <CardTitle className="text-2xl">R$ 1.850,00</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500">1 título a pagar na semana · Clique para baixar ou conciliar OFX</p>
+                  </CardContent>
+                </Card>
+
                 <Card
                   onClick={() => setModuloAtivo('folha')}
                   className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
                 >
                   <CardHeader className="pb-2">
                     <CardDescription className="flex items-center justify-between">
-                      <span>Folha &amp; RH</span>
+                      <span>Status da Folha ({competencia.split('-').reverse().join('/')})</span>
                       <Users className="w-4 h-4 text-emerald-600" />
                     </CardDescription>
                     <CardTitle className="text-2xl">{contagens.empregados} Empregados</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-slate-500">Clique para calcular e fechar a folha</p>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  onClick={() => setModuloAtivo('contabil')}
-                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
-                >
-                  <CardHeader className="pb-2">
-                    <CardDescription className="flex items-center justify-between">
-                      <span>Contabilidade</span>
-                      <Calculator className="w-4 h-4 text-blue-600" />
-                    </CardDescription>
-                    <CardTitle className="text-2xl">{contagens.lancamentos} Lançamentos</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xs text-slate-500">Partidas dobradas</p>
+                    <p className="text-xs text-slate-500">Clique para calcular, fechar competência ou emitir holerites PDF</p>
                   </CardContent>
                 </Card>
 
@@ -340,29 +356,45 @@ export default function HomePage() {
                 >
                   <CardHeader className="pb-2">
                     <CardDescription className="flex items-center justify-between">
-                      <span>Fiscal &amp; IR</span>
+                      <span>Impostos a recolher do mês</span>
                       <FileText className="w-4 h-4 text-indigo-600" />
                     </CardDescription>
                     <CardTitle className="text-2xl">{contagens.apuracoes} Apurações</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-slate-500">Conferência tributária</p>
+                    <p className="text-xs text-slate-500">ISS, PIS e COFINS apurados · Clique para aprovar guias</p>
                   </CardContent>
                 </Card>
 
                 <Card
-                  onClick={() => setModuloAtivo('obrigacoes')}
+                  onClick={() => setModuloAtivo('contabil')}
                   className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
                 >
                   <CardHeader className="pb-2">
                     <CardDescription className="flex items-center justify-between">
-                      <span>Obrigações</span>
-                      <CalendarClock className="w-4 h-4 text-amber-600" />
+                      <span>Diário, Balancete &amp; DRE</span>
+                      <Calculator className="w-4 h-4 text-blue-600" />
                     </CardDescription>
-                    <CardTitle className="text-2xl">{contagens.obrigacoesPendentes} Pendentes</CardTitle>
+                    <CardTitle className="text-2xl">{contagens.lancamentos} Lançamentos</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-slate-500">Alertas auxiliares de prazo</p>
+                    <p className="text-xs text-slate-500">Partidas dobradas · Clique para abrir relatórios contábeis</p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  onClick={() => setModuloAtivo('cadastros')}
+                  className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border-slate-200"
+                >
+                  <CardHeader className="pb-2">
+                    <CardDescription className="flex items-center justify-between">
+                      <span>Documentos vencendo (30 dias)</span>
+                      <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                    </CardDescription>
+                    <CardTitle className="text-2xl">1 Certidão</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-slate-500">CND Federal vence em breve · Clique para renovar documento</p>
                   </CardContent>
                 </Card>
               </div>
