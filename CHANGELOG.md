@@ -46,7 +46,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-3.15] Bens, direitos e dívidas (PR #62, José Erivan): Registro e consolidação patrimonial de bens, direitos, dívidas e ônus reais por declaração IRPF (RF-032).
 - [SPEC-3.16] Importação de informes e origem dos dados (PR #63, José Erivan): Importação de informes CSV/JSON e digitação assistida com registro de exercício e distinção de origem dos dados (RF-035, RB-005).
 - [SPEC-3.17] Consistência e regras do exercício (PR #64, José Erivan): Parametrização de limites por exercício fiscal e conferência de consistência entre rendimentos, IR retido, patrimônio, deduções e dependentes (RF-036, RF-041).
-- [SPEC-3.18] Comparação de opções de tributação (PR #A definir, José Erivan): Comparador entre tributação Completa e Simplificada IRPF com teto parametrizado, estimativas e premissas (RF-037).
+- [SPEC-3.18] Comparação de opções de tributação (PR #65, José Erivan): Comparador entre tributação Completa e Simplificada IRPF com teto parametrizado, estimativas e premissas (RF-037).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 

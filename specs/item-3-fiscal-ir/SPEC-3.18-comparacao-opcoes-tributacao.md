@@ -55,6 +55,7 @@ Esta especificação define o **comparador de opções de tributação permitida
 - Modelos, serviço, controller e rotas em `src/models/ComparacaoTributacaoIrModel.ts`, `src/services/ComparacaoTributacaoIrService.ts`, `src/controllers/ComparacaoTributacaoIrController.ts` e `src/routes/comparacaoTributacaoIrRoutes.ts`, registrados em `src/app.ts`.
 - Suíte de testes `npx jest tests/comparacaoOpcoesTributacaoIr.test.ts` aprovada (1 suíte, 3 testes: CA-1 a CA-3).
 - Compilação `npm run build` (`tsc`) concluída sem erros.
+- PR: https://github.com/joaovitor-webdev/pagamentus/pull/65
 
 ## 11. Histórico de revisão
 - Revisão técnica por `@joaovitor-webdev`.
