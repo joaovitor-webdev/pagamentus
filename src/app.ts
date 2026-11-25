@@ -182,6 +182,9 @@ import { criarAlertaVencimentoRouter } from './routes/alertaVencimentoRoutes';
 import { PortalClienteService } from './services/PortalClienteService';
 import { PortalClienteController } from './controllers/PortalClienteController';
 import { criarPortalClienteRouter } from './routes/portalClienteRoutes';
+import { OrganizacaoDocumentoService } from './services/OrganizacaoDocumentoService';
+import { OrganizacaoDocumentoController } from './controllers/OrganizacaoDocumentoController';
+import { criarOrganizacaoDocumentoRouter } from './routes/organizacaoDocumentoRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -263,6 +266,7 @@ export function criarApp(): {
   tarefaObrigacaoService: TarefaObrigacaoService;
   alertaVencimentoService: AlertaVencimentoService;
   portalClienteService: PortalClienteService;
+  organizacaoDocumentoService: OrganizacaoDocumentoService;
 } {
   const app = express();
 
@@ -613,6 +617,12 @@ export function criarApp(): {
     portalClienteService
   );
 
+  // 48. Módulo Organização Documental, Checklist e Correções (SPEC-4.10)
+  const organizacaoDocumentoService = new OrganizacaoDocumentoService();
+  const organizacaoDocumentoController = new OrganizacaoDocumentoController(
+    organizacaoDocumentoService
+  );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -705,6 +715,10 @@ export function criarApp(): {
   app.use('/api', criarTarefaObrigacaoRouter(tarefaObrigacaoController));
   app.use('/api', criarAlertaVencimentoRouter(alertaVencimentoController));
   app.use('/api', criarPortalClienteRouter(portalClienteController));
+  app.use(
+    '/api',
+    criarOrganizacaoDocumentoRouter(organizacaoDocumentoController)
+  );
 
   return {
     app,
@@ -783,6 +797,7 @@ export function criarApp(): {
     tarefaObrigacaoService,
     alertaVencimentoService,
     portalClienteService,
+    organizacaoDocumentoService,
   };
 }
 
