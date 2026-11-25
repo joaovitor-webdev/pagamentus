@@ -77,6 +77,10 @@ export default function HomePage() {
     empregados: 0,
     lancamentos: 0,
     apuracoes: 0,
+    apuracoesAprovadas: 0,
+    impostosMesValor: 0,
+    folhaStatus: 'ABERTA',
+    folhaLiquidoTotal: 0,
     obrigacoesPendentes: 0,
   });
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -155,16 +159,36 @@ export default function HomePage() {
   useEffect(() => {
     if (!usuarioLogado || !empresaSelecionada.id) return;
     const supabase = createClient();
+    const hoje = new Date().toISOString().slice(0, 10);
+    const seteDias = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+
     Promise.all([
       supabase.from('empregados').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaSelecionada.id),
-      supabase.from('lancamentos_contabeis').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaSelecionada.id),
-      supabase.from('apuracoes_fiscais').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaSelecionada.id),
-      supabase.from('obrigacoes_acessorias').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaSelecionada.id).neq('status', 'ENTREGUE'),
-    ]).then(([empRes, lancRes, apRes, obRes]) => {
+      supabase.from('lancamentos_contabeis').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaSelecionada.id).eq('estornado', false),
+      supabase.from('apuracoes_fiscais').select('valor_apurado, status').eq('empresa_id', empresaSelecionada.id).eq('competencia', competencia),
+      supabase
+        .from('obrigacoes_acessorias')
+        .select('id', { count: 'exact', head: true })
+        .eq('empresa_id', empresaSelecionada.id)
+        .neq('status', 'ENTREGUE')
+        .gte('vencimento', hoje)
+        .lte('vencimento', seteDias),
+      supabase.from('competencias').select('status_folha').eq('empresa_id', empresaSelecionada.id).eq('ano_mes', competencia).maybeSingle(),
+      supabase.from('folha_calculos').select('valor_liquido').eq('empresa_id', empresaSelecionada.id).eq('competencia', competencia),
+    ]).then(([empRes, lancRes, apRes, obRes, compRes, folhaRes]) => {
+      const aps = apRes.data || [];
+      const impostosTotal = aps.reduce((acc, a) => acc + Number(a.valor_apurado || 0), 0);
+      const aprovadas = aps.filter((a) => a.status === 'APROVADA').length;
+      const liqTotal = (folhaRes.data || []).reduce((acc, f) => acc + Number(f.valor_liquido || 0), 0);
+
       setContagens({
         empregados: empRes.count ?? 0,
         lancamentos: lancRes.count ?? 0,
-        apuracoes: apRes.count ?? 0,
+        apuracoes: aps.length,
+        apuracoesAprovadas: aprovadas,
+        impostosMesValor: impostosTotal,
+        folhaStatus: compRes.data?.status_folha || 'ABERTA',
+        folhaLiquidoTotal: liqTotal,
         obrigacoesPendentes: obRes.count ?? 0,
       });
     });
@@ -196,8 +220,22 @@ export default function HomePage() {
     );
   }
 
+  const REGIME_NOME: Record<string, string> = {
+    PRESUMIDO: 'Lucro Presumido',
+    SIMPLES: 'Simples Nacional',
+    PF: 'Pessoa Física',
+    REAL: 'Lucro Real',
+  };
+
+  const FOLHA_STATUS_NOME: Record<string, string> = {
+    ABERTA: 'Aberta',
+    CALCULADA: 'Calculada',
+    CONFERIDA: 'Conferida',
+    FECHADA: 'Fechada',
+  };
+
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="min-h-screen flex bg-slate-50 overflow-x-hidden w-full max-w-full">
       <Sidebar
         moduloAtivo={moduloAtivo}
         onSelectModulo={setModuloAtivo}
@@ -210,32 +248,32 @@ export default function HomePage() {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 max-w-full overflow-x-hidden">
         {/* Header Contextual */}
-        <header className="bg-white/90 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-30 h-16 px-4 sm:px-6 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <header className="bg-white/90 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-30 min-h-14 py-2 px-3 sm:px-6 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               type="button"
               onClick={() => setMobileMenuAberto(true)}
               aria-label="Abrir menu"
-              className="lg:hidden p-2 rounded-md text-slate-600 hover:bg-slate-100"
+              className="lg:hidden p-2 rounded-md text-slate-600 hover:bg-slate-100 shrink-0"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="hidden sm:block">
+            <div className="hidden md:block min-w-0">
               <p className="text-xs text-slate-400">Empresa ativa</p>
-              <p className="text-sm font-semibold text-slate-800 truncate max-w-[240px]">
+              <p className="text-sm font-semibold text-slate-800 truncate max-w-[220px]">
                 {empresaSelecionada.nome}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
             <select
               aria-label="Competência"
               value={competencia}
               onChange={(e) => setCompetencia(e.target.value)}
-              className="text-xs sm:text-sm border border-blue-200 rounded-md px-2.5 py-1.5 bg-blue-50 font-semibold text-blue-800 transition-colors hover:bg-blue-100/70"
+              className="text-xs sm:text-sm border border-blue-200 rounded-md px-2 py-1.5 bg-blue-50 font-semibold text-blue-800 transition-colors hover:bg-blue-100/70 shrink-0"
             >
               <option value="2026-11">Comp: 2026-11</option>
               <option value="2026-10">Comp: 2026-10</option>
@@ -249,7 +287,7 @@ export default function HomePage() {
                 const found = empresas.find((emp) => emp.id === e.target.value);
                 if (found) setEmpresaSelecionada(found);
               }}
-              className="text-xs sm:text-sm border border-slate-300 rounded-md px-2.5 py-1.5 bg-white text-slate-800 max-w-[170px] sm:max-w-none"
+              className="text-xs sm:text-sm border border-slate-300 rounded-md px-2 py-1.5 bg-white text-slate-800 max-w-[160px] sm:max-w-[240px] truncate"
             >
               {empresas.map((emp) => (
                 <option key={emp.id} value={emp.id}>
@@ -261,42 +299,21 @@ export default function HomePage() {
         </header>
 
         {/* Área de Conteúdo */}
-        <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-6 transition-all duration-200">
+        <main className="flex-1 p-3 sm:p-6 max-w-7xl w-full mx-auto space-y-6 transition-all duration-200 overflow-x-hidden">
           {moduloAtivo === 'dashboard' && (
             <div className="space-y-6">
               {/* Banner de Contexto */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                <div className="flex items-center gap-3 min-w-0">
                   <Building2 className="w-8 h-8 text-blue-600 shrink-0" />
-                  <div>
-                    <h2 className="font-semibold text-slate-900">{empresaSelecionada.nome}</h2>
-                    <p className="text-xs text-slate-500">
-                      Documento: {empresaSelecionada.cnpj} · Regime: {empresaSelecionada.regime} · UF:{' '}
+                  <div className="min-w-0">
+                    <h2 className="font-semibold text-slate-900 truncate">{empresaSelecionada.nome}</h2>
+                    <p className="text-xs text-slate-500 break-words">
+                      Documento: {empresaSelecionada.cnpj} · Regime:{' '}
+                      {REGIME_NOME[empresaSelecionada.regime] || empresaSelecionada.regime} · UF:{' '}
                       {empresaSelecionada.uf}
                     </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    className={
-                      health?.status === 'UP'
-                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                        : 'bg-amber-100 text-amber-800 border-amber-200'
-                    }
-                  >
-                    <Database className="w-3 h-3 mr-1" />
-                    {health?.status === 'UP'
-                      ? `API Online (v${health.versao})`
-                      : 'Dados Fictícios Prontos'}
-                  </Badge>
-                  <a
-                    href="/api/docs"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-md text-xs font-medium border border-slate-200 bg-white px-3 py-1.5 hover:bg-slate-100 text-slate-800 transition-colors"
-                  >
-                    API Docs <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
-                  </a>
                 </div>
               </div>
 
@@ -314,7 +331,7 @@ export default function HomePage() {
                     <CardTitle className="text-2xl">{contagens.obrigacoesPendentes} Pendentes</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-slate-500">Clique para abrir o calendário fiscal e anexar comprovantes</p>
+                    <p className="text-xs text-slate-500">Vencimento nos próximos 7 dias · Clique para abrir calendário</p>
                   </CardContent>
                 </Card>
 
@@ -343,10 +360,15 @@ export default function HomePage() {
                       <span>Status da Folha ({competencia.split('-').reverse().join('/')})</span>
                       <Users className="w-4 h-4 text-emerald-600" />
                     </CardDescription>
-                    <CardTitle className="text-2xl">{contagens.empregados} Empregados</CardTitle>
+                    <CardTitle className="text-xl">
+                      {FOLHA_STATUS_NOME[contagens.folhaStatus] || contagens.folhaStatus} ·{' '}
+                      {contagens.folhaLiquidoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-slate-500">Clique para calcular, fechar competência ou emitir holerites PDF</p>
+                    <p className="text-xs text-slate-500">
+                      {contagens.empregados} empregados ativos · Clique para ver folha e holerites PDF
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -359,10 +381,14 @@ export default function HomePage() {
                       <span>Impostos a recolher do mês</span>
                       <FileText className="w-4 h-4 text-indigo-600" />
                     </CardDescription>
-                    <CardTitle className="text-2xl">{contagens.apuracoes} Apurações</CardTitle>
+                    <CardTitle className="text-2xl">
+                      {contagens.impostosMesValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-slate-500">ISS, PIS e COFINS apurados · Clique para aprovar guias</p>
+                    <p className="text-xs text-slate-500">
+                      {contagens.apuracoesAprovadas} de {contagens.apuracoes} guias aprovadas · Clique para conferir
+                    </p>
                   </CardContent>
                 </Card>
 
