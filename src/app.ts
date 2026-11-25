@@ -185,6 +185,9 @@ import { criarPortalClienteRouter } from './routes/portalClienteRoutes';
 import { OrganizacaoDocumentoService } from './services/OrganizacaoDocumentoService';
 import { OrganizacaoDocumentoController } from './controllers/OrganizacaoDocumentoController';
 import { criarOrganizacaoDocumentoRouter } from './routes/organizacaoDocumentoRoutes';
+import { AcessoRetencaoConsentimentoService } from './services/AcessoRetencaoConsentimentoService';
+import { AcessoRetencaoConsentimentoController } from './controllers/AcessoRetencaoConsentimentoController';
+import { criarAcessoRetencaoConsentimentoRouter } from './routes/acessoRetencaoConsentimentoRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -267,6 +270,7 @@ export function criarApp(): {
   alertaVencimentoService: AlertaVencimentoService;
   portalClienteService: PortalClienteService;
   organizacaoDocumentoService: OrganizacaoDocumentoService;
+  acessoRetencaoConsentimentoService: AcessoRetencaoConsentimentoService;
 } {
   const app = express();
 
@@ -623,6 +627,14 @@ export function criarApp(): {
     organizacaoDocumentoService
   );
 
+  // 49. Módulo Acesso, Retenção e Consentimentos (SPEC-4.11)
+  const acessoRetencaoConsentimentoService =
+    new AcessoRetencaoConsentimentoService();
+  const acessoRetencaoConsentimentoController =
+    new AcessoRetencaoConsentimentoController(
+      acessoRetencaoConsentimentoService
+    );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -719,6 +731,12 @@ export function criarApp(): {
     '/api',
     criarOrganizacaoDocumentoRouter(organizacaoDocumentoController)
   );
+  app.use(
+    '/api',
+    criarAcessoRetencaoConsentimentoRouter(
+      acessoRetencaoConsentimentoController
+    )
+  );
 
   return {
     app,
@@ -798,6 +816,7 @@ export function criarApp(): {
     alertaVencimentoService,
     portalClienteService,
     organizacaoDocumentoService,
+    acessoRetencaoConsentimentoService,
   };
 }
 
