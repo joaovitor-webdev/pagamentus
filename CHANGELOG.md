@@ -64,6 +64,7 @@ Uma linha por spec concluída, no estilo Keep a Changelog.
 - [SPEC-5.4] Exportação controlada e saída de dados — implementação (PR #80, Pablo Eduardo): Exportação em formatos abertos (JSON/CSV) com controle de permissão e trilha de auditoria com hash SHA-256 (RF-073, RNF-015).
 - [SPEC-5.5] Relatórios de auditoria — implementação (PR #81, Pablo Eduardo): Registro de eventos e emissão de relatórios de auditoria filtrados por módulo, usuário, ação e período com controle de permissão (RF-074).
 - [SPEC-5.6] API documentada — implementação (PR #82, Pablo Eduardo): Contrato OpenAPI 3.0.3, página HTML de documentação, política de rate limiting (HTTP 429) e logs de acesso sanitizados com controle de permissão (RF-077).
+- [SPEC-5.7] Importação e exportação validadas — implementação (PR #83, Pablo Eduardo): Validação estrutural de arquivos, detecção e prevenção de duplicidades, pré-visualização, relatório de processamento e preservação de arquivos originais com hash SHA-256 (RF-078, RB-006).
 - SPEC-5.1: Especificação em revisão de navegação, responsividade, acessibilidade, compatibilidade com navegadores, exportações em formatos abertos e documentação de requisitos de integração.
 - SPEC-4.3: Portal de documentos do cliente com upload, filtros, checklist, confirmação de recebimento, correção e auditoria.
 
