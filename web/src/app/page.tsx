@@ -6,6 +6,7 @@ import { ModuloContabil } from '@/components/ModuloContabil';
 import { ModuloFolha } from '@/components/ModuloFolha';
 import { ModuloFiscalIR } from '@/components/ModuloFiscalIR';
 import { ModuloAuditoria } from '@/components/ModuloAuditoria';
+import { TelaLogin } from '@/components/TelaLogin';
 import {
   Building2,
   Calculator,
@@ -83,6 +84,12 @@ const OBRIGACOES_INICIAIS = [
 ];
 
 export default function HomePage() {
+  const [usuarioLogado, setUsuarioLogado] = useState<{
+    email: string;
+    nome: string;
+    perfil: string;
+  } | null>(null);
+  const [competencia, setCompetencia] = useState('2026-11');
   const [empresaSelecionada, setEmpresaSelecionada] = useState(EMPRESAS_FICTICIAS[0]);
   const [perfilAtivo, setPerfilAtivo] = useState('ADMINISTRADOR');
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -92,6 +99,17 @@ export default function HomePage() {
       if (data) setHealth(data);
     });
   }, []);
+
+  if (!usuarioLogado) {
+    return (
+      <TelaLogin
+        onLoginSuccess={(user) => {
+          setUsuarioLogado(user);
+          setPerfilAtivo(user.perfil);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -117,7 +135,18 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <select
+              aria-label="Competência"
+              value={competencia}
+              onChange={(e) => setCompetencia(e.target.value)}
+              className="text-xs sm:text-sm border border-slate-300 rounded-md px-2 py-1.5 bg-blue-50 font-semibold text-blue-800"
+            >
+              <option value="2026-11">Comp: 2026-11</option>
+              <option value="2026-10">Comp: 2026-10</option>
+              <option value="2026-12">Comp: 2026-12</option>
+            </select>
+
             <select
               aria-label="Selecionar Empresa"
               value={empresaSelecionada.id}
@@ -307,7 +336,7 @@ export default function HomePage() {
           </TabsContent>
 
           <TabsContent value="folha" className="mt-4">
-            <ModuloFolha perfilAtivo={perfilAtivo} />
+            <ModuloFolha perfilAtivo={perfilAtivo} competencia={competencia} />
           </TabsContent>
 
           <TabsContent value="auditoria" className="mt-4">
