@@ -4,54 +4,87 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Lock, LogIn, AlertCircle } from 'lucide-react';
+import { Lock, LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface TelaLoginProps {
-  onLoginSuccess: (usuario: { email: string; nome: string; perfil: string }) => void;
+  onLoginSuccess: (usuario: { id: string; email: string; nome: string; papel: string }) => void;
 }
 
 export function TelaLogin({ onLoginSuccess }: TelaLoginProps) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState<string | null>(null);
+  const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+  const [carregando, setCarregando] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro(null);
+    setMensagemSucesso(null);
 
     if (!email.trim() || !senha.trim()) {
       setErro('Informe o e-mail e a senha para entrar.');
       return;
     }
 
-    // Aceita credenciais de demonstração ou qualquer conta válida cadastrada
-    if (
-      (email.trim() === 'admin@pagamentus.test' || email.trim() === 'admin@pagamentus.local') &&
-      senha.length >= 4
-    ) {
-      onLoginSuccess({
+    setCarregando(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        nome: 'Ana Paula (Admin)',
-        perfil: 'ADMINISTRADOR',
+        password: senha,
       });
+
+      if (error || !data.user) {
+        setErro(error?.message || 'Credenciais inválidas. Verifique o e-mail e a senha.');
+        return;
+      }
+
+      const { data: perfil } = await supabase
+        .from('usuarios_perfis')
+        .select('nome, papel')
+        .eq('usuario_id', data.user.id)
+        .single();
+
+      onLoginSuccess({
+        id: data.user.id,
+        email: data.user.email || email.trim(),
+        nome: perfil?.nome || data.user.email?.split('@')[0] || 'Usuário',
+        papel: perfil?.papel || 'CLIENTE',
+      });
+    } catch {
+      setErro('Erro ao conectar ao servidor de autenticação.');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const handleRecuperarSenha = async () => {
+    setErro(null);
+    setMensagemSucesso(null);
+    if (!email.trim()) {
+      setErro('Digite seu e-mail acima para receber o link de recuperação de senha.');
       return;
     }
-
-    if (email.includes('@') && senha.length >= 6) {
-      onLoginSuccess({
-        email: email.trim(),
-        nome: email.split('@')[0],
-        perfil: 'CONTADOR',
-      });
-      return;
+    const supabase = createClient();
+    const redirectTo =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/redefinir-senha`
+        : 'https://pagamentus.vercel.app/redefinir-senha';
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo,
+    });
+    if (error) {
+      setErro(error.message);
+    } else {
+      setMensagemSucesso('Se o e-mail existir na base, um link de recuperação foi enviado.');
     }
-
-    setErro('Credenciais inválidas. Verifique o e-mail e a senha.');
   };
 
   const preencherDemo = () => {
     setEmail('admin@pagamentus.test');
-    setSenha('demo123456');
+    setSenha('Pagamentus@2026');
     setErro(null);
   };
 
@@ -73,11 +106,11 @@ export function TelaLogin({ onLoginSuccess }: TelaLoginProps) {
             <CardTitle className="flex items-center justify-between text-lg">
               <span>Entrar no Pagamentus</span>
               <Badge variant="secondary" className="text-xs">
-                <Lock className="w-3 h-3 mr-1" /> Ambiente Seguro
+                <Lock className="w-3 h-3 mr-1" /> Supabase Auth
               </Badge>
             </CardTitle>
             <CardDescription>
-              Digite seu e-mail e senha para acessar o ambiente de trabalho.
+              Acesso restrito a usuários convidados pelo administrador.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -94,7 +127,16 @@ export function TelaLogin({ onLoginSuccess }: TelaLoginProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Senha</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-medium text-slate-700">Senha</label>
+                  <button
+                    type="button"
+                    onClick={handleRecuperarSenha}
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
                 <input
                   type="password"
                   value={senha}
@@ -111,21 +153,30 @@ export function TelaLogin({ onLoginSuccess }: TelaLoginProps) {
                 </div>
               )}
 
-              <Button type="submit" className="w-full">
+              {mensagemSucesso && (
+                <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-md">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{mensagemSucesso}</span>
+                </div>
+              )}
+
+              <Button type="submit" className="w-full" disabled={carregando}>
                 <LogIn className="w-4 h-4 mr-2" />
-                Entrar no Pagamentus
+                {carregando ? 'Autenticando...' : 'Entrar no Pagamentus'}
               </Button>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Ambiente de demonstração</span>
-                <button
-                  type="button"
-                  onClick={preencherDemo}
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  Preencher conta demo
-                </button>
-              </div>
+              {process.env.NODE_ENV === 'development' && (
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                  <span>Ambiente de desenvolvimento</span>
+                  <button
+                    type="button"
+                    onClick={preencherDemo}
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    Preencher admin dev
+                  </button>
+                </div>
+              )}
             </form>
           </CardContent>
         </Card>

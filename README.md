@@ -130,3 +130,25 @@ A aplicação de demonstração iniciará na porta `3000` (`http://localhost:300
    ```
    Os testes de integração PostgreSQL exigem `NODE_ENV=test` e uma `DATABASE_URL_TEST` configurada para `pagamentus_test`.
 
+
+
+---
+
+## Usuários de Teste (Ambiente de Desenvolvimento)
+
+> **ATENÇÃO:** O arquivo `supabase/seed.sql` contém usuários e senhas **exclusivos para desenvolvimento e testes**. **Nunca execute o `seed.sql` em ambiente de produção.**
+
+| Papel RBAC | E-mail | Senha (Dev) |
+|---|---|---|
+| `ADMIN` | `admin@pagamentus.test` | `Pagamentus@2026` |
+| `CONTADOR` | `contador@pagamentus.test` | `Pagamentus@2026` |
+| `RH_DP` | `rh@pagamentus.test` | `Pagamentus@2026` |
+| `FINANCEIRO` | `financeiro@pagamentus.test` | `Pagamentus@2026` |
+| `CLIENTE` | `cliente@pagamentus.test` | `Pagamentus@2026` |
+
+### Segurança no Projeto Remoto (Supabase Cloud)
+- No painel do Supabase (`Authentication > Providers > Email`), desative **Allow new users to sign up** (`OFF`), pois o `supabase/config.toml` vale apenas localmente.
+- Em `Authentication > URL Configuration`, configure:
+  - **Site URL:** `https://pagamentus.vercel.app` (ou `http://localhost:3000` em dev)
+  - **Redirect URLs:** `http://localhost:3000/redefinir-senha` e `https://pagamentus.vercel.app/redefinir-senha`
+- Antes de colocar em produção real, execute `supabase/scripts/limpar_usuarios_teste.sql` para remover os 5 usuários de desenvolvimento.
