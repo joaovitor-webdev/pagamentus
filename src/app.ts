@@ -203,6 +203,9 @@ import { criarRelatorioAuditoriaRouter } from './routes/relatorioAuditoriaRoutes
 import { ApiDocumentadaService } from './services/ApiDocumentadaService';
 import { ApiDocumentadaController } from './controllers/ApiDocumentadaController';
 import { criarApiDocumentadaRouter } from './routes/apiDocumentadaRoutes';
+import { ImportacaoExportacaoValidadaService } from './services/ImportacaoExportacaoValidadaService';
+import { ImportacaoExportacaoValidadaController } from './controllers/ImportacaoExportacaoValidadaController';
+import { criarImportacaoExportacaoValidadaRouter } from './routes/importacaoExportacaoValidadaRoutes';
 
 /**
  * Factory para criar a aplicação Express configurada com os módulos contábeis e de plataforma
@@ -291,6 +294,7 @@ export function criarApp(): {
   exportacaoControladaService: ExportacaoControladaService;
   relatorioAuditoriaService: RelatorioAuditoriaService;
   apiDocumentadaService: ApiDocumentadaService;
+  importacaoExportacaoValidadaService: ImportacaoExportacaoValidadaService;
 } {
   const app = express();
 
@@ -685,6 +689,14 @@ export function criarApp(): {
     apiDocumentadaService
   );
 
+  // 55. Módulo Importação e Exportação Validadas (SPEC-5.7)
+  const importacaoExportacaoValidadaService =
+    new ImportacaoExportacaoValidadaService();
+  const importacaoExportacaoValidadaController =
+    new ImportacaoExportacaoValidadaController(
+      importacaoExportacaoValidadaService
+    );
+
   // Prefixo de rotas da API
   app.use('/api', criarPlanoContasRouter(planoContasController));
   app.use('/api', criarLancamentoContabilRouter(lancamentoController));
@@ -798,6 +810,12 @@ export function criarApp(): {
   );
   app.use('/api', criarRelatorioAuditoriaRouter(relatorioAuditoriaController));
   app.use('/api', criarApiDocumentadaRouter(apiDocumentadaController));
+  app.use(
+    '/api',
+    criarImportacaoExportacaoValidadaRouter(
+      importacaoExportacaoValidadaController
+    )
+  );
 
   return {
     app,
@@ -883,6 +901,7 @@ export function criarApp(): {
     exportacaoControladaService,
     relatorioAuditoriaService,
     apiDocumentadaService,
+    importacaoExportacaoValidadaService,
   };
 }
 
