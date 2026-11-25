@@ -113,6 +113,23 @@ export function ModuloFiscalIR({
     await carregarDados();
   };
 
+  const apurarCompetencia = async () => {
+    if (!empresaId) return;
+    setErro(null);
+    setSucesso(null);
+    const supabase = createClient();
+    const { error } = await supabase.rpc('apurar_competencia_fiscal', {
+      p_empresa_id: empresaId,
+      p_competencia: competencia,
+    });
+    if (error) {
+      setErro(error.message);
+      return;
+    }
+    setSucesso(`Apuração da competência ${competencia} recalculada a partir das receitas do Diário.`);
+    await carregarDados();
+  };
+
   const exportarMemoriaCSV = () => {
     const header = 'Tributo;Base Calculo;Aliquota;Valor Apurado;Status;Codigo Receita\n';
     const rows = apuracoes
@@ -174,10 +191,15 @@ export function ModuloFiscalIR({
             Comparador IRPF
           </Button>
           {aba === 'apuracoes' && (
-            <Button size="sm" variant="outline" onClick={exportarMemoriaCSV}>
-              <FileSpreadsheet className="w-4 h-4 mr-1" />
-              Exportar Memória
-            </Button>
+            <>
+              <Button size="sm" onClick={apurarCompetencia}>
+                Apurar competência
+              </Button>
+              <Button size="sm" variant="outline" onClick={exportarMemoriaCSV}>
+                <FileSpreadsheet className="w-4 h-4 mr-1" />
+                Exportar Memória
+              </Button>
+            </>
           )}
         </div>
       </CardHeader>
@@ -215,7 +237,12 @@ export function ModuloFiscalIR({
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{a.tributo}</TableCell>
                   <TableCell className="text-right">{formatBRL(a.base_calculo)}</TableCell>
-                  <TableCell className="text-right">{(Number(a.aliquota) * 100).toFixed(2)}%</TableCell>
+                  <TableCell className="text-right">
+                    {(Number(a.aliquota) > 1 ? Number(a.aliquota) : Number(a.aliquota) * 100).toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}%
+                  </TableCell>
                   <TableCell className="text-right font-semibold">{formatBRL(a.valor_apurado)}</TableCell>
                   <TableCell>
                     {a.status === 'APROVADA' ? (
